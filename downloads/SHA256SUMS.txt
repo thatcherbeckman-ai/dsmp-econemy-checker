@@ -5,4 +5,5 @@ ad452f3bdd629594f218aaeb349b9cca5ede238bf064772373a508400b804840  economy-tracke
 a1aaaa45b58748071ec1d439ea65888c118568fb8203468742d0fcac08ba4bdf  economy-tracker-0.4.2-mc1.21.11.jar
 d3e14303fc959cdad592d74d015d3abbbc9f5954f86b95d689dfefcc9a675482  economy-tracker-0.5.0-mc1.21.11.jar
 de8b4fefd70ce4da3e70839d2846e1646d3d876e94bbdaac8e7a5b8c4d0a903c  economy-tracker-0.5.1-mc1.21.11.jar
-de8b4fefd70ce4da3e70839d2846e1646d3d876e94bbdaac8e7a5b8c4d0a903c  economy-tracker-1.21.11.jar
+0890814b6cf3a2da81d770b17ec1187e986408df02f080abe9f4ae0812863ffa  economy-tracker-0.5.2-mc1.21.11.jar
+0890814b6cf3a2da81d770b17ec1187e986408df02f080abe9f4ae0812863ffa  economy-tracker-1.21.11.jar
