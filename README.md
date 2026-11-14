@@ -1,32 +1,42 @@
 # Economy Tracker — Fabric 1.21.11
 
-Version 0.5.5 adds `/economy rakeback resetall`, which resets every tracked player's rakeback to zero for the active server/account and saves it. This resets both loss progress and any winning surplus that offsets future losses. Balance, overall Profit, Player Nets, bets, graph and their reset baselines remain intact. Future bets continue building rakeback from the new zero baseline. `/economy rakeback reset NAME` still resets one player. The bulk command uses the existing active-server and writable-ledger checks and reports save failures.
+Version **0.6.0** adds a manually managed **Loans** chart. It shows player names, outstanding amounts, total outstanding money and a page indicator, using the existing rounded panel and font. Loans joins Profit → Player Nets → Recent Bets → Loans in the same eight-second rotation with a 400 ms fade. Press **P** to advance the view. Loans is skipped when empty, and **O → Trackers → Loans** toggles its visibility. Position, scale and glass settings use the shared rotating box.
 
-The 0.5.4 balanced Player Nets display is retained: when both sides exist, it shows the same number of players up and down, up to seven each. It chooses the largest gains and losses; positive and negative groups are each sorted from highest net to lowest. Zero-net players are hidden, including players whose results cancel out. When only one side has players, up to seven available players are shown. This changes only row selection, leaving ledger totals, bet history, reset baselines, balance and rakeback intact.
+Replace the previous mod JAR with `downloads/economy-tracker-0.6.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
 
-The 0.5.3 payment fixes are retained, including DonutSMP confirmations such as:
+## Loan commands
 
-```text
-unprayin paid you $ 1
-You paid unprayin $ 1 (+$ 1 tax)
-```
+These are local records of money owed, kept separately from the payment/bet ledger. They do not transfer money or automatically classify payments as loan repayments.
 
-The wallet adds incoming payments and subtracts outgoing payments **plus the stated tax**. Player Nets and rakeback count the money received by the player, excluding server tax. Rakeback remains net player losses since their rakeback reset; wins reduce progress, down to zero. Confirmed receipts can also be read when another client mod bypasses the normal command-observation event. Observed commands alone never move money. Repeated confirmations correlated with a command are suppressed for one second; without a server transaction ID, identical independent receipts cannot always be distinguished from server duplicates.
+| Command | Result |
+| --- | --- |
+| `/economy loan set Alex 10M` | Set Alex's total outstanding loan to $10M. |
+| `/economy loan add Alex 2M` | Add $2M to Alex's outstanding loan. |
+| `/economy loan paid Alex 5M` | Record a $5M repayment; a fully repaid loan disappears. |
+| `/economy loan remove Alex` | Remove Alex's loan record. |
+| `/economy loan list` | Show the current loan page in chat. |
+| `/economy loan page 2` | Select page 2 in the chart and list it in chat. |
 
-Replace the old JAR with `downloads/economy-tracker-0.5.5-mc1.21.11.jar`, using Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep only one Economy Tracker JAR installed. Press O for the editor.
+Names are case insensitive and support Java and dotted Bedrock names. Amounts accept decimals and K/M/B/T suffixes. Amounts must be positive; repayments cannot exceed what is owed. The chart sorts by largest outstanding loan and displays 14 players per page, with up to 1000 names stored. Records save on each successful edit in `config/economy-tracker/loans/`, isolated by the active server and account. Disconnecting clears the displayed session; reconnecting reloads its saved file. Invalid files are preserved and edits paused. Failed saves retain the previous displayed records. Loans never alter balance, Profit, Player Nets, rakeback, bets, or graph history.
 
-Use `/economy auto on` to enable payment bet/rakeback capture and balance reading. If no exact starting balance has been read, **type `/bal` yourself once**, or set it locally with `/economy balance AMOUNT`. `/economy balance sync` only enables passive reading and inspects the sidebar. The mod never sends `/bal`, payments, or other server commands. Confirmed payments then adjust the balance automatically. Rounded sidebar readings cannot erase exact payment changes. If a message format is unsupported, `/economy balance debug` prints local reading diagnostics.
+## Retained features
 
-Existing records, balance history, reset baselines and layout remain compatible with 0.5.2. A receipt missed by an older version cannot be reconstructed retroactively; an exact balance reply corrects the current wallet.
+- `/economy rakeback resetall` resets all rakeback, including winning surplus, for the active server/account. `/economy rakeback reset NAME` still resets one player. Other financial records remain intact.
+- Player Nets hides zero totals and shows equal numbers up/down when both exist, up to seven each. If only one side exists, it shows up to seven available players.
+- Payment parsing supports `Name paid you $1` and `You paid Name $1 (+$1 tax)`. The wallet deducts payment plus tax; player results and rakeback exclude server tax. Confirmed receipts also work when another mod bypasses the normal outgoing-command event.
+- `/economy profit reset`, `/economy graph reset`, and `/economy player reset NAME` retain their separate reset baselines.
+- The mod never sends server commands or payments. `/economy balance sync` enables passive reading and checks the sidebar locally. Type `/bal` yourself for a fresh exact starting balance, or set it with `/economy balance AMOUNT`. `/economy auto on` enables payment-based bet/rakeback capture and balance reading.
+
+Observed commands alone never move money. Repeated confirmations correlated with a command are suppressed for one second; without server transaction IDs, identical independent receipts cannot always be distinguished from duplicate server messages. Missed historical payments cannot be reconstructed automatically. Existing financial data and layout remain compatible; the loan file has its own versioned schema.
 
 ## Build and verification
-
-The build compiles the available repair/display/command sources against the checksum-pinned 0.5.4 release. A guarded ASM transformation attaches the new subcommand immediately before the existing command tree is registered, and adds a small client adapter that calls the existing `runLocal` and save/message methods. The actual generated methods are also loaded with JVM verification enabled in a headless client fixture to test scope guarding, reset execution, saving and failure reporting. The existing balanced Player Nets renderer is preserved. Other release entries are verified byte-for-byte apart from compiled sources retained in the repository.
-
-Run:
 
 ```sh
 python3 tools/build.py
 ```
 
-Requires Java 21 (`JAVA_HOME`), JUnit Console Standalone (`JUNIT_JAR`) Gson (`GSON_JAR`) ASM 9.8 (`ASM_JAR`) and Brigadier 1.3.10 (`BRIGADIER_JAR`, available from the official Minecraft libraries repository). Defaults use the managed workspace's prepared Java/dependency cache. The build runs 26 regression tests, including four bulk-reset/command tests for real Brigadier registration and completion, preservation of per-player commands and other ledger fields, persistence, account scoping, repeated reset and continuing new activity, including six Player Nets tests for matching counts, zero filtering, single-sided data, ordering and reset-baseline behavior. The 16 existing payment tests cover taxed/untaxed payments, command-independent confirmations, duplicates associated with commands, negative/failed inputs, small payments against rounded balances, payout matching, rakeback reset behavior, disabled capture, initial balance, and persistence. It does not connect to a live DonutSMP account.
+The build compiles the retained repair, command, display and loan sources against the checksum-pinned 0.5.5 release. The original financial ledger and payment/wallet implementation are retained. Guarded ASM adapters attach the loan command, open/close the correct loan session, add the fourth view, and add the editor toggle. Generated adapters run in headless client, renderer and editor fixtures with JVM verification enabled. Other release entries are checked byte-for-byte apart from explicitly compiled or adapted classes. Test fixtures are excluded from the mod JAR.
+
+Requires Java 21 (`JAVA_HOME`), JUnit Console Standalone (`JUNIT_JAR`), Gson (`GSON_JAR`), ASM 9.8 (`ASM_JAR`), ASM Tree 9.8 (`ASM_TREE_JAR`), and Brigadier 1.3.10 (`BRIGADIER_JAR`). Defaults use the prepared workspace dependency cache.
+
+**37 regression tests** cover payment/tax behavior, balance reconciliation, bulk rakeback reset, balanced Player Nets, manual loans, repayments, persistence and server/account isolation, invalid input and file handling, failed saves, pagination, settings migration, and four-view rotation/fading. The adapter smoke checks exercise command scope guards, persistence, rendering, unsigned loan amounts, editor layout/toggling, and save failure reporting. These are headless checks; they do not connect to a live DonutSMP account.

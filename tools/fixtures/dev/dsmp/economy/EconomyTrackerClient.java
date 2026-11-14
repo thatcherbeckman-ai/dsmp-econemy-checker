@@ -7,6 +7,17 @@ import dev.dsmp.economy.core.Ledger;
 /** Headless fixture with the production command/save method descriptors. */
 public final class EconomyTrackerClient {
     public final Ledger ledger = new Ledger();
+    public final TrackerConfig config = new TrackerConfig();
+    public final LocalStore store;
+    private String scope;
+    public EconomyTrackerClient() { this(java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "loan-command-fixture")); }
+    public EconomyTrackerClient(java.nio.file.Path dir) { store = new LocalStore(dir); }
+    public void openLedger(String account) {
+        scope = null;
+        if (account == null) return;
+        scope = account; active = true;
+    }
+    public void disconnect() { scope = null; active = false; }
     public String status = "Save failed";
     public boolean active, saveSucceeds = true;
     public int saves;
@@ -18,7 +29,11 @@ public final class EconomyTrackerClient {
         return dispatcher;
     }
     public String help() { return "Commands: /economy rakeback reset NAME | set NAME AMOUNT | show NAME."; }
-    private int runLocal(Runnable action) { if (!active) return 0; action.run(); return 1; }
+    private int runLocal(Runnable action) {
+        if (!active) return 0;
+        try { action.run(); return 1; }
+        catch (IllegalArgumentException | IllegalStateException | ArithmeticException ex) { message = ex.getMessage(); return 0; }
+    }
     private boolean saveLedger() { saves++; return saveSucceeds; }
     private void say(String text) { message = text; }
 }
