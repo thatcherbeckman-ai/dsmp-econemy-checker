@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the manual Loans chart against the verified 0.5.5 release."""
+"""Build the No Loan list against the verified 0.6.0 release."""
 import hashlib
 import json
 import os
@@ -9,9 +9,9 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / 'downloads/economy-tracker-0.5.5-mc1.21.11.jar'
-BASE_SHA256 = 'a2a15bdffb3e51e894cf8245ada5205b4576c095875b2a748702af076048e198'
-VERSION = '0.6.0'
+BASE = ROOT / 'downloads/economy-tracker-0.6.0-mc1.21.11.jar'
+BASE_SHA256 = '715002403b6678d088022d99d539d89042407bca9c5532520a53f0ecb3d68982'
+VERSION = '0.6.1'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest() == BASE_SHA256, 'Unexpected base JAR'
 java_home = Path(os.environ.get('JAVA_HOME', '/workspace/.tools/jdk-21.0.9+10'))
 java, javac = str(java_home / 'bin/java'), str(java_home / 'bin/javac')
@@ -37,7 +37,7 @@ patch_tools.mkdir(parents=True, exist_ok=True)
 asm_tree_matches = list(Path('/workspace/.gradle/wrapper/dists').rglob('asm-tree-9.8.jar'))
 asm_tree = Path(os.environ['ASM_TREE_JAR']) if 'ASM_TREE_JAR' in os.environ else sorted(asm_tree_matches)[-1]
 asm_cp = os.pathsep.join(map(str, (asm, asm_tree)))
-subprocess.run([javac, '--release', '21', '-cp', asm_cp, '-d', str(patch_tools), str(ROOT / 'tools/PatchLoans.java'), str(ROOT / 'tools/PatchRakebackCommand.java')], check=True)
+subprocess.run([javac, '--release', '21', '-cp', asm_cp, '-d', str(patch_tools), str(ROOT / 'tools/PatchLoans.java'), str(ROOT / 'tools/PatchRakebackCommand.java'), str(ROOT / 'tools/PatchNoLoanLabels.java')], check=True)
 patch_classpath = os.pathsep.join(map(str, (patch_tools, asm, asm_tree)))
 original_classes = build / 'original-classes'
 original_classes.mkdir(parents=True, exist_ok=True)
@@ -47,7 +47,7 @@ with zipfile.ZipFile(BASE) as original:
         destination = original_classes / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(original.read(name))
-subprocess.run([java, '-cp', patch_classpath, 'PatchLoans', str(original_classes), str(classes)], check=True)
+subprocess.run([java, '-cp', patch_classpath, 'PatchNoLoanLabels', str(original_classes / patch_names[2]), str(classes / patch_names[2])], check=True)
 # Execute the generated Minecraft adapters in native-free fixtures with JVM verification.
 fixture = build / 'command-fixture'
 if fixture.exists(): shutil.rmtree(fixture)
@@ -58,8 +58,10 @@ fixture_client = fixture / patch_names[0]
 subprocess.run([java, '-cp', patch_classpath, 'PatchRakebackCommand', str(fixture_client), str(fixture_client)], check=True)
 fixture_store = fixture / patch_names[1]
 fixture_store.parent.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(original_classes / patch_names[1], fixture_store)
+with zipfile.ZipFile(ROOT / 'downloads/economy-tracker-0.5.5-mc1.21.11.jar') as legacy:
+    fixture_store.write_bytes(legacy.read(patch_names[1]))
 subprocess.run([java, '-cp', patch_classpath, 'PatchLoans', str(fixture), str(fixture)], check=True)
+subprocess.run([java, '-cp', patch_classpath, 'PatchNoLoanLabels', str(fixture / patch_names[2]), str(fixture / patch_names[2])], check=True)
 for smoke in ('RakebackPatchSmoke', 'LoanPatchSmoke'):
     subprocess.run([java, '-Xverify:all', '-cp', os.pathsep.join(map(str, (fixture, classes, BASE, brigadier, gson))), smoke], check=True)
 output = build / f'economy-tracker-{VERSION}-mc1.21.11.jar'

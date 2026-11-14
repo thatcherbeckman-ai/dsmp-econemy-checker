@@ -28,6 +28,16 @@ public final class LoanPatchSmoke {
         client.openLedger("server|other"); if (LoanService.hasLoans()) throw new AssertionError("Account isolation failed");
         client.openLedger("server|account"); if (!LoanService.hasLoans()) throw new AssertionError("Loan not saved");
         dispatcher.execute("economy loan paid Alex 10M", new Object()); if (LoanService.hasLoans()) throw new AssertionError("Repayment not cleared");
+        dispatcher.execute("economy loan noloan add Blocked", new Object());
+        if (!LoanService.hasLoans()) throw new AssertionError("No Loan list hidden without debts");
+        String noLoanView = TrackerRenderer.show(3, client.ledger);
+        if (!noLoanView.contains("NO LOAN LIST") || !noLoanView.contains("BlockedNO LOAN") || noLoanView.contains("Blocked$0")) throw new AssertionError(noLoanView);
+        if (dispatcher.execute("economy loan set Blocked 1M", new Object()) != 0) throw new AssertionError("No Loan restriction bypassed");
+        client.disconnect(); client.openLedger("server|account");
+        if (!TrackerRenderer.show(3, client.ledger).contains("BlockedNO LOAN")) throw new AssertionError("No Loan record not saved");
+        dispatcher.execute("economy loan noloan remove Blocked", new Object());
+        if (LoanService.hasLoans()) throw new AssertionError("No Loan entry not removed");
+        if (!TrackerRenderer.show(0, client.ledger).contains("PLAYER NETS")) throw new AssertionError("Player Nets render changed");
         if (!before.equals(client.ledger.snapshot())) throw new AssertionError("Loan changed financial ledger");
         System.out.println("Loan adapter smoke check passed: scoped commands, persistence, rendering, unsigned amounts, editor layout/toggle and isolation");
     }

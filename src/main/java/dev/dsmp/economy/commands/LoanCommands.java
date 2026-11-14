@@ -22,6 +22,16 @@ public final class LoanCommands {
         loan.then(LiteralArgumentBuilder.<S>literal("page")
                 .then(RequiredArgumentBuilder.<S, Integer>argument("number", IntegerArgumentType.integer(1))
                         .executes(c -> action.loanCommand("page", null, Integer.toString(IntegerArgumentType.getInteger(c, "number"))))));
+        var noLoan = LiteralArgumentBuilder.<S>literal("noloan").executes(c -> action.loanCommand("noloan_list", null, null));
+        for (String operation : new String[]{"add", "remove"}) {
+            noLoan.then(LiteralArgumentBuilder.<S>literal(operation)
+                    .then(RequiredArgumentBuilder.<S, String>argument("player", StringArgumentType.word())
+                            .executes(c -> action.loanCommand("noloan_" + operation, StringArgumentType.getString(c, "player"), null))));
+        }
+        noLoan.then(LiteralArgumentBuilder.<S>literal("list").executes(c -> action.loanCommand("noloan_list", null, null))
+                .then(RequiredArgumentBuilder.<S, Integer>argument("number", IntegerArgumentType.integer(1))
+                        .executes(c -> action.loanCommand("noloan_list", null, Integer.toString(IntegerArgumentType.getInteger(c, "number"))))));
+        loan.then(noLoan);
         root.then(loan);
     }
 }
