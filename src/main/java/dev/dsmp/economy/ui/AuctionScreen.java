@@ -28,10 +28,10 @@ public final class AuctionScreen extends class_437 {
         for(int i=0;i<rows()&&from+i<found.size();i++){var e=found.get(from+i);button(12,76+i*24,w,22,"    "+e.name(),()->{selected=e.id();method_41843();});}
         button(12,field_22790-68,44,20,"Prev",()->{page=Math.max(0,page-1);method_41843();});button(60,field_22790-68,44,20,"Next",()->{page=Math.min(pages()-1,page+1);method_41843();});button(108,field_22790-68,Math.max(44,w-96),20,"Search",()->{appliedQuery=query;page=0;method_41843();});
         int cw=Math.max(36,(field_22789-right-18)/2),y=field_22790-92;
-        button(right,y,cw,20,"Start",()->act(()->{AuctionItems.find(selected);AuctionService.start(selected,Integer.parseInt(quantity.trim()),Integer.parseInt(seconds.trim()),System.currentTimeMillis());},"Auction started. Close settings to see the item overlay."));
-        button(right+cw+6,y,cw,20,"End early",()->act(AuctionService::end,"Auction finished. Winner remains on screen."));
+        button(right,y,cw,20,"Start",()->act(()->{AuctionItems.find(selected);AuctionService.start(selected,Integer.parseInt(quantity.trim()),Integer.parseInt(seconds.trim()),System.currentTimeMillis(),AuctionHologram.capture());AuctionHologram.tick(class_310.method_1551());},"Placed at your feet. Close settings and walk away to view."));
+        button(right+cw+6,y,cw,20,"End early",()->act(AuctionService::end,"Auction finished. Winner stays above the item."));
         button(right,y+24,cw,20,"Cancel lot",()->act(AuctionService::cancel,"Auction cancelled; bids retained for review."));
-        button(right+cw+6,y+24,cw,20,"Hide result",()->act(AuctionService::hide,"Auction overlay hidden."));
+        button(right+cw+6,y+24,cw,20,"Hide result",()->act(AuctionService::hide,"Auction hologram removed."));
         button(field_22789-70,12,58,20,"Done",this::method_25419);
     }
     private void field(int x,int y,int w,String value,int max,String placeholder,java.util.function.Consumer<String> setter){var field=new class_342(field_22793,x,y,w,20,class_2561.method_43470(placeholder));field.method_1880(max);field.method_1852(value);field.method_47404(class_2561.method_43470(placeholder));field.method_1863(setter);method_37063(field);}

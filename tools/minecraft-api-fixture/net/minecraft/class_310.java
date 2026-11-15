@@ -3,6 +3,7 @@ public final class class_310 {
     private static final class_310 INSTANCE = new class_310();
     public class_437 screen;
     public class_746 field_1724;
+    public class_638 field_1687;
     public final class_320 session=new class_320();
     public class_320 method_1548(){return session;}
     public final class_327 field_1772 = new class_327();

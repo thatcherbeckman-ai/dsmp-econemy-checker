@@ -9,7 +9,7 @@ import java.nio.file.Files;
 public final class AuctionPatchSmoke {
     private static void click(class_437 screen,String label){screen.widgets.stream().filter(b->b.label.trim().equals(label)).findFirst().orElseThrow(()->new AssertionError(label)).click();}
     public static void main(String[] args)throws Exception{
-        var mod=new EconomyTrackerClient(Files.createTempDirectory("auction-ui-"));var game=class_310.method_1551();game.field_1724=new class_746();game.session.username="MyRealAccount";
+        var mod=new EconomyTrackerClient(Files.createTempDirectory("auction-ui-"));var game=class_310.method_1551();game.field_1724=new class_746();game.field_1687=new class_638("minecraft:overworld");game.session.username="MyRealAccount";
         if(((AuctionAction)(Object)mod).auctionAction(()->{throw new AssertionError("Ran without scope");})!=0)throw new AssertionError("Missing server guard");
         mod.openLedger("server|account");mod.openMenu();var dashboard=(DashboardScreen)game.screen;var g=new class_332();dashboard.method_25394(g,0,0,0);
         if(g.text.stream().noneMatch(s->s.equals("Welcome, MyRealAccount"))||class_490.lastEntity!=game.field_1724)throw new AssertionError("Welcome banner did not use current user and local entity");

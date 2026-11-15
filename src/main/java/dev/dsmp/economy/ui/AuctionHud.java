@@ -4,14 +4,9 @@ import dev.dsmp.economy.auction.*;
 import dev.dsmp.economy.core.Money;
 import net.minecraft.*;
 
-/** Centered item lot and receipt-based bidding; no server commands or delivery automation. */
+/** Settings-only lot preview. The in-world display is owned by AuctionHologram. */
 public final class AuctionHud {
     private AuctionHud(){}
-    public static void draw(class_332 g,int width,int height,boolean editing){
-        if(editing)return;
-        long now=System.currentTimeMillis();AuctionService.tick(now);var round=AuctionService.current();if(round==null||!round.visible())return;
-        drawLot(g,round,width/2,Math.max(20,height/2-78),Math.min(1f,Math.min(width/360f,height/270f)),now);
-    }
     public static void drawLot(class_332 g,AuctionRound round,int center,int top,float scale,long now){
         AuctionItems.Entry item;try{item=AuctionItems.find(round.item());}catch(IllegalArgumentException ex){centered(g,"Auction item unavailable",center,top,0xFFE57885,.85f);return;}
         var pose=g.method_51448();pose.pushMatrix();pose.translate(center,top);pose.scale(scale);

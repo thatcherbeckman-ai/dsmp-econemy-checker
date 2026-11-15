@@ -23,7 +23,8 @@ public final class AuctionService {
     private static void commit(AuctionRound next){
         try{store.save(next);round=next;}catch(Exception ex){error="Auction save failed. Bidding stopped; reconnect after fixing storage.";if(round!=null&&round.state()==AuctionRound.State.RUNNING)round=round.withState(AuctionRound.State.INTERRUPTED);throw new IllegalStateException(error,ex);}
     }
-    public static void start(String item,int quantity,int seconds,long now){ready();if(round!=null&&round.state()==AuctionRound.State.RUNNING)throw new IllegalStateException("An auction is already running");commit(AuctionRound.start(item,quantity,seconds,now));}
+    public static void start(String item,int quantity,int seconds,long now){start(item,quantity,seconds,now,null);}
+    public static void start(String item,int quantity,int seconds,long now,AuctionAnchor anchor){ready();if(round!=null&&round.state()==AuctionRound.State.RUNNING)throw new IllegalStateException("An auction is already running");var next=AuctionRound.start(item,quantity,seconds,now);commit(anchor==null?next:next.at(anchor));}
     public static void end(){ready();if(round==null||round.state()!=AuctionRound.State.RUNNING)throw new IllegalStateException("No running auction");commit(round.withState(AuctionRound.State.ENDED));}
     public static void cancel(){ready();if(round==null||round.state()!=AuctionRound.State.RUNNING)throw new IllegalStateException("No running auction");commit(round.withState(AuctionRound.State.CANCELLED));}
     public static void hide(){ready();if(round!=null)commit(round.hide());}
