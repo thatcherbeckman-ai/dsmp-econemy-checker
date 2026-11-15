@@ -1,2 +1,4 @@
 package net.minecraft;
-public final class class_327 { public int method_1727(String text) { return text.codePointCount(0,text.length())*6; } }
+public final class class_327 {
+    public int method_27525(class_5348 text){if(text instanceof class_5250 component&&component.font().equals("economy_tracker:bubble")&&System.getProperty("economy.fixture.bubbleFont")!=null){try{var font=java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT,new java.io.File(System.getProperty("economy.fixture.bubbleFont"))).deriveFont(10f);return (int)Math.ceil(font.getStringBounds(text.getString(),new java.awt.font.FontRenderContext(null,true,true)).getWidth());}catch(Exception ex){throw new IllegalStateException(ex);}}
+return text.getString().codePointCount(0,text.getString().length())*(text instanceof class_5250 t&&t.font().equals("economy_tracker:bubble")?7:6);} public int method_1727(String text) { return text.codePointCount(0,text.length())*6; } }

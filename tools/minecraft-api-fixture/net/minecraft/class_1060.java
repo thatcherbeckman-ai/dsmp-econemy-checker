@@ -1,0 +1,1 @@
+package net.minecraft; public class class_1060 {public final java.util.Map<class_2960,class_1044> textures=new java.util.HashMap<>();public void method_4616(class_2960 id,class_1044 texture){var old=textures.put(id,texture);if(old!=null)old.close();}public void method_4615(class_2960 id){var old=textures.remove(id);if(old!=null)old.close();}}

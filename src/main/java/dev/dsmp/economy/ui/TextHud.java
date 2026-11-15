@@ -13,9 +13,10 @@ public final class TextHud {
     private record Cached(String text,int font,TextLayout.Measure measure) {}
     private static final Map<TextBox,Cached> CACHE=Collections.synchronizedMap(new WeakHashMap<>());
     private TextHud() {}
-    private static int width(String text,int font) { return font==2?class_310.method_1551().field_1772.method_1727(text):HudFont.width(text,font==1); }
-    private static class_2561 component(String text,int font) { return font==2?class_2561.method_43470(text):HudFont.text(text,font==1); }
+    private static int width(String text,int font) { return TextFonts.width(text,font); }
+    private static class_2561 component(String text,int font) { return TextFonts.text(text,font); }
     public static TextLayout.Measure measure(TextBox box) {
+        if(!box.lineStyles.isEmpty()){var layout=StyledTextHud.layout(box);return new TextLayout.Measure(java.util.List.of(),layout.width(),layout.height());}
         Cached cached=CACHE.get(box);
         if(cached==null||!cached.text().equals(box.text)||cached.font()!=box.font) {
             cached=new Cached(box.text,box.font,TextLayout.measure(box,s->width(s,box.font))); CACHE.put(box,cached);
@@ -27,14 +28,9 @@ public final class TextHud {
         for(var box:config.textBoxes)if(box.visible||editing)drawBox(graphics,box,width,height,editing);
     }
     private static void drawBox(class_332 graphics,TextBox box,int width,int height,boolean editing) {
+        if(!box.lineStyles.isEmpty()){StyledTextHud.draw(graphics,box,width,height,editing);return;}
         var measure=measure(box); var bounds=TextLayout.bounds(box,measure,width,height,editing);
-        if(box.backgroundStyle!=0&&box.backgroundOpacity>0) {
-            int alpha=box.visible?box.backgroundOpacity:box.backgroundOpacity/3;
-            if(box.backgroundStyle==1) {
-                GlassPane.fill(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),alpha<<24|0x17373D);
-                GlassPane.border(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),(box.visible?180:60)<<24);
-            } else graphics.method_25294(bounds.x(),bounds.y(),bounds.x()+bounds.width(),bounds.y()+bounds.height(),alpha<<24|0x0B1018);
-        }
+        background(graphics,box,bounds);
         class_327 font=class_310.method_1551().field_1772;
         for(int lineIndex=0;lineIndex<measure.lines().size();lineIndex++) {
             var line=measure.lines().get(lineIndex); int x=TextLayout.lineX(box,measure,line),y=TextLayout.PADDING+lineIndex*TextLayout.LINE_HEIGHT;
@@ -60,6 +56,15 @@ public final class TextHud {
                     }
                 } finally { graphics.method_51448().popMatrix(); }
             }
+        }
+    }
+    static void background(class_332 graphics,TextBox box,TextLayout.Bounds bounds){
+        if(box.backgroundStyle!=0&&box.backgroundOpacity>0) {
+            int alpha=box.visible?box.backgroundOpacity:box.backgroundOpacity/3;
+            if(box.backgroundStyle==1) {
+                GlassPane.fill(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),alpha<<24|0x17373D);
+                GlassPane.border(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),(box.visible?180:60)<<24);
+            } else graphics.method_25294(bounds.x(),bounds.y(),bounds.x()+bounds.width(),bounds.y()+bounds.height(),alpha<<24|0x0B1018);
         }
     }
     private static int opacity(int color,boolean visible) { return visible?color:color&0xFFFFFF|0x55000000; }

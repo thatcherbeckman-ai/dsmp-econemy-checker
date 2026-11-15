@@ -1,0 +1,1 @@
+package net.minecraft; public final class class_156 {public static java.nio.file.Path opened;public static class_158 method_668(){return new class_158();}public static class class_158 {public void method_60932(java.nio.file.Path path){opened=path;}}}

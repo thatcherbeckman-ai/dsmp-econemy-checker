@@ -6,6 +6,8 @@ public final class class_310 {
     public class_638 field_1687;
     public final class_320 session=new class_320();
     public class_320 method_1548(){return session;}
+    public final class_1060 textures=new class_1060();
+    public class_1060 method_1531(){return textures;}
     public final class_327 field_1772 = new class_327();
     public static class_310 method_1551() { return INSTANCE; }
     public void method_1507(class_437 screen) { this.screen = screen; if (screen != null) screen.method_41843(); }

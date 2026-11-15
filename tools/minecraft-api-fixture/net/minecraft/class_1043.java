@@ -1,0 +1,1 @@
+package net.minecraft; public class class_1043 extends class_1044 {public final class_1011 image; public class_1043(java.util.function.Supplier<String> name,class_1011 image){this.image=image;}@Override public void close(){super.close();image.close();}}

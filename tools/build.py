@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the anchored auction hologram against the verified 0.10.0 release."""
+"""Build per-line bubble text and images against the verified 0.10.1 release."""
 import hashlib
 import json
 import os
@@ -9,9 +9,9 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / 'downloads/economy-tracker-0.10.0-mc1.21.11.jar'
-BASE_SHA256 = '13837ed8aae6964ec13bc94a8e19cf7f883ee21b75727a2c62b30f98c00bd714'
-VERSION = '0.10.1'
+BASE = ROOT / 'downloads/economy-tracker-0.10.1-mc1.21.11.jar'
+BASE_SHA256 = 'e693684c5801d86bb5c023513ce064be0d4383c9741879e98abd2907a0993dca'
+VERSION = '0.11.0'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest() == BASE_SHA256, 'Unexpected base JAR'
 java_home = Path(os.environ.get('JAVA_HOME', '/workspace/.tools/jdk-21.0.9+10'))
 java, javac = str(java_home / 'bin/java'), str(java_home / 'bin/javac')
@@ -52,7 +52,7 @@ with zipfile.ZipFile(BASE) as original:
         destination = original_classes / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(original.read(name))
-subprocess.run([java, '-cp', patch_classpath, 'PatchAuctionHologram', str(original_classes), str(classes)], check=True)
+# The pinned client already contains all native adapters; only UI/model classes change.
 # Execute the generated Minecraft adapters in native-free fixtures with JVM verification.
 fixture = build / 'command-fixture'
 if fixture.exists(): shutil.rmtree(fixture)
@@ -72,11 +72,12 @@ subprocess.run([java, '-cp', patch_classpath, 'PatchTextBoxes', str(fixture), st
 subprocess.run([java, '-cp', patch_classpath, 'PatchDashboard', str(fixture), str(fixture)], check=True)
 subprocess.run([java, '-cp', patch_classpath, 'PatchAuction', str(fixture), str(fixture)], check=True)
 subprocess.run([java, '-cp', patch_classpath, 'PatchAuctionHologram', str(fixture), str(fixture)], check=True)
-for smoke in ('RakebackPatchSmoke', 'LoanPatchSmoke', 'AppearancePatchSmoke', 'TextBoxPatchSmoke', 'DashboardPatchSmoke', 'AuctionPatchSmoke', 'AuctionHologramSmoke'):
+for smoke in ('RakebackPatchSmoke', 'LoanPatchSmoke', 'AppearancePatchSmoke', 'TextBoxPatchSmoke', 'DashboardPatchSmoke', 'AuctionPatchSmoke', 'AuctionHologramSmoke', 'StyledTextSmoke'):
     subprocess.run([java, '-Xverify:all', '-cp', os.pathsep.join(map(str, (fixture, classes, BASE, brigadier, gson, api_stubs, joml))), smoke], check=True)
 output = build / f'economy-tracker-{VERSION}-mc1.21.11.jar'
 with zipfile.ZipFile(BASE) as original, zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as repaired:
     updated = {str(f.relative_to(classes)): f.read_bytes() for f in classes.rglob('*.class')}
+    updated.update({f.relative_to(ROOT / 'src/main/resources').as_posix(): f.read_bytes() for f in (ROOT / 'src/main/resources').rglob('*') if f.is_file()})
     for name in original.namelist():
         # The replaced implementation has a new nested Confirmation record.
         if name.startswith('dev/dsmp/economy/core/PaymentDetector') and name.endswith('.class'):
@@ -84,23 +85,21 @@ with zipfile.ZipFile(BASE) as original, zipfile.ZipFile(output, 'w', zipfile.ZIP
         data = updated.pop(name, original.read(name))
         if name == 'fabric.mod.json':
             metadata = json.loads(data); metadata['version'] = VERSION
-            assert 'accessWidener' not in metadata, 'Base already has an access widener; merge explicitly'
+            assert metadata.get('accessWidener') in (None, 'economy-tracker.accesswidener'), 'Unexpected access widener'
             metadata['accessWidener'] = 'economy-tracker.accesswidener'
             data = (json.dumps(metadata, indent=2) + '\n').encode()
         repaired.writestr(name, data)
-    for resource in sorted((ROOT / 'src/main/resources').rglob('*')):
-        if resource.is_file(): repaired.writestr(resource.relative_to(ROOT / 'src/main/resources').as_posix(), resource.read_bytes())
     for name, data in sorted(updated.items()): repaired.writestr(name, data)
 with zipfile.ZipFile(BASE) as old, zipfile.ZipFile(output) as new:
     assert new.testzip() is None
     metadata = json.loads(new.read('fabric.mod.json'))
     assert new.read(metadata['accessWidener']).startswith(b'accessWidener v2 intermediary\n')
     assert len(new.read(metadata['accessWidener']).decode().splitlines()) == 6
-    assert not any(n.startswith(('net/', 'tools/')) or n.endswith('Smoke.class') for n in new.namelist()), 'Fixture leaked into mod'
+    assert not any(n.startswith(('net/', 'tools/', 'org/lwjgl/', 'com/mojang/')) or n.endswith('Smoke.class') for n in new.namelist()), 'Fixture leaked into mod'
     for name in new.namelist():
         if name.endswith('.class'):
             assert b'sendCommand' not in new.read(name) and b'sendChat' not in new.read(name), name
-        if name not in ('fabric.mod.json', 'economy-tracker.accesswidener') and not name.startswith(('dev/dsmp/economy/core/WalletTracker', 'dev/dsmp/economy/core/PaymentDetector', 'dev/dsmp/economy/ui/PlayerNetRows', 'dev/dsmp/economy/ui/TrackerRenderer', 'dev/dsmp/economy/EconomyTrackerClient.class', 'dev/dsmp/economy/commands/', 'dev/dsmp/economy/core/RakebackReset', 'dev/dsmp/economy/loans/', 'dev/dsmp/economy/TrackerConfig', 'dev/dsmp/economy/core/ViewCycle', 'dev/dsmp/economy/LocalStore.class', 'dev/dsmp/economy/ui/TrackerScreen.class', 'dev/dsmp/economy/ui/AppearanceScreen', 'dev/dsmp/economy/appearance/', 'dev/dsmp/economy/text/', 'dev/dsmp/economy/ui/TextBoxesScreen', 'dev/dsmp/economy/ui/TextHud', 'dev/dsmp/economy/ui/GlassPane', 'dev/dsmp/economy/dashboard/', 'dev/dsmp/economy/ui/Dashboard', 'dev/dsmp/economy/ui/FestiveUi', 'dev/dsmp/economy/auction/', 'dev/dsmp/economy/ui/Auction', 'dev/dsmp/economy/ui/WelcomeBanner')):
+        if name not in ('fabric.mod.json', 'economy-tracker.accesswidener') and not name.startswith(('dev/dsmp/economy/core/WalletTracker', 'dev/dsmp/economy/core/PaymentDetector', 'dev/dsmp/economy/ui/PlayerNetRows', 'dev/dsmp/economy/ui/TrackerRenderer', 'dev/dsmp/economy/EconomyTrackerClient.class', 'dev/dsmp/economy/commands/', 'dev/dsmp/economy/core/RakebackReset', 'dev/dsmp/economy/loans/', 'dev/dsmp/economy/TrackerConfig', 'dev/dsmp/economy/core/ViewCycle', 'dev/dsmp/economy/LocalStore.class', 'dev/dsmp/economy/ui/TrackerScreen.class', 'dev/dsmp/economy/ui/AppearanceScreen', 'dev/dsmp/economy/appearance/', 'dev/dsmp/economy/text/', 'dev/dsmp/economy/ui/TextBoxesScreen', 'dev/dsmp/economy/ui/TextHud', 'dev/dsmp/economy/ui/GlassPane', 'dev/dsmp/economy/dashboard/', 'dev/dsmp/economy/ui/Dashboard', 'dev/dsmp/economy/ui/FestiveUi', 'dev/dsmp/economy/auction/', 'dev/dsmp/economy/ui/Auction', 'dev/dsmp/economy/ui/WelcomeBanner', 'dev/dsmp/economy/ui/LineStylesScreen', 'dev/dsmp/economy/ui/StyledTextHud', 'dev/dsmp/economy/ui/TextFonts', 'dev/dsmp/economy/ui/TextImages', 'assets/economy_tracker/font/bubble', 'assets/economy_tracker/textures/text_icons/')):
             assert old.read(name) == new.read(name), name
 print('Built', output)
 print('SHA256', hashlib.sha256(output.read_bytes()).hexdigest())

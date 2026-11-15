@@ -1,0 +1,1 @@
+package org.lwjgl.util.tinyfd; public class TinyFileDialogs {public static String nextSelection;public static String tinyfd_openFileDialog(CharSequence title,CharSequence defaultPath,org.lwjgl.PointerBuffer filters,CharSequence description,boolean multiple){var value=nextSelection;nextSelection=null;return value;}}

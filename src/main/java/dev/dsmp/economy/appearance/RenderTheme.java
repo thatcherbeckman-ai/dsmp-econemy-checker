@@ -41,7 +41,7 @@ public final class RenderTheme {
     public static boolean isEditor(Object screen) {
         if (screen == null) return false;
         String name = screen.getClass().getName();
-        return name.equals("dev.dsmp.economy.ui.TrackerScreen") || name.equals("dev.dsmp.economy.ui.AppearanceScreen") || name.equals("dev.dsmp.economy.ui.TextBoxesScreen") || name.equals("dev.dsmp.economy.ui.DashboardScreen") || name.equals("dev.dsmp.economy.ui.AuctionScreen");
+        return name.equals("dev.dsmp.economy.ui.TrackerScreen") || name.equals("dev.dsmp.economy.ui.AppearanceScreen") || name.equals("dev.dsmp.economy.ui.TextBoxesScreen") || name.equals("dev.dsmp.economy.ui.DashboardScreen") || name.equals("dev.dsmp.economy.ui.AuctionScreen") || name.equals("dev.dsmp.economy.ui.LineStylesScreen");
     }
     public static int color(TabAppearance style, int original) {
         int rgb = original & 0xFFFFFF, alpha = original >>> 24;

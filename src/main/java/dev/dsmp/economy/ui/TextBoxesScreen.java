@@ -22,6 +22,7 @@ public final class TextBoxesScreen extends class_437 {
     @Override protected void method_25426() {
         controls.clear();
         TextBox box=editor.selected();
+        button(field_22789-114,4,54,"Lines",this::lines);button(field_22789-56,4,46,"Preset",()->change(()->editor.reference(class_310.method_1551().method_1548().method_1676())));
         button(10,28,44,"New",()->change(()->editor.add()));
         button(58,28,106,editor.label(),()->change(editor::next));
         button(168,28,44,"Delete",()->change(editor::delete));
@@ -33,7 +34,7 @@ public final class TextBoxesScreen extends class_437 {
         content.method_1863(value->previewFields());start.method_1863(value->previewFields());end.method_1863(value->previewFields());
         button(222,78,88,"Grad: "+new String[]{"Solid","Across","Down"}[box==null?0:box.gradient],()->edit(b->b.gradient=(b.gradient+1)%3));
         button(10,104,44,"Size -",()->change(()->editor.size(-.1f)));button(58,104,44,"Size +",()->change(()->editor.size(.1f)));
-        button(106,104,88,new String[]{"Inter","Inter bold","Minecraft"}[box==null?0:box.font],()->edit(b->b.font=(b.font+1)%3));
+        button(106,104,88,TextFonts.NAMES[box==null?0:box.font],()->edit(b->b.font=(b.font+1)%4));
         button(198,104,58,new String[]{"Left","Center","Right"}[box==null?0:box.align],()->edit(b->b.align=(b.align+1)%3));
         button(260,104,50,"BG:"+new String[]{"off","glass","panel"}[box==null?1:box.backgroundStyle],()->edit(b->b.backgroundStyle=(b.backgroundStyle+1)%3));
         button(10,128,70,box==null||box.visible?"Visible":"Hidden",()->edit(b->b.visible=!b.visible));
@@ -45,6 +46,7 @@ public final class TextBoxesScreen extends class_437 {
         controls.add(new Control(x,y,width,label));
         method_37063((class_364)class_4185.method_46430(class_2561.method_43470(label),b->action.run()).method_46434(x,y,width,20).method_46431());
     }
+    private void lines(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}class_310.method_1551().method_1507(new LineStylesScreen(mod,this,box));}
     private boolean fields() {
         try { editor.fields(content.method_1882(),start.method_1882(),end.method_1882());return true; }
         catch(IllegalArgumentException ex){notice=ex.getMessage();return false;}
@@ -55,7 +57,7 @@ public final class TextBoxesScreen extends class_437 {
     @Override public void method_25394(class_332 graphics,int mx,int my,float delta){
         FestiveUi.background(graphics,field_22789,field_22790,mod.config);
         TextBox box=editor.selected();
-        graphics.method_51433(field_22793,"TEXT BOXES / "+editor.label()+(box==null?"":"  "+Math.round(box.size*100)+"%"),10,10,0xFFEAF2F8,true);
+        FestiveUi.text(graphics,FestiveUi.fit("TEXT BOXES / "+editor.label()+(box==null?"":"  "+Math.round(box.size*100)+"%"),field_22789-136,.75f),10,10,0xFFEAF2F8,.75f,true);
         graphics.method_51433(field_22793,"Start",10,83,0xFFEAF2F8,false);graphics.method_51433(field_22793,"End",120,83,0xFFEAF2F8,false);
         graphics.method_51433(field_22793,notice,10,151,0xFFB4C1CC,false);
         TrackerRenderer.drawAll(graphics,mod.config,mod.ledger,mod.viewCycle,field_22789,field_22790,true,false,mod.wallet.estimated());

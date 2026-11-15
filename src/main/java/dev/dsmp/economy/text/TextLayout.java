@@ -27,8 +27,8 @@ public final class TextLayout {
     }
     public static Bounds bounds(TextBox box, Measure measure, int width, int height, boolean editing) {
         int top=editing?EDITOR_TOP:0,rawWidth=measure.width()+PADDING*2,rawHeight=measure.height()+PADDING*2;
-        float scale=Math.min(box.size, Math.max(.1f,(width-8f)/rawWidth));
-        scale=Math.min(scale,Math.max(.1f,(height-top-8f)/rawHeight));
+        float scale=Math.min(box.size, Math.max(.01f,(width-8f)/rawWidth));
+        scale=Math.min(scale,Math.max(.01f,(height-top-8f)/rawHeight));
         int w=(int)Math.ceil(rawWidth*scale),h=(int)Math.ceil(rawHeight*scale);
         return new Bounds(Math.round(box.x*Math.max(0,width-w)),top+Math.round(box.y*Math.max(0,height-top-h)),w,h,scale);
     }
