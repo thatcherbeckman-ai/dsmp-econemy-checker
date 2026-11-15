@@ -9,7 +9,7 @@ public final class EconomyTrackerClient {
     public final dev.dsmp.economy.core.ViewCycle viewCycle = new dev.dsmp.economy.core.ViewCycle();
     public final dev.dsmp.economy.core.WalletTracker wallet = new dev.dsmp.economy.core.WalletTracker();
     public final Ledger ledger = new Ledger();
-    public final TrackerConfig config = new TrackerConfig();
+    public TrackerConfig config = new TrackerConfig();
     public final LocalStore store;
     private String scope;
     public EconomyTrackerClient() { this(java.nio.file.Path.of(System.getProperty("java.io.tmpdir"), "loan-command-fixture")); }
@@ -19,6 +19,8 @@ public final class EconomyTrackerClient {
         if (account == null) return;
         scope = account; active = true;
     }
+    public void openMenu() { net.minecraft.class_310.method_1551().method_1507(new dev.dsmp.economy.ui.TrackerScreen(this)); }
+    public void openCommandMenu() { net.minecraft.class_310.method_1551().method_1507(new dev.dsmp.economy.ui.TrackerScreen(this)); }
     public void disconnect() { scope = null; active = false; }
     public String status = "Save failed";
     public boolean active, saveSucceeds = true;

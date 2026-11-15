@@ -1,8 +1,25 @@
 # Economy Tracker — Fabric 1.21.11
 
-Version **0.8.0** adds freely positioned **custom text boxes** and a **Minecraft-glass pane design** inspired by the reference block: transparent tinted fill, white/cyan pixel edges and sparse diagonal highlights.
+Version **0.9.0** replaces the initial O-key menu with an advanced **Christmas dashboard**, inspired by the reference layouts: dark cards, purple sidebar navigation, clear ON/OFF controls, colored lights, snowy trees and presents. Snowfall can animate gently or remain still.
 
-Press **O → Widgets → Text boxes**. Click **New**, type the text, then drag its box anywhere in the canvas below the controls. Use literal `\n` in the input to create another line. Select existing boxes by clicking them or cycling the **Box** button.
+Press **O** or `/economy` to open it. The sidebar provides:
+
+- **Overview**: observed balance, profit since reset, money in/out, a smooth balance-history chart, recent bets and top winners/losers. Empty or unknown readings remain empty; charts do not invent a zero starting balance.
+- **HUD modules**: explicit ON/OFF controls for Balance, Profit, Player Nets, Recent Bets, Rakeback and Loans.
+- **Appearance**: independent panel sizes, RGB colors, opacity and designs with live preview.
+- **Text boxes**: the movable custom text and gradient editor.
+- **HUD layout**: the drag editor, which now returns to the dashboard when closed.
+- **Loans**: player/amount fields with Set, Add, Repay, Remove and No Loan list controls. These use the existing scoped local loan commands and save loan edits immediately. Cancel only reverts settings, not loan actions already saved.
+- **Tracking**: automatic bet capture, passive balance reading, HUD rotation and the unpaid-stake settlement wait.
+- **Settings**: Christmas background, snow animation, menu accent, shared HUD base scale and default glass opacity.
+
+**Save** or **Esc** saves preferences; **Cancel** restores the last saved checkpoint. Returning from a saved appearance/text editor updates that checkpoint so cancelling the dashboard cannot undo a child editor's committed changes. Failed settings saves keep the screen open and Cancel stays available. The overview and loan-table read API are read-only; changing preferences does not reset financial records. Layouts adapt to smaller GUI sizes, and loan-table pagination keeps every record accessible.
+
+[Dashboard layout preview (sample data)](downloads/preview-0.9.0-overview.png) · [HUD settings layout preview](downloads/preview-0.9.0-modules.png). These images are native-free layout captures, not live Minecraft screenshots.
+
+The existing features remain available, including freely positioned **custom text boxes** and a **Minecraft-glass pane design** inspired by the reference block: transparent tinted fill, white/cyan pixel edges and sparse diagonal highlights.
+
+Press **O → Text boxes**. Click **New**, type the text, then drag its box anywhere in the canvas below the controls. Use literal `\n` in the input to create another line. Select existing boxes by clicking them or cycling the **Box** button.
 
 Each box has:
 
@@ -14,9 +31,9 @@ Each box has:
 
 **Done** or **Esc** saves; **Cancel** restores the text boxes from when the editor opened. Hidden boxes stay dimly visible for positioning in the editor but disappear from the in-game HUD. Text boxes remain visible independently of the rotating data tabs. Positions are saved relative to the viewport and remain within it when resolution changes. Up to 32 boxes, 1024 characters per box and 24 lines are supported.
 
-Existing panels using the Glass design now use the pixel-edged **MC Glass** look. **O → Style → Design** offers MC Glass, Outline, Square, Minimal and **Soft glass** (the earlier rounded appearance). Custom background colors tint the glass. Text box frames default to glass and can be changed with their BG button.
+Existing panels using the Glass design now use the pixel-edged **MC Glass** look. **O → Appearance → Design** offers MC Glass, Outline, Square, Minimal and **Soft glass** (the earlier rounded appearance). Custom background colors tint the glass. Text box frames default to glass and can be changed with their BG button.
 
-The prior independent appearance settings are retained for **Profit, Player Nets, Recent Bets, Loans, Rakeback and Balance**. Press **O → Style**, then click **Edit: ...** to choose a panel. Each has its own:
+The prior independent appearance settings are retained for **Profit, Player Nets, Recent Bets, Loans, Rakeback and Balance**. Press **O → Appearance**, then click **Edit: ...** to choose a panel. Each has its own:
 
 - Size, adjustable from 50% to 200% of the existing global scale, with live preview and matching drag bounds.
 - Accent, background, text, up/money and down/status colors. Click a color to open the RGB picker; use presets or adjust R/G/B in steps of 16 or 1. The header shows the exact hex value.
@@ -29,9 +46,9 @@ The prior **0.6.1 No Loan List** remains available. It adds a **No Loan List** s
 
 Listed players cannot have new or increased loan entries recorded in the tracker. Existing debts are retained and can still be reduced, repaid or removed; clearing a debt does not clear the No Loan flag. Removing a flag permits new entries again. This applies to local loan records, not payments made on the server.
 
-The manually managed **Loans** chart is retained. It shows player names, outstanding amounts, total outstanding money and a page indicator, using the existing rounded panel and font. Loans joins Profit → Player Nets → Recent Bets → Loans in the same eight-second rotation with a 400 ms fade. Press **P** to advance the view. Loans is skipped when empty, and **O → Trackers → Loans** toggles its visibility. Position, scale and glass settings use the shared rotating box.
+The manually managed **Loans** chart is retained. It shows player names, outstanding amounts, total outstanding money and a page indicator, using the existing rounded panel and font. Loans joins Profit → Player Nets → Recent Bets → Loans in the same eight-second rotation with a 400 ms fade. Press **P** to advance the view. Loans is skipped when empty, and **O → HUD modules → Loans** toggles its visibility. Position, scale and glass settings use the shared rotating box.
 
-Replace the previous mod JAR with `downloads/economy-tracker-0.8.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
+Replace the previous mod JAR with `downloads/economy-tracker-0.9.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
 
 ## Loan commands
 
@@ -67,10 +84,12 @@ Observed commands alone never move money. Repeated confirmations correlated with
 python3 tools/build.py
 ```
 
-The build compiles retained sources against the checksum-pinned 0.7.0 release. Guarded ASM adapters add the Text boxes entry, draw custom text after the normal HUD panels, and route the MC Glass design through pixel-pane drawing helpers. The Minecraft 1.21.11 text-field, draw-context and font API signatures were checked against Yarn documentation. API fixtures and test harnesses are excluded from the release JAR; JOML is supplied by Minecraft at runtime.
+The build compiles retained sources against the checksum-pinned 0.8.0 release. A guarded ASM adapter replaces the O-key and `/economy` menu constructors with the dashboard, adds the winter layout-editor backdrop, and returns that editor to the dashboard. Appearance and text editors share the winter background and styled controls. API fixtures and sample-data render harnesses remain excluded from the mod JAR.
 
-Native-free checks execute the real text-entry screen and generated adapters, including vertical clipping, matrix restoration, font selection, gradient colors, dragging, saving/cancelling and validation. Financial ledger, payment capture, wallet, loan data classes, client, local storage and the existing Inter font adapter remain byte-for-byte unchanged.
+Native-free checks execute navigation, module toggles, child-save checkpoints, loan forms, layout return, resizing, saving/cancelling and failed saves. Financial ledger, payment capture, wallet and loan model/store classes remain byte-for-byte unchanged. The loan service adds only an immutable read-only snapshot accessor for the dashboard table.
+
+`DashboardPreview` in the fixture harness exports explicitly synthetic draw captures. `python3 tools/render_dashboard_preview.py` renders them with Pillow and the bundled Inter fonts for layout inspection.
 
 Requires Java 21 (`JAVA_HOME`), JUnit Console Standalone (`JUNIT_JAR`), Gson (`GSON_JAR`), ASM 9.8 (`ASM_JAR`), ASM Tree 9.8 (`ASM_TREE_JAR`), Brigadier 1.3.10 (`BRIGADIER_JAR`) and JOML 1.10.8 (`JOML_JAR`). Defaults use the prepared workspace dependency cache.
 
-**69 regression tests** cover text editing and persistence, Unicode measurement, drag bounds and viewport fitting, gradient endpoints, glass geometry and tinting, independent six-panel appearances, RGB adjustments, settings migration/persistence, validation, preview isolation, scale/geometry, fade colors, cancel/reset behavior, payment/tax behavior, balance reconciliation, bulk rakeback reset, balanced Player Nets, manual loans, repayments, No Loan list restrictions and repayment exceptions, schema migration, mixed-section pagination, persistence and server/account isolation, invalid input and file handling, failed saves, pagination, settings migration, and four-view rotation/fading. The adapter smoke checks exercise command scope guards, persistence, rendering, unsigned loan amounts, editor layout/toggling, and save failure reporting. These are headless checks; they do not connect to a live DonutSMP account.
+**78 regression tests** cover winter preferences, settings transactions/checkpoints, independent HUD toggles, responsive geometry, bounded animation, balance interpolation without fabricated activity, text editing and persistence, Unicode measurement, drag bounds and viewport fitting, gradient endpoints, glass geometry and tinting, independent six-panel appearances, RGB adjustments, settings migration/persistence, validation, preview isolation, scale/geometry, fade colors, cancel/reset behavior, payment/tax behavior, balance reconciliation, bulk rakeback reset, balanced Player Nets, manual loans, repayments, No Loan list restrictions and repayment exceptions, schema migration, mixed-section pagination, persistence and server/account isolation, invalid input and file handling, failed saves, pagination, settings migration, and four-view rotation/fading. The adapter smoke checks exercise command scope guards, persistence, rendering, unsigned loan amounts, editor layout/toggling, and save failure reporting. These are headless checks; they do not connect to a live DonutSMP account.

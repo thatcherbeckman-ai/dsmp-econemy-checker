@@ -19,6 +19,7 @@ public final class LoanService {
         try { store = new LoanStore(directory, scope); book = store.load(); }
         catch (Exception ex) { error = "Loans unreadable; original file preserved. Fix the loan file and reconnect."; }
     }
+    public static LoanBook.Snapshot readOnlySnapshot() { return book.snapshot(); }
     public static boolean hasLoans() { return error == null && (book.loanCount() > 0 || book.noLoanCount() > 0); }
     private static int loanPageSize() { return book.noLoanCount() == 0 ? 14 : 7; }
     private static int noLoanPageSize() { return book.loanCount() == 0 ? 13 : 6; }

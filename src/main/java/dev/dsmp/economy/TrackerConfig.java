@@ -6,6 +6,9 @@ package dev.dsmp.economy;
 import dev.dsmp.economy.core.MessageParser;
 
 public final class TrackerConfig {
+    public boolean festiveBackground = true;
+    public boolean animateSnow = true;
+    public int menuAccent = 0x8B6CF2;
     public java.util.List<dev.dsmp.economy.text.TextBox> textBoxes = new java.util.ArrayList<>();
     public dev.dsmp.economy.appearance.TabAppearance[] appearances = {
         new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance(),
@@ -50,6 +53,7 @@ public final class TrackerConfig {
     }
 
     public void validate() {
+        if ((menuAccent & 0xFF000000) != 0) throw new IllegalArgumentException("Invalid menu accent color");
         if (textBoxes == null || textBoxes.size() > 32) throw new IllegalArgumentException("Invalid text boxes");
         var textIds = new java.util.HashSet<String>();
         for (var box : textBoxes) {

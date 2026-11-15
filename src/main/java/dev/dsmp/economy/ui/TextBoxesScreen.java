@@ -12,12 +12,15 @@ public final class TextBoxesScreen extends class_437 {
     private final TextBoxEditor editor;
     private class_342 content,start,end;
     private String notice="Drag below. Use \\n for a new line.";
+    private record Control(int x,int y,int width,String label){}
+    private final java.util.List<Control> controls=new java.util.ArrayList<>();
     private TextBox dragging;
     private double offsetX,offsetY;
     public TextBoxesScreen(EconomyTrackerClient mod,class_437 parent) {
         super(class_2561.method_43470("Custom Text Boxes"));this.mod=mod;this.parent=parent;editor=new TextBoxEditor(mod.config);
     }
     @Override protected void method_25426() {
+        controls.clear();
         TextBox box=editor.selected();
         button(10,28,44,"New",()->change(()->editor.add()));
         button(58,28,106,editor.label(),()->change(editor::next));
@@ -39,6 +42,7 @@ public final class TextBoxesScreen extends class_437 {
         button(256,128,56,"+ Line",()->{if(editor.selected()!=null)content.method_1867("\\n");});
     }
     private void button(int x,int y,int width,String label,Runnable action) {
+        controls.add(new Control(x,y,width,label));
         method_37063((class_364)class_4185.method_46430(class_2561.method_43470(label),b->action.run()).method_46434(x,y,width,20).method_46431());
     }
     private boolean fields() {
@@ -49,7 +53,7 @@ public final class TextBoxesScreen extends class_437 {
     private void change(Runnable action){if(!fields())return;try{action.run();dragging=null;method_41843();}catch(IllegalArgumentException ex){notice=ex.getMessage();}}
     private void edit(java.util.function.Consumer<TextBox> action){change(()->{if(editor.selected()!=null)action.accept(editor.selected());});}
     @Override public void method_25394(class_332 graphics,int mx,int my,float delta){
-        graphics.method_25294(0,0,field_22789,field_22790,0xEE0B1018);
+        FestiveUi.background(graphics,field_22789,field_22790,mod.config);
         TextBox box=editor.selected();
         graphics.method_51433(field_22793,"TEXT BOXES / "+editor.label()+(box==null?"":"  "+Math.round(box.size*100)+"%"),10,10,0xFFEAF2F8,true);
         graphics.method_51433(field_22793,"Start",10,83,0xFFEAF2F8,false);graphics.method_51433(field_22793,"End",120,83,0xFFEAF2F8,false);
@@ -57,6 +61,7 @@ public final class TextBoxesScreen extends class_437 {
         TrackerRenderer.drawAll(graphics,mod.config,mod.ledger,mod.viewCycle,field_22789,field_22790,true,false,mod.wallet.estimated());
         TextHud.outline(graphics,box,field_22789,field_22790);
         super.method_25394(graphics,mx,my,delta);
+        for(var c:controls)FestiveUi.control(graphics,c.x(),c.y(),c.width(),20,c.label(),c.label().equals("Done"),mx>=c.x()&&mx<c.x()+c.width()&&my>=c.y()&&my<c.y()+20,mod.config.menuAccent);
     }
     @Override public boolean method_25402(class_11909 event,boolean doubleClick){
         if(super.method_25402(event,doubleClick))return true;
@@ -71,7 +76,7 @@ public final class TextBoxesScreen extends class_437 {
         TextLayout.drag(dragging,bounds,event.comp_4798(),event.comp_4799(),offsetX,offsetY,field_22789,field_22790,true);return true;
     }
     @Override public boolean method_25406(class_11909 event){if(dragging!=null){dragging=null;return true;}return super.method_25406(event);}
-    @Override public void method_25419(){if(!fields())return;if(mod.saveConfig())class_310.method_1551().method_1507(parent);else notice="Save failed. Retry Done or use Cancel.";}
+    @Override public void method_25419(){if(!fields())return;if(mod.saveConfig()){if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();class_310.method_1551().method_1507(parent);}else notice="Save failed. Retry Done or use Cancel.";}
     private void cancel(){editor.cancel();class_310.method_1551().method_1507(parent);}
     @Override public boolean method_25421(){return false;}
 }

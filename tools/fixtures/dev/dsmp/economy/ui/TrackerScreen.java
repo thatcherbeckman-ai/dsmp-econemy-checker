@@ -22,5 +22,7 @@ public final class TrackerScreen extends net.minecraft.class_437 {
     }
     private void button(int x, int y, int width, String label, Runnable click) { buttons.add(new Button(x, y, width, label, click)); }
     public void method_41843() { buttons.clear(); method_25426(); }
+    public void method_25394(net.minecraft.class_332 g,int mx,int my,float delta) { g.method_25294(0,0,field_22789,field_22790,-301396199); super.method_25394(g,mx,my,delta); }
+    public void method_25419() { if(mod.saveConfig())super.method_25419();else super.method_25419(); }
     public boolean warning() { return IntStream.range(0, 3).noneMatch(i -> mod.config.panels[i].visible); }
 }

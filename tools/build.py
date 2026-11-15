@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build movable gradient text boxes and Minecraft glass against the verified 0.7.0 release."""
+"""Build the advanced Christmas settings dashboard against the verified 0.8.0 release."""
 import hashlib
 import json
 import os
@@ -9,9 +9,9 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / 'downloads/economy-tracker-0.7.0-mc1.21.11.jar'
-BASE_SHA256 = 'a2ca79ff5124bc1bfe08dafbb8ba6afd11bb5dc9e6269e7089b8be6347083de7'
-VERSION = '0.8.0'
+BASE = ROOT / 'downloads/economy-tracker-0.8.0-mc1.21.11.jar'
+BASE_SHA256 = '5e53ce46269dc5347a70457fcc060ca2fdcc0f1cb02182aa1d6e791fc1896417'
+VERSION = '0.9.0'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest() == BASE_SHA256, 'Unexpected base JAR'
 java_home = Path(os.environ.get('JAVA_HOME', '/workspace/.tools/jdk-21.0.9+10'))
 java, javac = str(java_home / 'bin/java'), str(java_home / 'bin/javac')
@@ -42,7 +42,7 @@ patch_tools.mkdir(parents=True, exist_ok=True)
 asm_tree_matches = list(Path('/workspace/.gradle/wrapper/dists').rglob('asm-tree-9.8.jar'))
 asm_tree = Path(os.environ['ASM_TREE_JAR']) if 'ASM_TREE_JAR' in os.environ else sorted(asm_tree_matches)[-1]
 asm_cp = os.pathsep.join(map(str, (asm, asm_tree)))
-subprocess.run([javac, '--release', '21', '-cp', asm_cp, '-d', str(patch_tools), str(ROOT / 'tools/PatchLoans.java'), str(ROOT / 'tools/PatchRakebackCommand.java'), str(ROOT / 'tools/PatchNoLoanLabels.java'), str(ROOT / 'tools/PatchAppearance.java'), str(ROOT / 'tools/PatchTextBoxes.java')], check=True)
+subprocess.run([javac, '--release', '21', '-cp', asm_cp, '-d', str(patch_tools), str(ROOT / 'tools/PatchLoans.java'), str(ROOT / 'tools/PatchRakebackCommand.java'), str(ROOT / 'tools/PatchNoLoanLabels.java'), str(ROOT / 'tools/PatchAppearance.java'), str(ROOT / 'tools/PatchTextBoxes.java'), str(ROOT / 'tools/PatchDashboard.java')], check=True)
 patch_classpath = os.pathsep.join(map(str, (patch_tools, asm, asm_tree)))
 original_classes = build / 'original-classes'
 original_classes.mkdir(parents=True, exist_ok=True)
@@ -52,7 +52,7 @@ with zipfile.ZipFile(BASE) as original:
         destination = original_classes / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(original.read(name))
-subprocess.run([java, '-cp', patch_classpath, 'PatchTextBoxes', str(original_classes), str(classes)], check=True)
+subprocess.run([java, '-cp', patch_classpath, 'PatchDashboard', str(original_classes), str(classes)], check=True)
 # Execute the generated Minecraft adapters in native-free fixtures with JVM verification.
 fixture = build / 'command-fixture'
 if fixture.exists(): shutil.rmtree(fixture)
@@ -69,7 +69,8 @@ subprocess.run([java, '-cp', patch_classpath, 'PatchLoans', str(fixture), str(fi
 subprocess.run([java, '-cp', patch_classpath, 'PatchNoLoanLabels', str(fixture / patch_names[2]), str(fixture / patch_names[2])], check=True)
 subprocess.run([java, '-cp', patch_classpath, 'PatchAppearance', str(fixture), str(fixture)], check=True)
 subprocess.run([java, '-cp', patch_classpath, 'PatchTextBoxes', str(fixture), str(fixture)], check=True)
-for smoke in ('RakebackPatchSmoke', 'LoanPatchSmoke', 'AppearancePatchSmoke', 'TextBoxPatchSmoke'):
+subprocess.run([java, '-cp', patch_classpath, 'PatchDashboard', str(fixture), str(fixture)], check=True)
+for smoke in ('RakebackPatchSmoke', 'LoanPatchSmoke', 'AppearancePatchSmoke', 'TextBoxPatchSmoke', 'DashboardPatchSmoke'):
     subprocess.run([java, '-Xverify:all', '-cp', os.pathsep.join(map(str, (fixture, classes, BASE, brigadier, gson, api_stubs, joml))), smoke], check=True)
 output = build / f'economy-tracker-{VERSION}-mc1.21.11.jar'
 with zipfile.ZipFile(BASE) as original, zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as repaired:
@@ -90,7 +91,7 @@ with zipfile.ZipFile(BASE) as old, zipfile.ZipFile(output) as new:
     for name in new.namelist():
         if name.endswith('.class'):
             assert b'sendCommand' not in new.read(name) and b'sendChat' not in new.read(name), name
-        if name != 'fabric.mod.json' and not name.startswith(('dev/dsmp/economy/core/WalletTracker', 'dev/dsmp/economy/core/PaymentDetector', 'dev/dsmp/economy/ui/PlayerNetRows', 'dev/dsmp/economy/ui/TrackerRenderer', 'dev/dsmp/economy/EconomyTrackerClient.class', 'dev/dsmp/economy/commands/', 'dev/dsmp/economy/core/RakebackReset', 'dev/dsmp/economy/loans/', 'dev/dsmp/economy/TrackerConfig', 'dev/dsmp/economy/core/ViewCycle', 'dev/dsmp/economy/LocalStore.class', 'dev/dsmp/economy/ui/TrackerScreen.class', 'dev/dsmp/economy/ui/AppearanceScreen', 'dev/dsmp/economy/appearance/', 'dev/dsmp/economy/text/', 'dev/dsmp/economy/ui/TextBoxesScreen', 'dev/dsmp/economy/ui/TextHud', 'dev/dsmp/economy/ui/GlassPane')):
+        if name != 'fabric.mod.json' and not name.startswith(('dev/dsmp/economy/core/WalletTracker', 'dev/dsmp/economy/core/PaymentDetector', 'dev/dsmp/economy/ui/PlayerNetRows', 'dev/dsmp/economy/ui/TrackerRenderer', 'dev/dsmp/economy/EconomyTrackerClient.class', 'dev/dsmp/economy/commands/', 'dev/dsmp/economy/core/RakebackReset', 'dev/dsmp/economy/loans/', 'dev/dsmp/economy/TrackerConfig', 'dev/dsmp/economy/core/ViewCycle', 'dev/dsmp/economy/LocalStore.class', 'dev/dsmp/economy/ui/TrackerScreen.class', 'dev/dsmp/economy/ui/AppearanceScreen', 'dev/dsmp/economy/appearance/', 'dev/dsmp/economy/text/', 'dev/dsmp/economy/ui/TextBoxesScreen', 'dev/dsmp/economy/ui/TextHud', 'dev/dsmp/economy/ui/GlassPane', 'dev/dsmp/economy/dashboard/', 'dev/dsmp/economy/ui/Dashboard', 'dev/dsmp/economy/ui/FestiveUi')):
             assert old.read(name) == new.read(name), name
 print('Built', output)
 print('SHA256', hashlib.sha256(output.read_bytes()).hexdigest())
