@@ -6,6 +6,16 @@ package dev.dsmp.economy;
 import dev.dsmp.economy.core.MessageParser;
 
 public final class TrackerConfig {
+    public dev.dsmp.economy.appearance.TabAppearance[] appearances = {
+        new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance(),
+        new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance(),
+        new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance()};
+    public transient int renderPage = 2;
+    public transient int appearancePreview = -1;
+    public dev.dsmp.economy.appearance.TabAppearance appearance(int index) {
+        if (index < 0 || index >= appearances.length) throw new IllegalArgumentException("Unknown appearance");
+        return appearances[index];
+    }
     public Panel[] panels = new Panel[]{new Panel(0.02f, 0.1f), new Panel(0.35f, 0.1f), new Panel(0.68f, 0.1f)};
     public Panel rakebackPanel = new Panel(0.98f, 0.1f);
     public Panel balancePanel = new Panel(0.02f, 0.98f);
@@ -39,6 +49,11 @@ public final class TrackerConfig {
     }
 
     public void validate() {
+        if (appearances == null || appearances.length != 6) throw new IllegalArgumentException("Expected six appearances");
+        for (var appearance : appearances) {
+            if (appearance == null) throw new IllegalArgumentException("Missing appearance");
+            appearance.validate();
+        }
         if (this.panels == null || this.panels.length != 3 || !Float.isFinite(this.scale) || this.scale < 0.4f || this.scale > 1.5f || this.opacity < 40 || this.opacity > 240 || this.serverAddress == null || this.serverAddress.isBlank() || this.paymentSettlementSeconds < 5 || this.paymentSettlementSeconds > 600) {
             throw new IllegalArgumentException("Invalid tracker settings");
         }

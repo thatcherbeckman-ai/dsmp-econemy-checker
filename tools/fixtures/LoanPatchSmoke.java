@@ -16,11 +16,11 @@ public final class LoanPatchSmoke {
         String view = TrackerRenderer.show(3, client.ledger);
         if (!view.contains("LOANS") || !view.contains("Alex") || !view.contains("Total") || view.contains("+$")) throw new AssertionError(view);
         var screen = new TrackerScreen(client, 1);
-        if (screen.buttons().size() != 4) throw new AssertionError("Missing editor toggle");
-        for (var b : screen.buttons()) if (b.width() != 70 || b.x() + b.width() > 302) throw new AssertionError("Overlapping layout");
-        screen.buttons().getLast().click().run();
+        if (screen.buttons().stream().filter(b -> b.y() == 54).count() != 4) throw new AssertionError("Missing editor toggle");
+        for (var b : screen.buttons().stream().filter(b -> b.y() == 54).toList()) if (b.width() != 70 || b.x() + b.width() > 302) throw new AssertionError("Overlapping layout");
+        screen.buttons().stream().filter(b -> b.label().startsWith("Loans:")).findFirst().orElseThrow().click().run();
         if (client.config.loansVisible || client.config.enabledViews()[3]) throw new AssertionError("Cannot hide loans");
-        screen.buttons().getLast().click().run();
+        screen.buttons().stream().filter(b -> b.label().startsWith("Loans:")).findFirst().orElseThrow().click().run();
         if (!client.config.loansVisible) throw new AssertionError("Cannot show loans");
         for (var panel : client.config.panels) panel.visible = false;
         if (screen.warning()) throw new AssertionError("Incorrect all-views-off hint");

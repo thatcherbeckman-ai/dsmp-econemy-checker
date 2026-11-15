@@ -29,6 +29,11 @@ public final class EconomyTrackerClient {
         return dispatcher;
     }
     public String help() { return "Commands: /economy rakeback reset NAME | set NAME AMOUNT | show NAME."; }
+    public boolean showHud(Object screen) { return !(screen instanceof dev.dsmp.economy.ui.TrackerScreen); }
+    public boolean saveConfig() {
+        if (!saveSucceeds) return false;
+        try { store.saveConfig(config); return true; } catch (java.io.IOException ex) { status = "Save failed"; return false; }
+    }
     private int runLocal(Runnable action) {
         if (!active) return 0;
         try { action.run(); return 1; }
