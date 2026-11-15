@@ -33,7 +33,7 @@ class DashboardTest {
         assertEquals(ChristmasScene.weather(640,480,1,true,false),ChristmasScene.weather(640,480,99,true,false));assertNotEquals(ChristmasScene.weather(640,480,1,true,true),ChristmasScene.weather(640,480,99,true,true));assertTrue(ChristmasScene.weather(640,480,9,false,true).isEmpty());assertTrue(ChristmasScene.background(640,480,0x8B6CF2,true).size()>ChristmasScene.background(640,480,0x8B6CF2,false).size());
     }
     @Test void compactLayoutKeepsNavigationModulesAndLoanPaginationAccessible(){
-        for(int[] size:new int[][]{{320,240},{640,480},{1280,720}}){var d=DashboardLayout.of(size[0],size[1]);assertTrue(d.left()+d.contentWidth()<=size[0]);assertTrue(d.navY(7)+d.navStep()-2<size[1]-16);assertTrue(d.rowY(5)+d.rowHeight()-4<size[1]-18);assertTrue(d.loanRows()>=1);}
+        for(int[] size:new int[][]{{320,240},{640,480},{1280,720}}){var d=DashboardLayout.of(size[0],size[1]);assertTrue(d.left()+d.contentWidth()<=size[0]);assertTrue(d.navY(8)+d.navStep()-2<size[1]-16);assertTrue(d.rowY(5)+d.rowHeight()-4<size[1]-18);assertTrue(d.loanRows()>=1);}
     }
     @Test void balanceCurveUsesOnlyObservedExtremaWithoutAnInventedZero(){
         var points=List.of(new Ledger.Point(1,1000),new Ledger.Point(2,2000),new Ledger.Point(3,1500),new Ledger.Point(4,500));var plot=BalanceCurve.build(points);assertEquals(500,plot.min());assertEquals(2000,plot.max());assertEquals(1000,plot.samples().getFirst().cents());assertEquals(500,plot.samples().getLast().cents());assertEquals(0,plot.samples().getFirst().x());assertEquals(1,plot.samples().getLast().x());assertTrue(plot.samples().stream().allMatch(p->p.cents()>=500&&p.cents()<=2000));

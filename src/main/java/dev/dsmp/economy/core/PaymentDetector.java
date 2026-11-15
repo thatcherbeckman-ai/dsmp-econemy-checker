@@ -71,8 +71,9 @@ public final class PaymentDetector {
             if (cents <= 0) return NONE;
             if (received) {
                 if (player.equalsIgnoreCase(localName)) return NONE;
-                boolean changed = captureBets && ledger.receiveStake(UUID.randomUUID().toString(), player, cents, now);
-                return new Detection(changed, cents);
+                boolean auction = dev.dsmp.economy.auction.AuctionService.receive(player, cents, now);
+                boolean changed = captureBets && !auction && ledger.receiveStake(UUID.randomUUID().toString(), player, cents, now);
+                return new Detection(changed, cents, auction);
             }
             long tax = taxValue == null ? 0 : Money.parse(taxValue.replaceAll("\\s+", ""));
             long debit = Math.addExact(cents, tax);
@@ -107,5 +108,8 @@ public final class PaymentDetector {
     }
     private record Intent(String id, String player, long cents, long time) {}
     private record Confirmation(String player, long cents, long time) {}
-    public record Detection(boolean betChanged, Long walletDelta) {}
+    public record Detection(boolean betChanged, Long walletDelta, boolean auctionPayment) {
+        public Detection(boolean betChanged, Long walletDelta) { this(betChanged, walletDelta, false); }
+        public boolean suppressesCustom() { return betChanged || auctionPayment; }
+    }
 }

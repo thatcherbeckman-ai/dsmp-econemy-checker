@@ -10,7 +10,7 @@ import java.util.*;
 
 /** Responsive settings dashboard: read-only overview, explicit HUD controls and loan tools. */
 public final class DashboardScreen extends class_437 {
-    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings"};
+    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions"};
     private static final int WHITE=0xFFE7EAF3,MUTED=0xFF8993AC,GREEN=0xFF63D9A0,RED=0xFFE57885;
     private record Control(int x,int y,int width,int height,String label,boolean active,Runnable action){}
     private record LoanRow(String name,String value,boolean heading){}
@@ -35,7 +35,7 @@ public final class DashboardScreen extends class_437 {
     private void button(int x,int y,int w,int h,String label,boolean active,Runnable action){controls.add(new Control(x,y,w,h,label,active,action));method_37063((class_364)class_4185.method_46430(class_2561.method_43470(label),b->action.run()).method_46434(x,y,w,h).method_46431());}
     private void toggle(DashboardLayout d,int y,boolean value,java.util.function.Consumer<Boolean> set){button(field_22789-84,y,32,18,"ON",value,()->change(()->set.accept(true)));button(field_22789-48,y,32,18,"OFF",!value,()->change(()->set.accept(false)));}
     private void change(Runnable action){action.run();method_41843();}
-    private void navigate(int target){commitDraft();if(target==2){class_310.method_1551().method_1507(new AppearanceScreen(mod,this));return;}if(target==3){class_310.method_1551().method_1507(new TextBoxesScreen(mod,this));return;}if(target==4){class_310.method_1551().method_1507(new TrackerScreen(mod));return;}page=target;notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";method_41843();}
+    private void navigate(int target){commitDraft();if(target==2){class_310.method_1551().method_1507(new AppearanceScreen(mod,this));return;}if(target==3){class_310.method_1551().method_1507(new TextBoxesScreen(mod,this));return;}if(target==8){class_310.method_1551().method_1507(new AuctionScreen(mod,this));return;}if(target==4){class_310.method_1551().method_1507(new TrackerScreen(mod));return;}page=target;notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";method_41843();}
     private void commitDraft(){if(name!=null){nameDraft=name.method_1882();amountDraft=amount.method_1882();}}
     private void initLoans(DashboardLayout d){
         int half=(d.contentWidth()-8)/2;
@@ -72,14 +72,15 @@ public final class DashboardScreen extends class_437 {
         FestiveUi.text(g,"Page "+(loanPage+1)+" / "+loanPages(d),d.left()+112,field_22790-42,MUTED,.75f,false);
     }
     private void overview(class_332 g,DashboardLayout d){
+        int bannerHeight=WelcomeBanner.height(field_22790);WelcomeBanner.draw(g,d.left(),56,d.contentWidth(),bannerHeight,mod.config.menuAccent);int cardsTop=56+bannerHeight+8;
         int columns=d.contentWidth()>=400?4:2,cw=(d.contentWidth()-(columns-1)*8)/columns,ch=48;
         String balance=mod.ledger.balance().isPresent()?Money.format(mod.ledger.balance().getAsLong(),false):"--";
         String[] names={mod.wallet.estimated()?"BALANCE ~":"BALANCE","PROFIT","RECEIVED","PAID"};String[] values={balance,Money.format(mod.ledger.displayedProfit(),true),Money.format(mod.ledger.displayedMoneyIn(),false),Money.format(mod.ledger.displayedMoneyOut(),false)};
         int[] colors={0xFFD8BD6A,mod.ledger.displayedProfit()<0?RED:GREEN,0xFF9680E8,0xFF69B5CF};
-        for(int i=0;i<4;i++){int x=d.left()+(i%columns)*(cw+8),y=58+(i/columns)*(ch+8);FestiveUi.panel(g,x,y,cw,ch,colors[i]&0xFFFFFF);FestiveUi.text(g,names[i],x+7,y+7,MUTED,.63f,true);FestiveUi.text(g,FestiveUi.fit(values[i],cw-12,1.15f),x+7,y+21,colors[i],1.15f,true);}
-        int graphTop=58+((4+columns-1)/columns)*(ch+8);
+        for(int i=0;i<4;i++){int x=d.left()+(i%columns)*(cw+8),y=cardsTop+(i/columns)*(ch+8);FestiveUi.panel(g,x,y,cw,ch,colors[i]&0xFFFFFF);FestiveUi.text(g,names[i],x+7,y+7,MUTED,.63f,true);FestiveUi.text(g,FestiveUi.fit(values[i],cw-12,1.15f),x+7,y+21,colors[i],1.15f,true);}
+        int graphTop=cardsTop+((4+columns-1)/columns)*(ch+8);
         if(d.contentWidth()>=450){
-            int feedWidth=Math.min(280,d.contentWidth()/3),sectionHeight=Math.min(280,Math.max(120,(field_22790-graphTop-40)/2));
+            int feedWidth=Math.min(280,d.contentWidth()/3),sectionHeight=Math.min(280,Math.max(54,(field_22790-graphTop-40)/2));
             feed(g,d.left(),graphTop,feedWidth,sectionHeight);graph(g,d.left()+feedWidth+8,graphTop,d.contentWidth()-feedWidth-8,sectionHeight);
             int boardTop=graphTop+sectionHeight+10,boardHeight=Math.min(160,field_22790-boardTop-28);
             if(boardHeight>=50){var players=mod.ledger.playerNets();int bw=(d.contentWidth()-8)/2;board(g,d.left(),boardTop,bw,boardHeight,"TOP WINNERS",players.stream().filter(v->v.cents()>0).limit(5).toList(),GREEN);board(g,d.left()+bw+8,boardTop,bw,boardHeight,"TOP LOSERS",players.stream().filter(v->v.cents()<0).sorted(java.util.Comparator.comparingLong(dev.dsmp.economy.core.Ledger.PlayerNet::cents)).limit(5).toList(),RED);}

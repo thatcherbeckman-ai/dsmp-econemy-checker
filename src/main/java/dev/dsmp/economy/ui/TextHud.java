@@ -25,6 +25,7 @@ public final class TextHud {
     public static TextLayout.Bounds bounds(TextBox box,int width,int height,boolean editing) { return TextLayout.bounds(box,measure(box),width,height,editing); }
     public static void draw(class_332 graphics,TrackerConfig config,int width,int height,boolean editing) {
         for(var box:config.textBoxes)if(box.visible||editing)drawBox(graphics,box,width,height,editing);
+        AuctionHud.draw(graphics,width,height,editing);
     }
     private static void drawBox(class_332 graphics,TextBox box,int width,int height,boolean editing) {
         var measure=measure(box); var bounds=TextLayout.bounds(box,measure,width,height,editing);

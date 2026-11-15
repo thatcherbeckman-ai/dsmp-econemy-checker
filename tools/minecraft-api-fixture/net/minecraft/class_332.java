@@ -13,6 +13,8 @@ public final class class_332 {
     public void method_44379(int x1,int y1,int x2,int y2) { scissorDepth++; }
     public void method_44380() { if(--scissorDepth<0)throw new IllegalStateException("Unbalanced clip"); }
     public void method_51439(class_327 font,class_2561 value,int x,int y,int color,boolean shadow) { text.add(value.getString());shapes.add(new Shape("text",color));captureText(value.getString(),x,y,color,value instanceof class_5250 component&&component.bold()); }
+    public final java.util.List<class_1799> items=new java.util.ArrayList<>();
+    public void method_51427(class_1799 item,int x,int y){items.add(item);}
     public final List<Float> scales = new ArrayList<>();
     public void method_25294(int x1, int y1, int x2, int y2, int color) { shapes.add(new Shape("fill", color));draws.add(new Draw("rect",x1,y1,x2-x1,y2-y1,color,"",1,false)); }
     public void method_51433(class_327 font, String value, int x, int y, int color, boolean shadow) { text.add(value); shapes.add(new Shape("text", color));captureText(value,x,y,color,false); }

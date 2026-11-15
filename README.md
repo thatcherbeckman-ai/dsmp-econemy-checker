@@ -1,10 +1,12 @@
 # Economy Tracker — Fabric 1.21.11
 
-Version **0.9.0** replaces the initial O-key menu with an advanced **Christmas dashboard**, inspired by the reference layouts: dark cards, purple sidebar navigation, clear ON/OFF controls, colored lights, snowy trees and presents. Snowfall can animate gently or remain still.
+Version **0.10.0** adds **payment-driven auctions** and an Overview welcome banner with your current Minecraft username and live character/skin. It retains the advanced Christmas dashboard.
+
+The dashboard replaces the initial O-key menu with an advanced **Christmas dashboard**, inspired by the reference layouts: dark cards, purple sidebar navigation, clear ON/OFF controls, colored lights, snowy trees and presents. Snowfall can animate gently or remain still.
 
 Press **O** or `/economy` to open it. The sidebar provides:
 
-- **Overview**: observed balance, profit since reset, money in/out, a smooth balance-history chart, recent bets and top winners/losers. Empty or unknown readings remain empty; charts do not invent a zero starting balance.
+- **Overview**: a purple welcome banner with the logged-in username and actual local player model/skin, followed by observed balance, profit since reset, money in/out, a smooth balance-history chart, recent bets and top winners/losers. Empty or unknown readings remain empty; charts do not invent a zero starting balance.
 - **HUD modules**: explicit ON/OFF controls for Balance, Profit, Player Nets, Recent Bets, Rakeback and Loans.
 - **Appearance**: independent panel sizes, RGB colors, opacity and designs with live preview.
 - **Text boxes**: the movable custom text and gradient editor.
@@ -12,6 +14,7 @@ Press **O** or `/economy` to open it. The sidebar provides:
 - **Loans**: player/amount fields with Set, Add, Repay, Remove and No Loan list controls. These use the existing scoped local loan commands and save loan edits immediately. Cancel only reverts settings, not loan actions already saved.
 - **Tracking**: automatic bet capture, passive balance reading, HUD rotation and the unpaid-stake settlement wait.
 - **Settings**: Christmas background, snow animation, menu accent, shared HUD base scale and default glass opacity.
+- **Auctions**: searchable item picker, quantity and timer, centered item overlay, cumulative bids and final winner.
 
 **Save** or **Esc** saves preferences; **Cancel** restores the last saved checkpoint. Returning from a saved appearance/text editor updates that checkpoint so cancelling the dashboard cannot undo a child editor's committed changes. Failed settings saves keep the screen open and Cancel stays available. The overview and loan-table read API are read-only; changing preferences does not reset financial records. Layouts adapt to smaller GUI sizes, and loan-table pagination keeps every record accessible.
 
@@ -48,7 +51,21 @@ Listed players cannot have new or increased loan entries recorded in the tracker
 
 The manually managed **Loans** chart is retained. It shows player names, outstanding amounts, total outstanding money and a page indicator, using the existing rounded panel and font. Loans joins Profit → Player Nets → Recent Bets → Loans in the same eight-second rotation with a 400 ms fade. Press **P** to advance the view. Loans is skipped when empty, and **O → HUD modules → Loans** toggles its visibility. Position, scale and glass settings use the shared rotating box.
 
-Replace the previous mod JAR with `downloads/economy-tracker-0.9.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
+Replace the previous mod JAR with `downloads/economy-tracker-0.10.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
+
+## Auctions
+
+Press **O → Auctions**. Search for an item by its name or identifier and click **Search**, select it, set **Quantity** (1–64) and **Timer** in seconds (1–86400), then click **Start**. **Done** returns to the dashboard; close the dashboard to see the centered lot in game. Items come from Minecraft's live registry, including registered items from installed mods. The display uses Minecraft's actual item renderer. A two-item lot shows two item models, like the reference.
+
+While the timer runs, confirmed incoming payment receipts add to that player's **cumulative bid**. The leading player's name and total replace **No bids yet**. Names are case insensitive; equal totals favor the first player to reach that total. Receipts at the exact end time or later are outside the auction. At zero, **Winner: NAME** and their total stay above the item until **Hide result** or a new auction. With no receipts it says **No bids received**. **End early** settles the current bids; **Cancel lot** stops the auction without declaring a winner. Bids are listed by total in the setup screen where space permits.
+
+Auction receipts still adjust the passive wallet and balance history, but do **not** create gambling bets, player nets, profit or rakeback entries, including with automatic bet capture disabled. The custom bet parser is also bypassed for these receipts. Payments outside a running auction retain their existing interpretation. All incoming receipts during a running auction are treated as bids, so finish the auction before accepting unrelated payments.
+
+This is a local tracker/display. Deliver the item and handle refunds yourself. Pause **Tracking → Automatic bets** before issuing auction refunds, since ordinary outgoing payments keep their existing bet interpretation. No payments, messages or server commands are sent by the auction feature.
+
+The current lot and bids save atomically under `config/economy-tracker/auctions/`, isolated by server and account. Starting a new lot replaces that account's previous lot. Auction actions save immediately and are not undone by the dashboard's settings Cancel. Disconnecting or loading an unfinished lot marks it **Interrupted**, retaining recorded bids without declaring a winner after missed offline payments. A read failure preserves the original file and pauses edits. A bid-save failure stops the auction and shows an error; receipts during its original timer window remain excluded from gambling records. A new auction requires joining the configured server with writable tracker data.
+
+The Overview banner renders your actual local player entity with Minecraft's inventory player renderer, using your currently loaded skin and the logged-in session's username. It uses no third-party skin service and never substitutes the reference player's character. When no in-world player exists, it shows the account name without a character model. The banner adapts to smaller GUI sizes.
 
 ## Loan commands
 
@@ -84,12 +101,12 @@ Observed commands alone never move money. Repeated confirmations correlated with
 python3 tools/build.py
 ```
 
-The build compiles retained sources against the checksum-pinned 0.8.0 release. A guarded ASM adapter replaces the O-key and `/economy` menu constructors with the dashboard, adds the winter layout-editor backdrop, and returns that editor to the dashboard. Appearance and text editors share the winter background and styled controls. API fixtures and sample-data render harnesses remain excluded from the mod JAR.
+The build compiles retained sources against the checksum-pinned 0.9.0 release. A guarded ASM adapter attaches auction lifetime/storage to the existing server/account scope, advances deadlines on client ticks even when the HUD is hidden, bypasses custom bet parsing for auction receipts, and uses the existing local-action guard. The dashboard, item picker, item HUD and live player welcome banner compile against narrow API fixtures checked against Yarn 1.21.11 mappings. Fixtures and sample-data render harnesses remain excluded from the mod JAR.
 
-Native-free checks execute navigation, module toggles, child-save checkpoints, loan forms, layout return, resizing, saving/cancelling and failed saves. Financial ledger, payment capture, wallet and loan model/store classes remain byte-for-byte unchanged. The loan service adds only an immutable read-only snapshot accessor for the dashboard table.
+Native-free checks execute cumulative bidding, exact deadlines, ties, empty results, overflow/validation, persistence, corruption and write failures, interruption, payment/bet isolation, native adapter hooks, item selection, winner rendering calls, the current-user player model, navigation and resizing. The existing financial ledger, wallet and loan model/store classes remain byte-for-byte unchanged. Payment capture adds auction receipt routing; ordinary payment and tax behavior retains regression coverage.
 
 `DashboardPreview` in the fixture harness exports explicitly synthetic draw captures. `python3 tools/render_dashboard_preview.py` renders them with Pillow and the bundled Inter fonts for layout inspection.
 
 Requires Java 21 (`JAVA_HOME`), JUnit Console Standalone (`JUNIT_JAR`), Gson (`GSON_JAR`), ASM 9.8 (`ASM_JAR`), ASM Tree 9.8 (`ASM_TREE_JAR`), Brigadier 1.3.10 (`BRIGADIER_JAR`) and JOML 1.10.8 (`JOML_JAR`). Defaults use the prepared workspace dependency cache.
 
-**78 regression tests** cover winter preferences, settings transactions/checkpoints, independent HUD toggles, responsive geometry, bounded animation, balance interpolation without fabricated activity, text editing and persistence, Unicode measurement, drag bounds and viewport fitting, gradient endpoints, glass geometry and tinting, independent six-panel appearances, RGB adjustments, settings migration/persistence, validation, preview isolation, scale/geometry, fade colors, cancel/reset behavior, payment/tax behavior, balance reconciliation, bulk rakeback reset, balanced Player Nets, manual loans, repayments, No Loan list restrictions and repayment exceptions, schema migration, mixed-section pagination, persistence and server/account isolation, invalid input and file handling, failed saves, pagination, settings migration, and four-view rotation/fading. The adapter smoke checks exercise command scope guards, persistence, rendering, unsigned loan amounts, editor layout/toggling, and save failure reporting. These are headless checks; they do not connect to a live DonutSMP account.
+**90 regression tests** cover winter preferences, settings transactions/checkpoints, independent HUD toggles, responsive geometry, bounded animation, balance interpolation without fabricated activity, text editing and persistence, Unicode measurement, drag bounds and viewport fitting, gradient endpoints, glass geometry and tinting, independent six-panel appearances, RGB adjustments, settings migration/persistence, validation, preview isolation, scale/geometry, fade colors, cancel/reset behavior, payment/tax behavior, balance reconciliation, bulk rakeback reset, balanced Player Nets, manual loans, repayments, No Loan list restrictions and repayment exceptions, schema migration, mixed-section pagination, persistence and server/account isolation, invalid input and file handling, failed saves, pagination, settings migration, and four-view rotation/fading. The adapter smoke checks exercise command scope guards, persistence, rendering, unsigned loan amounts, editor layout/toggling, and save failure reporting. These are headless checks; they do not connect to a live DonutSMP account.

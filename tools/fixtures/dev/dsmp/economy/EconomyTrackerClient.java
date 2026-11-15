@@ -22,6 +22,8 @@ public final class EconomyTrackerClient {
     public void openMenu() { net.minecraft.class_310.method_1551().method_1507(new dev.dsmp.economy.ui.TrackerScreen(this)); }
     public void openCommandMenu() { net.minecraft.class_310.method_1551().method_1507(new dev.dsmp.economy.ui.TrackerScreen(this)); }
     public void disconnect() { scope = null; active = false; }
+    public void auctionTick() {}
+    public boolean customFallback(dev.dsmp.economy.core.PaymentDetector.Detection payment) { if (!payment.betChanged()) return true; return false; }
     public String status = "Save failed";
     public boolean active, saveSucceeds = true;
     public int saves;
