@@ -6,6 +6,7 @@ package dev.dsmp.economy;
 import dev.dsmp.economy.core.MessageParser;
 
 public final class TrackerConfig {
+    public java.util.List<dev.dsmp.economy.text.TextBox> textBoxes = new java.util.ArrayList<>();
     public dev.dsmp.economy.appearance.TabAppearance[] appearances = {
         new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance(),
         new dev.dsmp.economy.appearance.TabAppearance(), new dev.dsmp.economy.appearance.TabAppearance(),
@@ -49,6 +50,13 @@ public final class TrackerConfig {
     }
 
     public void validate() {
+        if (textBoxes == null || textBoxes.size() > 32) throw new IllegalArgumentException("Invalid text boxes");
+        var textIds = new java.util.HashSet<String>();
+        for (var box : textBoxes) {
+            if (box == null) throw new IllegalArgumentException("Missing text box");
+            box.validate();
+            if (!textIds.add(box.id)) throw new IllegalArgumentException("Duplicate text box ID");
+        }
         if (appearances == null || appearances.length != 6) throw new IllegalArgumentException("Expected six appearances");
         for (var appearance : appearances) {
             if (appearance == null) throw new IllegalArgumentException("Missing appearance");

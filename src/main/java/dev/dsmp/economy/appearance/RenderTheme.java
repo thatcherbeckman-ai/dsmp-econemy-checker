@@ -41,7 +41,7 @@ public final class RenderTheme {
     public static boolean isEditor(Object screen) {
         if (screen == null) return false;
         String name = screen.getClass().getName();
-        return name.equals("dev.dsmp.economy.ui.TrackerScreen") || name.equals("dev.dsmp.economy.ui.AppearanceScreen");
+        return name.equals("dev.dsmp.economy.ui.TrackerScreen") || name.equals("dev.dsmp.economy.ui.AppearanceScreen") || name.equals("dev.dsmp.economy.ui.TextBoxesScreen");
     }
     public static int color(TabAppearance style, int original) {
         int rgb = original & 0xFFFFFF, alpha = original >>> 24;
@@ -63,6 +63,9 @@ public final class RenderTheme {
     }
     public static boolean suppressBorder(TabAppearance style, int width, int height) {
         return width >= 224 && height >= 70 && style.design == TabAppearance.MINIMAL;
+    }
+    public static boolean minecraftGlass(TabAppearance style, int width, int height) {
+        return style.design == TabAppearance.GLASS && width >= 224 && height >= 70;
     }
     public static boolean square(TabAppearance style) { return style.design == TabAppearance.SQUARE; }
 }

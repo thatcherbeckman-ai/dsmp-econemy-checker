@@ -6,6 +6,8 @@ import dev.dsmp.economy.core.Ledger;
 
 /** Headless fixture with the production command/save method descriptors. */
 public final class EconomyTrackerClient {
+    public final dev.dsmp.economy.core.ViewCycle viewCycle = new dev.dsmp.economy.core.ViewCycle();
+    public final dev.dsmp.economy.core.WalletTracker wallet = new dev.dsmp.economy.core.WalletTracker();
     public final Ledger ledger = new Ledger();
     public final TrackerConfig config = new TrackerConfig();
     public final LocalStore store;

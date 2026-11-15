@@ -17,7 +17,7 @@ public final class AppearancePatchSmoke {
         click(screen,"Size +"); if(client.config.appearance(2).size!=1.05f||client.config.appearance(0).size!=1) throw new AssertionError("Size not independent");
         click(screen,"Accent"); click(screen,"Preset color");
         if(client.config.appearance(2).accent==new TabAppearance().accent) throw new AssertionError("Color picker not applied");
-        click(screen,"Back"); click(screen,"Design: Glass");
+        click(screen,"Back"); click(screen,"Design: MC Glass");
         var graphics=new class_332(); screen.method_25394(graphics,0,0,0);
         if(graphics.text.stream().noneMatch(s->s.contains("PROFIT"))||graphics.shapes.stream().noneMatch(s->s.kind().equals("border"))) throw new AssertionError("Preview not rendered");
         click(screen,"Done"); if(class_310.method_1551().screen!=parent) throw new AssertionError("Done did not return");

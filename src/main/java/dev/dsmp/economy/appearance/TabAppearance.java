@@ -2,8 +2,8 @@ package dev.dsmp.economy.appearance;
 
 /** One independent appearance for a HUD view or widget. Colors are RGB. */
 public final class TabAppearance {
-    public static final int GLASS = 0, OUTLINE = 1, SQUARE = 2, MINIMAL = 3;
-    public static final String[] DESIGNS = {"Glass", "Outline", "Square", "Minimal"};
+    public static final int GLASS = 0, OUTLINE = 1, SQUARE = 2, MINIMAL = 3, SOFT_GLASS = 4;
+    public static final String[] DESIGNS = {"MC Glass", "Outline", "Square", "Minimal", "Soft glass"};
     public float size = 1;
     public int accent = -2974791 & 0xFFFFFF;
     public int background = 0x0F1722;

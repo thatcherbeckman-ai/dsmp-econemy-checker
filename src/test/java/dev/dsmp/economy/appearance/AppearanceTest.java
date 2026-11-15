@@ -42,14 +42,14 @@ class AppearanceTest {
     @Test void corruptAppearanceValuesAreRejected() {
         var c=new TrackerConfig(); c.appearance(0).size=Float.NaN; assertThrows(IllegalArgumentException.class,c::validate);
         c=new TrackerConfig(); c.appearance(1).accent=0xFF123456; assertThrows(IllegalArgumentException.class,c::validate);
-        c=new TrackerConfig(); c.appearance(2).design=4; assertThrows(IllegalArgumentException.class,c::validate);
+        c=new TrackerConfig(); c.appearance(2).design=5; assertThrows(IllegalArgumentException.class,c::validate);
         c=new TrackerConfig(); c.appearance(3).opacity=0; assertThrows(IllegalArgumentException.class,c::validate);
         c=new TrackerConfig(); c.appearances=new TabAppearance[2]; assertThrows(IllegalArgumentException.class,c::validate);
     }
     @Test void editorChangesOnlyTheChosenPanelAndResetPreservesOthers() {
         var c=new TrackerConfig(); var editor=new AppearanceEditor(c);
         click(editor,"Size +"); assertEquals(1.05f,c.appearance(2).size); assertEquals(1,c.appearance(0).size);
-        click(editor,"Design: Glass"); assertEquals(TabAppearance.OUTLINE,c.appearance(2).design);
+        click(editor,"Design: MC Glass"); assertEquals(TabAppearance.OUTLINE,c.appearance(2).design);
         select(editor,0); click(editor,"Size -"); click(editor,"Reset Player Nets");
         assertEquals(1,c.appearance(0).size); assertEquals(1.05f,c.appearance(2).size); assertEquals(TabAppearance.OUTLINE,c.appearance(2).design);
         var seen=new HashSet<Integer>(); for(int i=0;i<6;i++) { seen.add(editor.selected()); editNext(editor); } assertEquals(6,seen.size());
