@@ -1,0 +1,54 @@
+package dev.dsmp.economy.probe;
+
+import dev.dsmp.economy.*;
+import dev.dsmp.economy.auction.*;
+import dev.dsmp.economy.core.*;
+import dev.dsmp.economy.text.*;
+import dev.dsmp.economy.ui.*;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.*;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.*;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.screens.*;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.input.*;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.Display;
+import com.mojang.blaze3d.platform.InputConstants;
+import java.nio.file.*;
+import java.util.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+
+/** Test-only mod, never included in release artifacts. Uses an isolated offline game directory. */
+public final class NativeProbe implements ClientModInitializer {
+ private EconomyTrackerClient mod;private Screen dashboard,textEditor;private int step,ticks,frames;private String imported;private AuctionAnchor anchor;private long deadline;private boolean creating;
+ private Path game(){return Path.of(System.getProperty("user.dir"));}
+ private static void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
+ private void click(Minecraft client,String label){Screen screen=client.gui.screen();var button=screen.children().stream().filter(e->e instanceof Button b&&b.getMessage().getString().equals(label)).map(e->(Button)e).findFirst().orElseThrow(()->new AssertionError("No button "+label+" in "+screen.getClass()));button.onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));}
+ private void mark(String message){System.out.println("ECONOMY_NATIVE_PROBE "+message);try{Files.writeString(game().resolve("probe-progress.txt"),message);}catch(Exception ignored){}}
+ public void onInitializeClient(){
+  ScreenEvents.AFTER_INIT.register((client,screen,width,height)->{if(screen.getClass().getName().startsWith("dev.dsmp.economy.ui."))ScreenEvents.afterExtract(screen).register((s,g,mx,my,delta)->{frames++;g.text(client.font,"NATIVE 26.3 TEST - SAMPLE DATA",8,s.height-10,0xFFFFFFFF);});});
+  ClientLifecycleEvents.CLIENT_STARTED.register(client->{mod=new EconomyTrackerClient();mod.ledger.recordBalance(Money.parse("123M"),System.currentTimeMillis());mod.ledger.recordBet(new Ledger.Bet("sample-a","ProbeWinner",Money.parse("1M"),System.currentTimeMillis()));mod.ledger.recordBet(new Ledger.Bet("sample-b","ProbeLoser",-Money.parse("2M"),System.currentTimeMillis()));deadline=System.currentTimeMillis()+150000;client.gui.setScreen(new DashboardScreen(mod));dashboard=client.gui.screen();mark("STARTED");});
+  ClientTickEvents.END_CLIENT_TICK.register(client->{if(mod==null)return;if(++ticks%15!=0)return;try{if(System.currentTimeMillis()>deadline)throw new AssertionError("Native smoke timeout at step "+step);run(client);}catch(Throwable ex){ex.printStackTrace();mark("FAIL "+ex);try{Files.writeString(game().resolve("probe-result.txt"),"FAIL "+ex);}catch(Exception ignored){}mod=null;client.stop();}});
+ }
+ private void run(Minecraft client)throws Exception{
+  switch(step){
+   case 0->{if(client.gui.overlay()!=null)return;if(client.gui.screen()!=dashboard){client.gui.setScreen(dashboard);return;}if(frames<3)return;click(client,"HUD modules");mark("DASHBOARD_RENDERED");step++;}
+   case 1->{click(client,"Appearance");step++;}
+   case 2->{click(client,"Size +");click(client,"Done");check(client.gui.screen()==dashboard,"Appearance navigation");click(client,"Text boxes");textEditor=client.gui.screen();click(client,"New");click(client,"Preset");check(mod.config.textBoxes.getFirst().text.startsWith("IGN EconBuildCheck"),"Current username preset");step++;}
+   case 3->{click(client,"Lines");click(client,"Next");click(client,"Next");click(client,"Next");click(client,"Image");var image=new BufferedImage(32,16,BufferedImage.TYPE_INT_ARGB);for(int x=0;x<32;x++)for(int y=0;y<16;y++)image.setRGB(x,y,x<16?0xFFFF4466:0xFF33DDBB);Path path=game().resolve("probe-image.png");ImageIO.write(image,"PNG",path.toFile());imported=TextImages.importPng(path);mod.config.textBoxes.getFirst().editLine(3).image=imported;step++;}
+   case 4->{var cache=TextImages.class.getDeclaredField("CACHE");cache.setAccessible(true);check(((Map<?,?>)cache.get(null)).containsKey(imported),"Imported PNG did not upload to native texture manager");click(client,"Text");List<EditBox> fields=client.gui.screen().children().stream().filter(e->e instanceof EditBox).map(e->(EditBox)e).toList();fields.get(2).setValue("00FFCC");fields.get(3).setValue("FF44AA");click(client,"Solid");click(client,"Across");step++;}
+   case 5->{Screenshot.grab(client,false);click(client,"Done");check(client.gui.screen()==textEditor,"Line return");var box=mod.config.textBoxes.getFirst();var b=TextHud.bounds(box,textEditor.width,textEditor.height,true);var mouse=new MouseButtonEvent(b.x()+1,b.y()+1,new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));check(textEditor.mouseClicked(mouse,false),"SDL mouse cannot select styled text");var target=new MouseButtonEvent(1,TextLayout.EDITOR_TOP+1,new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));textEditor.mouseDragged(target,0,0);textEditor.mouseReleased(target);check(box.x==0&&box.y==0,"SDL text drag bounds");step++;}
+   case 6->{click(client,"Done");check(client.gui.screen()==dashboard,"Text save return");check(mod.store.loadConfig().textBoxes.getFirst().style(3).image.equals(imported),"Native save/load");click(client,"Auctions");check(AuctionItems.all().isEmpty(),"Title-screen catalogue must wait for bound world components");mark("MENUS_TEXT_IMAGES_DRAG_SAVED");step++;}
+   case 7->{click(client,"Done");CreateWorldScreen.testWorld(client,()->client.gui.setScreen(new TitleScreen()));creating=true;step++;}
+   case 8->{if(client.level!=null&&client.player!=null)client.gui.setScreen(null);if(client.level==null||client.player==null||client.player.tickCount<50){if(ticks%120==0){var screen=client.gui.screen();mark("WAIT_WORLD "+(screen==null?"none":screen.getClass().getName())+" player="+(client.player==null?"none":client.player.tickCount));if(screen!=null)System.out.println(screen.children().stream().filter(e->e instanceof Button).map(e->((Button)e).getMessage().getString()).toList());}if(client.gui.screen() instanceof CreateWorldScreen)click(client,"Create New World");else if(client.gui.screen() instanceof ConfirmScreen){var buttons=client.gui.screen().children().stream().filter(e->e instanceof Button).map(e->(Button)e).toList();if(!buttons.isEmpty())buttons.getFirst().onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));}return;}client.gui.setScreen(null);if(++frames<20)return;check(AuctionItems.all().size()>1000,"Live world item registry incomplete");AuctionService.open("native-probe|offline",game().resolve("auction-test"));anchor=AuctionHologram.capture();AuctionService.start("minecraft:elytra",2,60,System.currentTimeMillis(),anchor);client.player.setXRot(75);step++;mark("LOCAL_WORLD_AUCTION_STARTED");}
+   case 9->{var entities=new ArrayList<net.minecraft.world.entity.Entity>();client.level.entitiesForRendering().forEach(entities::add);var item=entities.stream().filter(e->e.getId()<0&&e instanceof ItemEntity).findFirst().orElseThrow(()->new AssertionError("No world auction item"));check(item.isCurrentlyGlowing(),"Running item not glowing");check(Math.abs(item.getX()-anchor.x())<.001&&Math.abs(item.getZ()-anchor.z())<.001,"Hologram moved");check(entities.stream().anyMatch(e->e.getId()<0&&e instanceof Display.TextDisplay),"No world billboard label");AuctionService.receive("ProbeBidder",500,System.currentTimeMillis());AuctionService.end();step++;}
+   case 10->{var entities=new ArrayList<net.minecraft.world.entity.Entity>();client.level.entitiesForRendering().forEach(entities::add);check(entities.stream().filter(e->e.getId()<0&&e instanceof ItemEntity).noneMatch(net.minecraft.world.entity.Entity::isCurrentlyGlowing),"Finished item still glowing");check(AuctionService.current().leader().orElseThrow().player().equals("ProbeBidder"),"Winner");Screenshot.grab(client,false);AuctionService.hide();step++;}
+   case 11->{var entities=new ArrayList<net.minecraft.world.entity.Entity>();client.level.entitiesForRendering().forEach(entities::add);check(entities.stream().noneMatch(e->e.getId()<0&&(e instanceof ItemEntity||e instanceof Display.TextDisplay)),"Hidden hologram left entities");client.gui.setScreen(new DashboardScreen(mod));step++;mark("WORLD_ITEM_GLOW_WINNER_HIDE_PASSED");}
+   case 12->{Screenshot.grab(client,false);step++;}
+   case 13->{check(frames>30,"Too few native GUI frames");Files.writeString(game().resolve("probe-result.txt"),"PASS native 26.3 menus, text/images, SDL drag, save/load, live item registry, local-world item/text entities, active glow, winner and hide; frames="+frames);mark("PASS frames="+frames);mod=null;client.stop();}
+  }
+ }
+}

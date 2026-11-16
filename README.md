@@ -1,6 +1,17 @@
-# Economy Tracker — Fabric 1.21.11
+# Economy Tracker — Fabric 26.3 and 1.21.11
 
-Version **0.11.0** adds **individual text-line design, bubble lettering and images next to each line**, plus a rounded-row preset inspired by the reference. Existing payment-driven auctions, ground holograms with active-bidding glow, the current-player welcome banner and the Christmas dashboard remain available.
+Version **0.12.0** adds a native **Minecraft 26.3 / Java 25** build. It retains the balance/bet/rakeback trackers, eight-second fading tabs, loans, auction ground holograms with active-bidding glow, current-player welcome banner, Christmas dashboard, and per-line bubble text/images.
+
+| Minecraft | JAR | Java | Fabric Loader |
+| --- | --- | --- | --- |
+| **26.3** | [0.12.0 download](downloads/economy-tracker-0.12.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
+
+Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
+
+The 26.3 adapter uses the actual Minecraft SDK with Mojang names, the new GUI extraction/screen APIs, RenderPearl texture pipelines, SDL keyboard/mouse codes and native asynchronous PNG chooser. It reads the new optional team-color scoreboard slot. Auction item stacks wait for joined-world component data and the picker cache resets between connections/worlds.
+
+**Existing tracking/configuration data keeps its format and location.** The core, wallet, ledger, loan, auction and text-data classes are carried over byte-for-byte from 0.11.0. The compatibility build does not enable server commands or payment automation.
 
 The dashboard replaces the initial O-key menu with an advanced **Christmas dashboard**, inspired by the reference layouts: dark cards, purple sidebar navigation, clear ON/OFF controls, colored lights, snowy trees and presents. Snowfall can animate gently or remain still.
 
@@ -69,7 +80,7 @@ Listed players cannot have new or increased loan entries recorded in the tracker
 
 The manually managed **Loans** chart is retained. It shows player names, outstanding amounts, total outstanding money and a page indicator, using the existing rounded panel and font. Loans joins Profit → Player Nets → Recent Bets → Loans in the same eight-second rotation with a 400 ms fade. Press **P** to advance the view. Loans is skipped when empty, and **O → HUD modules → Loans** toggles its visibility. Position, scale and glass settings use the shared rotating box.
 
-Replace the previous mod JAR with `downloads/economy-tracker-0.11.0-mc1.21.11.jar`. Use Fabric Loader 0.18.4+, Fabric API for 1.21.11 and Java 21. Keep one Economy Tracker JAR installed.
+Choose the JAR for your Minecraft version from the table above. Use matching Fabric API and the required Java/Fabric Loader versions. Keep one Economy Tracker JAR installed.
 
 ## Auctions
 
@@ -117,7 +128,7 @@ Names are case insensitive and support Java and dotted Bedrock names. Amounts ac
 
 Observed commands alone never move money. Repeated confirmations correlated with a command are suppressed for one second; without server transaction IDs, identical independent receipts cannot always be distinguished from duplicate server messages. Missed historical payments cannot be reconstructed automatically. Existing financial data and layout remain compatible; loan file schema 1 is read and migrated to schema 2 on the next edit, retaining outstanding debts. Schema 2 stores the No Loan list alongside loans.
 
-## Build and verification
+## Minecraft 1.21.11 build and verification
 
 ```sh
 python3 tools/build.py
@@ -144,3 +155,17 @@ These checks do not replace live in-game rendering validation.
 Per-line tests additionally cover legacy settings, independent styles, deep-copy cancellation, inheritance and gradients, line removal, small viewport fitting, PNG validation/import, transparent images, thumbnail bounds, file limits, missing files and symlink rejection. `StyledTextSmoke` checks the real UI paths against native-free API stand-ins. Imported textures use a bounded 128-entry cache of thumbnails no larger than 256 pixels, with disposal on refresh/eviction.
 
 `tools/verify_text_api.py` verifies the new font/texture/folder API selectors against the SHA-checked official 1.21.11 client using the same arguments as the hologram verifier. The PNG chooser signature was also checked against Minecraft's bundled LWJGL TinyFD 3.3.3 library. `StyledTextPreview` and `tools/render_styled_text_preview.py` produce the explicitly synthetic layout preview using the shipped font and icons. Live Minecraft rendering still needs an in-game check.
+
+## Minecraft 26.3 build
+
+```sh
+ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
+```
+
+`tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
+
+The build runs **108 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+
+`python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
+
+The 26.3 native smoke **passed**: 106 rendered frames, menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
