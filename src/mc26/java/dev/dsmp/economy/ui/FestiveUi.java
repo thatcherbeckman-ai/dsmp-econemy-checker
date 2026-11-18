@@ -26,10 +26,14 @@ public final class FestiveUi {
         g.fill(x+1,y,x+w-1,y+h,0xED101522);g.fill(x,y+1,x+w,y+h-1,0xED101522);
         g.fill(x,y,x+w,y+1,0xFF000000|accent);g.fill(x,y+h-1,x+w,y+h,0x803F3F64);
     }
+    private static void rounded(net.minecraft.client.gui.GuiGraphicsExtractor g,int x,int y,int w,int h,int color){
+        g.fill(x+3,y,x+w-3,y+h,color);g.fill(x+1,y+1,x+w-1,y+h-1,color);g.fill(x,y+3,x+w,y+h-3,color);
+    }
     public static void control(net.minecraft.client.gui.GuiGraphicsExtractor g,int x,int y,int w,int h,String label,boolean active,boolean hovered,int accent){
-        int fill=active?0xFF000000|accent:hovered?0xFF34314C:0xFF1B2031;
-        g.fill(x,y,x+w,y+h,fill);g.fill(x,y,x+2,y+h,active?0xFFDFD6FF:0xFF45435D);
-        String shown=fit(label,w-8,.8f);int tw=(int)(HudFont.width(shown)*.8f);
-        text(g,shown,x+Math.max(4,(w-tw)/2),y+Math.max(2,(h-8)/2),active?0xFFFFFFFF:0xFFE3E5F3,.8f,active);
+        int border=hovered?0xFFBFA8EF:active?0xFF000000|accent:0xFF393B50;
+        int fill=active?0xFF000000|accent:hovered?0xFF302D46:0xFF191E2C;
+        rounded(g,x,y,w,h,border);rounded(g,x+1,y+1,w-2,h-2,fill);
+        String shown=fit(label,w-12,.84f);int tw=(int)(HudFont.width(shown,active)*.84f);
+        text(g,shown,x+Math.max(6,(w-tw)/2),y+Math.max(3,(h-8)/2),active?0xFFFFFFFF:0xFFE3E5F3,.84f,active);
     }
 }

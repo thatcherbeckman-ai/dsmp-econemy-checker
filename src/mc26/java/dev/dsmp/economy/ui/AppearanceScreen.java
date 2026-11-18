@@ -4,49 +4,53 @@ import dev.dsmp.economy.EconomyTrackerClient;
 import dev.dsmp.economy.appearance.AppearanceEditor;
 import dev.dsmp.economy.core.Ledger;
 import dev.dsmp.economy.core.ViewCycle;
-import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
-/** Minecraft 1.21.11 intermediary API; built without packaging the API fixtures. */
-public final class AppearanceScreen extends net.minecraft.client.gui.screens.Screen {
+/** The existing appearance controller with a roomy grid and a separate sample preview. */
+public final class AppearanceScreen extends Screen {
     private final EconomyTrackerClient mod;
-    private final net.minecraft.client.gui.screens.Screen parent;
+    private final Screen parent;
     private final AppearanceEditor editor;
-    private final Ledger sample = Ledger.demo();
-    private final ViewCycle cycle = new ViewCycle();
-    private java.util.List<AppearanceEditor.Control> controls = java.util.List.of();
-    public AppearanceScreen(EconomyTrackerClient mod, net.minecraft.client.gui.screens.Screen parent) {
-        super(net.minecraft.network.chat.Component.literal("Economy Tracker Appearance"));
-        this.mod = mod; this.parent = parent; editor = new AppearanceEditor(mod.config);
+    private final Ledger sample=Ledger.demo();
+    private final ViewCycle cycle=new ViewCycle();
+    public AppearanceScreen(EconomyTrackerClient mod,Screen parent){
+        super(Component.literal(MenuLayout.BRAND+" / Appearance"));this.mod=mod;this.parent=parent;editor=new AppearanceEditor(mod.config);
     }
-    @Override protected void init() {
-        controls = editor.controls(this::rebuildWidgets, this::onClose, this::cancel);
-        for (var control : controls)
-            button(control.x(), control.y(), control.width(), control.label(), control.action());
+    private int formWidth(MenuLayout m){return width>=780?Math.min(460,(m.contentWidth()-m.gap()*2)/2):m.contentWidth();}
+    @Override protected void init(){
+        var m=MenuLayout.of(width,height);int form=formWidth(m);
+        for(var c:editor.controls(this::rebuildWidgets,this::onClose,this::cancel)){
+            int x,y,w;
+            if(c.label().equals("Done")||c.label().equals("Cancel")){
+                x=c.label().equals("Done")?m.doneX():m.cancelX();y=m.actionY();w=m.actionWidth();
+            }else{
+                int row=(c.y()-28)/24,col=Math.clamp((c.x()-10)/98,0,2),cols=3;
+                if(editor.colorRole()<0&&row==0){col=0;cols=1;}
+                if(editor.colorRole()<0&&row==4){col=c.x()<100?0:1;cols=2;}
+                x=m.margin()+col*(form+m.gap())/cols;w=(form+m.gap())/cols-m.gap();y=m.row(row);
+            }
+            addRenderableWidget(new SettingsButton(x,y,w,m.buttonHeight(),c.label(),c.label().equals("Done"),mod.config.menuAccent,c.action()));
+        }
     }
-    private void button(int x, int y, int width, String label, Runnable action) {
-        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.Component.literal(label), button -> action.run())
-                .bounds(x, y, width, 20).build());
+    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,editor.heading());
+        int x=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin();
+        int y=width>=780?m.top():m.row(5)+m.gap();
+        int w=width-x-m.margin(),h=height-y-36;
+        if(w>0&&h>=24){
+            FestiveUi.panel(g,x,y,w,h,0x625084);FestiveUi.text(g,"SAMPLE PREVIEW",x+12,y+10,0xFFB7ABC9,.7f,true);
+            g.enableScissor(x+4,y+26,x+w-4,y+h-4);g.pose().pushMatrix();g.pose().translate(x+6,y+28);
+            try{TrackerRenderer.drawAll(g,editor.previewConfig(),sample,cycle,w-12,h-34,false,true,false);}
+            finally{g.pose().popMatrix();g.disableScissor();}
+        }
+        m.footer(g,editor.notice());super.extractRenderState(g,mx,my,delta);
     }
-    @Override public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        FestiveUi.background(graphics, width, height, mod.config);
-        graphics.text(font, editor.heading(), 10, 10, 0xFFEAF2F8, true);
-        graphics.text(font, editor.notice(), 10, 150, 0xFFB4C1CC, false);
-        TrackerRenderer.drawAll(graphics, editor.previewConfig(), sample, cycle, width, height, true, true, false);
-        super.extractRenderState(graphics, mouseX, mouseY, delta);
-        for (var c : controls) FestiveUi.control(graphics,c.x(),c.y(),c.width(),20,c.label(),c.label().equals("Done"),mouseX>=c.x()&&mouseX<c.x()+c.width()&&mouseY>=c.y()&&mouseY<c.y()+20,mod.config.menuAccent);
+    @Override public void onClose(){
+        if(mod.saveConfig()){if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();Minecraft.getInstance().gui.setScreen(parent);}else editor.failedSave();
     }
-    @Override public void onClose() {
-        if (mod.saveConfig()) { if (parent instanceof DashboardScreen dashboard) dashboard.checkpoint(); net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent); }
-        else editor.failedSave();
-    }
-    private void cancel() {
-        editor.cancel();
-        net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);
-    }
-    @Override public boolean isPauseScreen() { return false; }
+    private void cancel(){editor.cancel();Minecraft.getInstance().gui.setScreen(parent);}
+    @Override public boolean isPauseScreen(){return false;}
 }

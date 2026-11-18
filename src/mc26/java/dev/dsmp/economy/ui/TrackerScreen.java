@@ -4,219 +4,69 @@ import dev.dsmp.economy.EconomyTrackerClient;
 import dev.dsmp.economy.TrackerConfig;
 import dev.dsmp.economy.core.Ledger;
 import dev.dsmp.economy.loans.LoanService;
-import dev.dsmp.economy.loans.LoanUi;
-import dev.dsmp.economy.ui.AppearanceScreen;
-import dev.dsmp.economy.ui.DashboardNavigation;
-import dev.dsmp.economy.ui.FestiveUi;
-import dev.dsmp.economy.ui.TextBoxesScreen;
-import dev.dsmp.economy.ui.TrackerRenderer;
-import java.util.stream.IntStream;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.platform.InputConstants;
 
-public final class TrackerScreen
-extends Screen {
+/** Four spaced toolbar rows above the draggable HUD canvas. */
+public final class TrackerScreen extends Screen {
     private final EconomyTrackerClient mod;
-    private final Ledger sample = Ledger.demo();
-    private boolean preview = true;
-    private int tab;
-    private int dragging = -1;
-    private double offsetX;
-    private double offsetY;
-    private String notice = "Drag a box to move it. Esc saves.";
-
-    public TrackerScreen(EconomyTrackerClient mod) {
-        super((Component)Component.literal((String)"Economy Tracker Editor"));
-        this.mod = mod;
-    }
-
-    protected void init() {
-        this.button(10, 28, 50, "Layout", () -> {
-            this.tab = 0;
-            this.rebuildWidgets();
-        });
-        this.button(64, 28, 56, "Trackers", () -> {
-            this.tab = 1;
-            this.rebuildWidgets();
-        });
-        this.button(124, 28, 56, "Widgets", () -> {
-            this.tab = 2;
-            this.rebuildWidgets();
-        });
-        this.button(this.width - 66, 28, 56, "Done", this::onClose);
-        if (this.tab == 0) {
-            this.button(10, 54, 64, "Scale -", () -> {
-                this.mod.config.scale = Math.max(0.4f, this.mod.config.scale - 0.1f);
-            });
-            this.button(78, 54, 64, "Scale +", () -> {
-                this.mod.config.scale = Math.min(1.5f, this.mod.config.scale + 0.1f);
-            });
-            this.button(146, 54, 90, "Reset layout", () -> {
-                TrackerConfig defaults = new TrackerConfig();
-                for (int box = 0; box < 3; ++box) {
-                    this.mod.config.box((int)box).x = defaults.box((int)box).x;
-                    this.mod.config.box((int)box).y = defaults.box((int)box).y;
-                }
-                this.mod.config.scale = defaults.scale;
-            });
-            this.button(240, 54, 64, "Glass", () -> {
-                this.mod.config.opacity = this.mod.config.opacity >= 230 ? 80 : this.mod.config.opacity + 30;
-            });
-        } else if (this.tab == 1) {
-            this.toggle(10, 54, 70, "Nets", 0);
-            this.toggle(84, 54, 70, "Bets", 1);
-            this.toggle(158, 54, 70, "Profit", 2);
-        } else {
-            this.button(10, 54, 110, "Rakeback: " + (this.mod.config.rakebackPanel.visible ? "on" : "off"), () -> {
-                this.mod.config.rakebackPanel.visible = !this.mod.config.rakebackPanel.visible;
-                this.rebuildWidgets();
-            });
-            this.button(124, 54, 110, "Balance: " + (this.mod.config.balancePanel.visible ? "on" : "off"), () -> {
-                this.mod.config.balancePanel.visible = !this.mod.config.balancePanel.visible;
-                this.rebuildWidgets();
-            });
-            this.button(238, 54, 64, "Read bal", () -> this.mod.syncBalance());
+    private final Ledger sample=Ledger.demo();
+    private boolean preview=true;
+    private int tab,dragging=-1;
+    private double offsetX,offsetY;
+    private String notice="Drag a box to move it. Done or Esc saves.";
+    public TrackerScreen(EconomyTrackerClient mod){super(Component.literal(MenuLayout.BRAND+" / HUD layout"));this.mod=mod;}
+    private int canvasHeight(){return height-24;}
+    private void refresh(Runnable action){action.run();rebuildWidgets();}
+    @Override protected void init(){
+        var m=MenuLayout.of(width,height);
+        addRenderableWidget(new SettingsButton(m.cancelX(),8,m.actionWidth(),22,"Done",true,mod.config.menuAccent,this::onClose));
+        String[] tabs={"Layout","Trackers","Widgets","Style"};
+        for(int i=0;i<4;i++){int target=i;grid(i,4,0,tabs[i],tab==i,()->{if(target==3)Minecraft.getInstance().gui.setScreen(new AppearanceScreen(mod,this));else refresh(()->tab=target);});}
+        if(tab==0){
+            grid(0,4,1,"Scale -",false,()->mod.config.scale=Math.max(.4f,mod.config.scale-.1f));
+            grid(1,4,1,"Scale +",false,()->mod.config.scale=Math.min(1.5f,mod.config.scale+.1f));
+            grid(2,4,1,"Reset layout",false,()->{var defaults=new TrackerConfig();for(int i=0;i<3;i++){mod.config.box(i).x=defaults.box(i).x;mod.config.box(i).y=defaults.box(i).y;}mod.config.scale=defaults.scale;});
+            grid(3,4,1,"Glass",false,()->mod.config.opacity=mod.config.opacity>=230?80:mod.config.opacity+30);
+        }else if(tab==1){
+            String[] names={"Nets","Bets","Profit"};for(int i=0;i<3;i++){int id=i;grid(i,4,1,names[i]+(mod.config.panels[i].visible?": on":": off"),mod.config.panels[i].visible,()->refresh(()->mod.config.panels[id].visible=!mod.config.panels[id].visible));}
+            grid(3,4,1,LoanService.toggleLabel(mod.config.loansVisible),mod.config.loansVisible,()->refresh(()->mod.config.loansVisible=!mod.config.loansVisible));
+        }else{
+            grid(0,3,1,"Rakeback: "+(mod.config.rakebackPanel.visible?"on":"off"),mod.config.rakebackPanel.visible,()->refresh(()->mod.config.rakebackPanel.visible=!mod.config.rakebackPanel.visible));
+            grid(1,3,1,"Balance: "+(mod.config.balancePanel.visible?"on":"off"),mod.config.balancePanel.visible,()->refresh(()->mod.config.balancePanel.visible=!mod.config.balancePanel.visible));
+            grid(2,3,1,"Read bal",false,mod::syncBalance);
         }
-        this.button(10, 78, 94, this.preview ? "Sample preview" : "Your records", () -> {
-            this.preview = !this.preview;
-            this.rebuildWidgets();
-        });
-        this.button(108, 78, 94, "Reload settings", () -> {
-            this.mod.reloadConfig();
-            this.notice = this.mod.status;
-            this.rebuildWidgets();
-        });
-        if (this.tab == 1) {
-            this.button(206, 78, 94, this.mod.config.scoreboardBalance ? "Read bal: on" : "Read bal: off", () -> {
-                this.mod.config.scoreboardBalance = !this.mod.config.scoreboardBalance;
-                this.rebuildWidgets();
-            });
-        }
-        this.button(10, 102, 94, "Next view", () -> this.mod.viewCycle.next(this.mod.config.enabledViews(), System.nanoTime() / 1000000L));
-        this.button(108, 102, 94, this.mod.config.autoCycle ? "Cycle: 8s" : "Cycle: paused", () -> {
-            this.mod.config.autoCycle = !this.mod.config.autoCycle;
-            this.rebuildWidgets();
-        });
-        this.button(206, 102, 94, this.mod.config.autoDetectPayments ? "Auto bets: on" : "Auto bets: off", () -> {
-            this.mod.config.autoDetectPayments = !this.mod.config.autoDetectPayments;
-            this.rebuildWidgets();
-        });
-        this.addLoanToggle();
-        this.addAppearanceButton();
-        this.addTextBoxesButton();
+        grid(0,3,2,preview?"Sample preview":"Your records",preview,()->refresh(()->preview=!preview));
+        grid(1,3,2,"Reload settings",false,()->refresh(()->{mod.reloadConfig();notice=mod.status;}));
+        if(tab==1)grid(2,3,2,"Read bal: "+(mod.config.scoreboardBalance?"on":"off"),mod.config.scoreboardBalance,()->refresh(()->mod.config.scoreboardBalance=!mod.config.scoreboardBalance));
+        if(tab==2)grid(2,3,2,"Text boxes",false,()->Minecraft.getInstance().gui.setScreen(new TextBoxesScreen(mod,this)));
+        grid(0,3,3,"Next view",false,()->mod.viewCycle.next(mod.config.enabledViews(),System.nanoTime()/1000000L));
+        grid(1,3,3,mod.config.autoCycle?"Cycle: 8s":"Cycle: paused",mod.config.autoCycle,()->refresh(()->mod.config.autoCycle=!mod.config.autoCycle));
+        grid(2,3,3,"Auto bets: "+(mod.config.autoDetectPayments?"on":"off"),mod.config.autoDetectPayments,()->refresh(()->mod.config.autoDetectPayments=!mod.config.autoDetectPayments));
     }
-
-    private void toggle(int x, int y, int width, String name, int panel) {
-        this.button(x, y, width, name + (this.mod.config.panels[panel].visible ? ": on" : ": off"), () -> {
-            this.mod.config.panels[panel].visible = !this.mod.config.panels[panel].visible;
-            this.rebuildWidgets();
-        });
+    private void grid(int col,int cols,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.x(col,cols),42+row*30,m.cellWidth(col,cols),22,label,selected,mod.config.menuAccent,action));}
+    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+        FestiveUi.background(g,width,height,mod.config);var m=MenuLayout.of(width,height);
+        int room=m.cancelX()-m.margin()-8;float scale=Math.min(.9f,room/(float)HudFont.width(MenuLayout.BRAND,true));FestiveUi.text(g,MenuLayout.BRAND,m.margin(),12,0xFFF2EDF9,scale,true);
+        TrackerRenderer.drawAll(g,mod.config,preview?sample:mod.ledger,mod.viewCycle,width,canvasHeight(),true,preview,mod.wallet.estimated());
+        if(dragging>=0){var b=TrackerRenderer.bounds(mod.config,dragging,width,canvasHeight(),true);g.fill(b.x(),b.y(),b.x()+b.width(),b.y()+1,0xFFE3B0CB);}
+        m.footer(g,notice);super.extractRenderState(g,mx,my,delta);
     }
-
-    private void button(int x, int y, int width, String label, Runnable action) {
-        this.addRenderableWidget(Button.builder((Component)Component.literal((String)label), button -> action.run()).bounds(x, y, width, 20).build());
+    @Override public boolean mouseClicked(MouseButtonEvent event,boolean doubleClick){
+        if(super.mouseClicked(event,doubleClick))return true;
+        if(event.button()!=InputConstants.MOUSE_BUTTON_LEFT||event.y()<160||event.y()>=canvasHeight())return false;
+        for(int id=2;id>=0;id--){var b=TrackerRenderer.bounds(mod.config,id,width,canvasHeight(),true);if(!mod.config.boxVisible(id)||!b.contains(event.x(),event.y()))continue;dragging=id;offsetX=event.x()-b.x();offsetY=event.y()-b.y();return true;}return false;
     }
-
-public void extractRenderState(GuiGraphicsExtractor g,int mouseX,int mouseY,float delta) {
-        FestiveUi.background(g, this.width, this.height, this.mod.config);
-        g.fill(0, 0, this.width, this.height, 285937688);
-        g.text(this.font, "ECONOMY / HUD EDITOR", 10, 10, -2974791, true);
-        g.text(this.font, this.font.plainSubstrByWidth(this.notice, Math.max(10, this.width - 220)), 210, 10, -6313284, false);
-        TrackerRenderer.drawAll((GuiGraphicsExtractor)g, this.mod.config, this.preview ? this.sample : this.mod.ledger, this.mod.viewCycle, this.width, this.height, true, this.preview, this.mod.wallet.estimated());
-        if (LoanUi.viewsOff(IntStream.range(0, 3).noneMatch(i -> this.mod.config.panels[i].visible), this.mod.config)) {
-            g.text(this.font, "Rotating views off. Enable them in Trackers.", 10, 140, -6313284, false);
-        }
-        if (this.dragging >= 0) {
-            TrackerRenderer.Bounds box = TrackerRenderer.bounds(this.mod.config, this.dragging, this.width, this.height, true);
-            g.fill(box.x(), box.y(), box.x() + box.width(), box.y() + 1, -2974791);
-        }
-        super.extractRenderState((GuiGraphicsExtractor)g, (int)mouseX, (int)mouseY, (float)delta);
+    @Override public boolean mouseDragged(MouseButtonEvent event,double dx,double dy){
+        if(dragging<0)return super.mouseDragged(event,dx,dy);var b=TrackerRenderer.bounds(mod.config,dragging,width,canvasHeight(),true);
+        mod.config.box(dragging).x=(float)Math.clamp((event.x()-offsetX)/Math.max(1,width-b.width()),0,1);
+        mod.config.box(dragging).y=(float)Math.clamp((event.y()-offsetY-160)/Math.max(1,canvasHeight()-160-b.height()),0,1);return true;
     }
-
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (super.mouseClicked(event, doubleClick)) {
-            return true;
-        }
-        if (event.button() != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT || event.y() < 160.0) {
-            return false;
-        }
-        for (int widget = 2; widget >= 0; --widget) {
-            TrackerRenderer.Bounds box = TrackerRenderer.bounds(this.mod.config, widget, this.width, this.height, true);
-            if (!this.mod.config.boxVisible(widget) || !box.contains(event.x(), event.y())) continue;
-            this.dragging = widget;
-            this.offsetX = event.x() - (double)box.x();
-            this.offsetY = event.y() - (double)box.y();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-        if (this.dragging < 0) {
-            return super.mouseDragged(event, dx, dy);
-        }
-        TrackerRenderer.Bounds box = TrackerRenderer.bounds(this.mod.config, this.dragging, this.width, this.height, true);
-        this.mod.config.box((int)this.dragging).x = this.clamp((event.x() - this.offsetX) / (double)Math.max(1, this.width - box.width()));
-        this.mod.config.box((int)this.dragging).y = this.clamp((event.y() - this.offsetY - 160.0) / (double)Math.max(1, this.height - 160 - box.height()));
-        return true;
-    }
-
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (this.dragging >= 0) {
-            this.dragging = -1;
-            return true;
-        }
-        return super.mouseReleased(event);
-    }
-
-    private float clamp(double value) {
-        return (float)Math.max(0.0, Math.min(1.0, value));
-    }
-
-    public void onClose() {
-        if (this.mod.saveConfig()) {
-            DashboardNavigation.open(this.mod);
-        } else {
-            if (this.minecraft.player != null) {
-                this.minecraft.player.sendSystemMessage(Component.literal("[Economy Tracker] Settings were not saved: "+this.mod.status));
-            }
-            DashboardNavigation.open(this.mod);
-        }
-    }
-
-    public boolean isPauseScreen() {
-        return false;
-    }
-
-    private void addLoanToggle() {
-        if (this.tab == 1) {
-            this.button(232, 54, 70, LoanService.toggleLabel(this.mod.config.loansVisible), () -> {
-                this.mod.config.loansVisible ^= true;
-                this.rebuildWidgets();
-            });
-        }
-    }
-
-    private void addAppearanceButton() {
-        this.button(184, 28, 62, "Style", this::openAppearance);
-    }
-
-    private void openAppearance() {
-        Minecraft.getInstance().gui.setScreen((Screen)new AppearanceScreen(this.mod, this));
-    }
-
-    private void addTextBoxesButton() {
-        if (this.tab == 2) {
-            this.button(206, 78, 94, "Text boxes", this::openTextBoxes);
-        }
-    }
-
-    private void openTextBoxes() {
-        Minecraft.getInstance().gui.setScreen((Screen)new TextBoxesScreen(this.mod, this));
-    }
+    @Override public boolean mouseReleased(MouseButtonEvent event){if(dragging>=0){dragging=-1;return true;}return super.mouseReleased(event);}
+    @Override public void onClose(){if(mod.saveConfig())DashboardNavigation.open(mod);else{notice="Save failed. Retry Done or Esc.";}}
+    @Override public boolean isPauseScreen(){return false;}
 }

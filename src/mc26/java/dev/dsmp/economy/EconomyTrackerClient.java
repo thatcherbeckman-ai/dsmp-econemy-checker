@@ -383,7 +383,7 @@ AuctionAction {
     private void say(String text) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
-            player.sendSystemMessage(Component.literal("[Economy Tracker] "+text));
+            player.sendSystemMessage(Component.literal("[thatchacats econemy checker] "+text));
         }
     }
 

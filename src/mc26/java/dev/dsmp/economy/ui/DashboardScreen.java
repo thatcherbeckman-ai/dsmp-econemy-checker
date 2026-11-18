@@ -12,67 +12,65 @@ import java.util.*;
 public final class DashboardScreen extends net.minecraft.client.gui.screens.Screen {
     private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions"};
     private static final int WHITE=0xFFE7EAF3,MUTED=0xFF8993AC,GREEN=0xFF63D9A0,RED=0xFFE57885;
-    private record Control(int x,int y,int width,int height,String label,boolean active,Runnable action){}
     private record LoanRow(String name,String value,boolean heading){}
     private final EconomyTrackerClient mod;
     private final DashboardSettings settings;
-    private final List<Control> controls=new ArrayList<>();
     private int page,loanPage;
     private String notice="Changes apply live. Save or Cancel when finished.",nameDraft="",amountDraft="";
     private net.minecraft.client.gui.components.EditBox name,amount;
-    public DashboardScreen(EconomyTrackerClient mod){super(net.minecraft.network.chat.Component.literal("Economy Dashboard"));this.mod=mod;settings=new DashboardSettings(mod.config);}
+    public DashboardScreen(EconomyTrackerClient mod){super(net.minecraft.network.chat.Component.literal(MenuLayout.BRAND));this.mod=mod;settings=new DashboardSettings(mod.config);}
     public void checkpoint(){settings.checkpoint(mod.config);}
-    private DashboardLayout layout(){return DashboardLayout.of(width,height);}
+    private MenuLayout.Dashboard layout(){return MenuLayout.Dashboard.of(width,height);}
     @Override protected void init(){
-        controls.clear();name=null;amount=null;var d=layout();
-        for(int i=0;i<NAV.length;i++){int target=i;button(8,d.navY(i),d.sidebar()-16,d.navStep()-2,NAV[i],page==i,()->navigate(target));}
-        button(width-108,16,44,20,"Save",true,this::onClose);button(width-60,16,52,20,"Cancel",false,this::cancel);
-        if(page==1){int[] ids={5,2,0,1,4,3};for(int i=0;i<ids.length;i++){int id=ids[i],y=d.rowY(i)+(d.rowHeight()-18)/2;toggle(d,y,settings.visible(id),v->settings.visible(id,v));}}
-        if(page==6){toggle(d,d.rowY(0)+5,mod.config.autoDetectPayments,v->mod.config.autoDetectPayments=v);toggle(d,d.rowY(1)+5,mod.config.scoreboardBalance,v->mod.config.scoreboardBalance=v);toggle(d,d.rowY(2)+5,mod.config.autoCycle,v->mod.config.autoCycle=v);button(width-88,d.rowY(3)+4,34,20,"-5",false,()->change(()->settings.waitSeconds(-5)));button(width-50,d.rowY(3)+4,34,20,"+5",false,()->change(()->settings.waitSeconds(5)));}
-        if(page==7){toggle(d,d.rowY(0)+5,mod.config.festiveBackground,v->mod.config.festiveBackground=v);toggle(d,d.rowY(1)+5,mod.config.animateSnow,v->mod.config.animateSnow=v);button(width-110,d.rowY(2)+4,94,20,"Cycle accent",true,()->change(settings::nextAccent));button(width-88,d.rowY(3)+4,34,20,"-",false,()->change(()->settings.scale(-.05f)));button(width-50,d.rowY(3)+4,34,20,"+",false,()->change(()->settings.scale(.05f)));button(width-88,d.rowY(4)+4,34,20,"-20",false,()->change(()->settings.opacity(-20)));button(width-50,d.rowY(4)+4,34,20,"+20",false,()->change(()->settings.opacity(20)));}
+        name=null;amount=null;var d=layout();
+        for(int i=0;i<NAV.length;i++){int target=i;button(8,d.navY(i),d.sidebar()-16,d.navHeight(),NAV[i],page==i,()->navigate(target));}
+        var menu=MenuLayout.of(width,height);button(menu.doneX(),menu.actionY(),menu.actionWidth(),menu.buttonHeight(),"Save",true,this::onClose);button(menu.cancelX(),menu.actionY(),menu.actionWidth(),menu.buttonHeight(),"Cancel",false,this::cancel);
+        if(page==1){int[] ids={5,2,0,1,4,3};for(int i=0;i<ids.length;i++){int id=ids[i],y=d.controlY(i);toggle(d,y,settings.visible(id),v->settings.visible(id,v));}}
+        if(page==6){toggle(d,d.controlY(0),mod.config.autoDetectPayments,v->mod.config.autoDetectPayments=v);toggle(d,d.controlY(1),mod.config.scoreboardBalance,v->mod.config.scoreboardBalance=v);toggle(d,d.controlY(2),mod.config.autoCycle,v->mod.config.autoCycle=v);button(width-88,d.controlY(3),34,d.controlHeight(),"-5",false,()->change(()->settings.waitSeconds(-5)));button(width-50,d.controlY(3),34,d.controlHeight(),"+5",false,()->change(()->settings.waitSeconds(5)));}
+        if(page==7){toggle(d,d.controlY(0),mod.config.festiveBackground,v->mod.config.festiveBackground=v);toggle(d,d.controlY(1),mod.config.animateSnow,v->mod.config.animateSnow=v);button(width-110,d.controlY(2),94,d.controlHeight(),"Cycle accent",true,()->change(settings::nextAccent));button(width-88,d.controlY(3),34,d.controlHeight(),"-",false,()->change(()->settings.scale(-.05f)));button(width-50,d.controlY(3),34,d.controlHeight(),"+",false,()->change(()->settings.scale(.05f)));button(width-88,d.controlY(4),34,d.controlHeight(),"-20",false,()->change(()->settings.opacity(-20)));button(width-50,d.controlY(4),34,d.controlHeight(),"+20",false,()->change(()->settings.opacity(20)));}
         if(page==5)initLoans(d);
     }
-    private void button(int x,int y,int w,int h,String label,boolean active,Runnable action){controls.add(new Control(x,y,w,h,label,active,action));addRenderableWidget(net.minecraft.client.gui.components.Button.builder(net.minecraft.network.chat.Component.literal(label),b->action.run()).bounds(x,y,w,h).build());}
-    private void toggle(DashboardLayout d,int y,boolean value,java.util.function.Consumer<Boolean> set){button(width-84,y,32,18,"ON",value,()->change(()->set.accept(true)));button(width-48,y,32,18,"OFF",!value,()->change(()->set.accept(false)));}
+    private void button(int x,int y,int w,int h,String label,boolean active,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,active,mod.config.menuAccent,action));}
+    private void toggle(MenuLayout.Dashboard d,int y,boolean value,java.util.function.Consumer<Boolean> set){button(width-108,y,40,d.controlHeight(),"ON",value,()->change(()->set.accept(true)));button(width-58,y,40,d.controlHeight(),"OFF",!value,()->change(()->set.accept(false)));}
     private void change(Runnable action){action.run();rebuildWidgets();}
     private void navigate(int target){commitDraft();if(target==2){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AppearanceScreen(mod,this));return;}if(target==3){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TextBoxesScreen(mod,this));return;}if(target==8){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AuctionScreen(mod,this));return;}if(target==4){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TrackerScreen(mod));return;}page=target;notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";rebuildWidgets();}
     private void commitDraft(){if(name!=null){nameDraft=name.getValue();amountDraft=amount.getValue();}}
-    private void initLoans(DashboardLayout d){
-        int half=(d.contentWidth()-8)/2;
-        name=new net.minecraft.client.gui.components.EditBox(font,d.left(),56,half,20,net.minecraft.network.chat.Component.literal("Player name"));name.setMaxLength(17);name.setValue(nameDraft);name.setResponder(value->nameDraft=value);name.setHint(net.minecraft.network.chat.Component.literal("Player name"));addRenderableWidget(name);
-        amount=new net.minecraft.client.gui.components.EditBox(font,d.left()+half+8,56,half,20,net.minecraft.network.chat.Component.literal("Loan amount"));amount.setMaxLength(32);amount.setValue(amountDraft);amount.setResponder(value->amountDraft=value);amount.setHint(net.minecraft.network.chat.Component.literal("Amount, e.g. 10M"));addRenderableWidget(amount);
-        String[] labels={"Set","Add","Repay","Remove","No loan +","No loan -"},operations={"set","add","paid","remove","noloan_add","noloan_remove"};int cw=(d.contentWidth()-12)/3;
-        for(int i=0;i<6;i++){String op=operations[i];button(d.left()+(i%3)*(cw+6),82+(i/3)*24,cw,20,labels[i],i<3,()->loan(op));}
-        button(d.left(),height-48,48,20,"Prev",false,()->change(()->{commitDraft();loanPage=Math.max(0,loanPage-1);}));button(d.left()+54,height-48,48,20,"Next",false,()->change(()->{commitDraft();loanPage=Math.min(loanPages(d)-1,loanPage+1);}));
+    private void initLoans(MenuLayout.Dashboard d){
+        int gap=d.gap(),h=d.controlHeight(),half=(d.contentWidth()-gap)/2,y=d.bodyTop();
+        name=new net.minecraft.client.gui.components.EditBox(font,d.left(),y,half,h,net.minecraft.network.chat.Component.literal("Player name"));name.setMaxLength(17);name.setValue(nameDraft);name.setResponder(value->nameDraft=value);name.setHint(net.minecraft.network.chat.Component.literal("Player name"));addRenderableWidget(name);
+        amount=new net.minecraft.client.gui.components.EditBox(font,d.left()+half+gap,y,half,h,net.minecraft.network.chat.Component.literal("Loan amount"));amount.setMaxLength(32);amount.setValue(amountDraft);amount.setResponder(value->amountDraft=value);amount.setHint(net.minecraft.network.chat.Component.literal("Amount, e.g. 10M"));addRenderableWidget(amount);
+        String[] labels={"Set","Add","Repay","Remove","No loan +","No loan -"},operations={"set","add","paid","remove","noloan_add","noloan_remove"};int cw=(d.contentWidth()-gap*2)/3;
+        for(int i=0;i<6;i++){String op=operations[i];button(d.left()+(i%3)*(cw+gap),y+(i/3+1)*(h+gap),cw,h,labels[i],i<3,()->loan(op));}
+        button(d.left(),height-52,58,h,"Prev",false,()->change(()->{commitDraft();loanPage=Math.max(0,loanPage-1);}));button(d.left()+58+gap,height-52,58,h,"Next",false,()->change(()->{commitDraft();loanPage=Math.min(loanPages(d)-1,loanPage+1);}));
     }
+
     private void loan(String operation){commitDraft();int result=((LoanAction)(Object)mod).loanCommand(operation,nameDraft.trim(),amountDraft.trim());notice=result==1?"Loan record saved.":"Could not update loan. See chat for details.";loanPage=0;rebuildWidgets();}
     private List<LoanRow> loanRows(){var data=LoanService.readOnlySnapshot();var rows=new ArrayList<LoanRow>();for(var loan:data.loans())rows.add(new LoanRow(loan.player(),Money.format(loan.cents(),false),false));if(!data.noLoans().isEmpty()){rows.add(new LoanRow("NO LOAN LIST","",true));for(String player:data.noLoans())rows.add(new LoanRow(player,"NO LOAN",false));}return rows;}
-    private int loanPages(DashboardLayout d){return Math.max(1,(loanRows().size()+d.loanRows()-1)/d.loanRows());}
+    private int loanPages(MenuLayout.Dashboard d){return Math.max(1,(loanRows().size()+d.loanRows()-1)/d.loanRows());}
     @Override public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor g,int mx,int my,float delta){
         var d=layout();FestiveUi.background(g,width,height,mod.config);g.fill(0,0,d.sidebar(),height,0xF50B0F1A);g.fill(d.sidebar()-1,0,d.sidebar(),height,0xFF34304F);
-        FestiveUi.text(g,"ECONOMY",10,19,WHITE,.9f,true);FestiveUi.text(g,mod.config.festiveBackground?"WINTER EDITION":"HUD CONTROL",10,35,0xFF000000|mod.config.menuAccent,.6f,false);
-        FestiveUi.text(g,page==0?"Your economy":NAV[page],d.left(),18,WHITE,1.05f,true);
+        FestiveUi.text(g,"thatchacats",10,20,WHITE,Math.min(1f,(d.sidebar()-20)/(float)HudFont.width("thatchacats",true)),true);FestiveUi.text(g,"econemy checker",10,38,0xFF000000|mod.config.menuAccent,Math.min(.8f,(d.sidebar()-20)/(float)HudFont.width("econemy checker")),false);
+        String heading=page==0?MenuLayout.BRAND:NAV[page];int headingRoom=MenuLayout.of(width,height).doneX()-d.left()-10;FestiveUi.text(g,heading,d.left(),18,WHITE,Math.min(1.05f,headingRoom/(float)Math.max(1,HudFont.width(heading,true))),true);
         String subtitle=switch(page){case 0->"Live overview and HUD controls";case 1->"Choose the HUD modules shown in game";case 5->"Loan edits save immediately";case 6->"Tracking on "+mod.config.serverAddress;case 7->"Menu theme and shared HUD defaults";default->"";};
-        FestiveUi.text(g,FestiveUi.fit(subtitle,d.contentWidth(),.72f),d.left(),39,MUTED,.72f,false);
+        FestiveUi.text(g,FestiveUi.fit(subtitle,d.contentWidth(),.72f),d.left(),height>=480?48:42,MUTED,.72f,false);
         if(page==0)overview(g,d);else if(page==1)modules(g,d);else if(page==5)loans(g,d);else if(page==6)tracking(g,d);else if(page==7)preferences(g,d);
         g.fill(d.left()-4,height-23,width,height,0xE60B0F1A);
         String footer=notice;FestiveUi.text(g,FestiveUi.fit(footer,d.contentWidth(),.68f),d.left(),height-16,MUTED,.68f,false);
         super.extractRenderState(g,mx,my,delta);
-        for(var c:controls)FestiveUi.control(g,c.x,c.y,c.width,c.height,c.label,c.active,mx>=c.x&&mx<c.x+c.width&&my>=c.y&&my<c.y+c.height,mod.config.menuAccent);
     }
-    private void row(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d,int index,String title,String detail){int y=d.rowY(index);FestiveUi.panel(g,d.left(),y,d.contentWidth(),d.rowHeight()-4,0x39304F);int room=d.contentWidth()-96;FestiveUi.text(g,FestiveUi.fit(title,room,.8f),d.left()+8,y+4,WHITE,.8f,true);if(d.rowHeight()>=25)FestiveUi.text(g,FestiveUi.fit(detail,room,.62f),d.left()+8,y+16,MUTED,.62f,false);}
-    private void modules(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d){String[] names={"BALANCE","PROFIT TRACKER","PLAYER NETS","RECENT BETS","RAKEBACK","LOANS"};String[] descriptions={"Your name, money and change","Chart, winners and losses","Players up or down","Recent confirmed results","Net losses since reset","Outstanding loans and No Loan list"};for(int i=0;i<6;i++)row(g,d,i,names[i],descriptions[i]);}
-    private void tracking(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d){row(g,d,0,"AUTOMATIC BETS","Capture named payment results");row(g,d,1,"BALANCE READER","Read visible balance and payment messages");row(g,d,2,"ROTATE HUD","Eight seconds between views, with fading");row(g,d,3,"RESULT WAIT: "+mod.config.paymentSettlementSeconds+"s","Time before an unpaid stake counts as a win");}
-    private void preferences(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d){row(g,d,0,"CHRISTMAS BACKGROUND","Snowy trees, presents and colored lights");row(g,d,1,"SNOW ANIMATION","Gentle snowfall; off keeps a still scene");row(g,d,2,"MENU ACCENT","Personalize the dashboard highlight");row(g,d,3,"HUD BASE SIZE: "+Math.round(mod.config.scale*100)+"%","Base scale for the data panels");row(g,d,4,"GLASS OPACITY: "+mod.config.opacity,"Default opacity for panel styles");}
-    private void loans(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d){
-        var rows=loanRows();int count=d.loanRows();loanPage=Math.min(loanPage,loanPages(d)-1);FestiveUi.panel(g,d.left(),134,d.contentWidth(),Math.max(25,height-192),0x5A457F);
-        FestiveUi.text(g,"OUTSTANDING / NO LOAN",d.left()+7,138,MUTED,.65f,true);
-        int from=loanPage*count;for(int i=0;i<count&&from+i<rows.size();i++){var row=rows.get(from+i);int y=152+i*15;FestiveUi.text(g,FestiveUi.fit(row.name,d.contentWidth()-88,.8f),d.left()+7,y,row.heading?0xFFC7A5E8:WHITE,.8f,row.heading);int color=row.value.equals("NO LOAN")?RED:GREEN;FestiveUi.text(g,row.value,width-88,y,color,.75f,false);}
-        if(rows.isEmpty())FestiveUi.text(g,"No loan records yet",d.left()+7,155,MUTED,.75f,false);
-        FestiveUi.text(g,"Page "+(loanPage+1)+" / "+loanPages(d),d.left()+112,height-42,MUTED,.75f,false);
+    private void row(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d,int index,String title,String detail){int y=d.rowY(index);FestiveUi.panel(g,d.left(),y,d.contentWidth(),d.rowHeight()-d.gap(),0x39304F);int room=d.contentWidth()-126;FestiveUi.text(g,FestiveUi.fit(title,room,.8f),d.left()+12,y+7,WHITE,.8f,true);if(d.rowHeight()>=38)FestiveUi.text(g,FestiveUi.fit(detail,room,.62f),d.left()+12,y+24,MUTED,.62f,false);}
+    private void modules(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d){String[] names={"BALANCE","PROFIT TRACKER","PLAYER NETS","RECENT BETS","RAKEBACK","LOANS"};String[] descriptions={"Your name, money and change","Chart, winners and losses","Players up or down","Recent confirmed results","Net losses since reset","Outstanding loans and No Loan list"};for(int i=0;i<6;i++)row(g,d,i,names[i],descriptions[i]);}
+    private void tracking(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d){row(g,d,0,"AUTOMATIC BETS","Capture named payment results");row(g,d,1,"BALANCE READER","Read visible balance and payment messages");row(g,d,2,"ROTATE HUD","Eight seconds between views, with fading");row(g,d,3,"RESULT WAIT: "+mod.config.paymentSettlementSeconds+"s","Time before an unpaid stake counts as a win");}
+    private void preferences(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d){row(g,d,0,"CHRISTMAS BACKGROUND","Snowy trees, presents and colored lights");row(g,d,1,"SNOW ANIMATION","Gentle snowfall; off keeps a still scene");row(g,d,2,"MENU ACCENT","Personalize the dashboard highlight");row(g,d,3,"HUD BASE SIZE: "+Math.round(mod.config.scale*100)+"%","Base scale for the data panels");row(g,d,4,"GLASS OPACITY: "+mod.config.opacity,"Default opacity for panel styles");}
+    private void loans(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d){
+        var rows=loanRows();int count=d.loanRows();loanPage=Math.min(loanPage,loanPages(d)-1);FestiveUi.panel(g,d.left(),d.loanTop(),d.contentWidth(),Math.max(25,height-d.loanTop()-62),0x5A457F);
+        FestiveUi.text(g,"OUTSTANDING / NO LOAN",d.left()+10,d.loanTop()+8,MUTED,.65f,true);
+        int from=loanPage*count;for(int i=0;i<count&&from+i<rows.size();i++){var row=rows.get(from+i);int y=d.loanTop()+26+i*18;FestiveUi.text(g,FestiveUi.fit(row.name,d.contentWidth()-88,.8f),d.left()+7,y,row.heading?0xFFC7A5E8:WHITE,.8f,row.heading);int color=row.value.equals("NO LOAN")?RED:GREEN;FestiveUi.text(g,row.value,width-88,y,color,.75f,false);}
+        if(rows.isEmpty())FestiveUi.text(g,"No loan records yet",d.left()+10,d.loanTop()+26,MUTED,.75f,false);
+        FestiveUi.text(g,"Page "+(loanPage+1)+" / "+loanPages(d),d.left()+132,height-44,MUTED,.75f,false);
     }
-    private void overview(net.minecraft.client.gui.GuiGraphicsExtractor g,DashboardLayout d){
-        int bannerHeight=WelcomeBanner.height(height);WelcomeBanner.draw(g,d.left(),56,d.contentWidth(),bannerHeight,mod.config.menuAccent);int cardsTop=56+bannerHeight+8;
+    private void overview(net.minecraft.client.gui.GuiGraphicsExtractor g,MenuLayout.Dashboard d){
+        int bannerHeight=WelcomeBanner.height(height);WelcomeBanner.draw(g,d.left(),d.bodyTop(),d.contentWidth(),bannerHeight,mod.config.menuAccent);int cardsTop=d.bodyTop()+bannerHeight+12;
         int columns=d.contentWidth()>=400?4:2,cw=(d.contentWidth()-(columns-1)*8)/columns,ch=48;
         String balance=mod.ledger.balance().isPresent()?Money.format(mod.ledger.balance().getAsLong(),false):"--";
         String[] names={mod.wallet.estimated()?"BALANCE ~":"BALANCE","PROFIT","RECEIVED","PAID"};String[] values={balance,Money.format(mod.ledger.displayedProfit(),true),Money.format(mod.ledger.displayedMoneyIn(),false),Money.format(mod.ledger.displayedMoneyOut(),false)};

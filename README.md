@@ -1,10 +1,14 @@
-# Economy Tracker — Fabric 26.3 and 1.21.11
+# thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
-Version **0.12.0** adds a native **Minecraft 26.3 / Java 25** build. It retains the balance/bet/rakeback trackers, eight-second fading tabs, loans, auction ground holograms with active-bidding glow, current-player welcome banner, Christmas dashboard, and per-line bubble text/images.
+Version **0.12.1** renames the 26.3 mod to **thatchacats econemy checker** and refreshes its menus: wider button grids, consistent gutters, rounded controls, visible keyboard focus, and a separate appearance preview. Sidebar links, module/settings rows, auction controls, text/line editors and HUD layout controls have more space. On smaller GUI sizes the grids compact to keep every action within the screen. Shortened button labels have native tooltips with their full text.
+
+[View the updated settings](downloads/preview-0.12.1-settings.png) — native Minecraft 26.3 capture from the isolated test profile, labeled as sample data.
+
+All tracking data, commands, HUD features and existing configuration paths remain compatible. The native Minecraft **26.3 / Java 25** build retains the balance/bet/rakeback trackers, eight-second fading tabs, loans, auction ground holograms with active-bidding glow, current-player welcome banner, Christmas dashboard, and per-line bubble text/images.
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.12.0 download](downloads/economy-tracker-0.12.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.12.1 download](downloads/economy-tracker-0.12.1-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -168,4 +172,4 @@ The build runs **108 regression tests on Java 25** and repeats them against the 
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
-The 26.3 native smoke **passed**: 106 rendered frames, menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
+The 26.3 native smoke **passed**: 60 responsive native menu layouts (320×240, 480×360, 960×700 and 1280×720), with no overlapping or offscreen button/input bounds, plus menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.

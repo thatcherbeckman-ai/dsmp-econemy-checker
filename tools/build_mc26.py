@@ -6,7 +6,7 @@ from prepare_mc26 import prepare
 ROOT=Path(__file__).resolve().parents[1];CACHE=prepare();BUILD=ROOT/'build/mc26';BUILD.mkdir(parents=True,exist_ok=True)
 BASE=ROOT/'downloads/economy-tracker-0.11.0-mc1.21.11.jar'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest()=='c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c'
-VERSION='0.12.0'
+VERSION='0.12.1'
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME')
 prepared=ROOT.parent/'.tools/economy-jdk25-path.txt'
 if not jdk and prepared.exists():jdk=prepared.read_text().strip()
@@ -37,7 +37,7 @@ with zipfile.ZipFile(BASE) as original,zipfile.ZipFile(output,'w',zipfile.ZIP_DE
         if name.endswith('.class') and name not in updated and b'net/minecraft/' in raw:raise RuntimeError('Unported Minecraft adapter: '+name)
         data=updated.pop(name,raw)
         if name=='fabric.mod.json':
-            info=json.loads(data);info['version']=VERSION;info['description']='Client-side economy tracking, editable HUD, styled text and auction holograms for Minecraft 26.3.'
+            info=json.loads(data);info['version']=VERSION;info['name']='thatchacats econemy checker';info['description']='Client-side economy tracking, editable HUD, styled text and auction holograms for Minecraft 26.3.'
             info['depends'].update({'fabricloader':'>=0.20.1','minecraft':'~26.3','java':'>=25','fabric-api':'>=0.166.2'})
             data=(json.dumps(info,indent=2)+'\n').encode()
         target.writestr(name,data)
