@@ -6,6 +6,7 @@ import dev.dsmp.economy.core.*;
 import dev.dsmp.economy.text.*;
 import dev.dsmp.economy.ui.*;
 import dev.dsmp.economy.inventory.*;
+import dev.dsmp.economy.menubackground.*;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.level.GameType;
 import net.fabricmc.api.ClientModInitializer;
@@ -26,7 +27,7 @@ import javax.imageio.ImageIO;
 
 /** Test-only mod, never included in release artifacts. Uses an isolated offline game directory. */
 public final class NativeProbe implements ClientModInitializer {
- private EconomyTrackerClient mod;private Screen dashboard,textEditor;private int step,ticks,frames;private String imported;private AuctionAnchor anchor;private long deadline;private boolean creating;private int holiday;private InventoryOptions originalInventory;
+ private EconomyTrackerClient mod;private Screen dashboard,textEditor;private int step,ticks,frames;private String imported;private AuctionAnchor anchor;private long deadline;private boolean creating;private int holiday;private InventoryOptions originalInventory;private MenuBackgroundOptions originalMenu;private int sceneProbe;
  private Path game(){return Path.of(System.getProperty("user.dir"));}
  private static void check(boolean ok,String why){if(!ok)throw new AssertionError(why);}
  private void click(Minecraft client,String label){Screen screen=client.gui.screen();var button=screen.children().stream().filter(e->e instanceof Button b&&b.getMessage().getString().equals(label)).map(e->(Button)e).findFirst().orElseThrow(()->new AssertionError("No button "+label+" in "+screen.getClass()));button.onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));}
@@ -45,9 +46,10 @@ public final class NativeProbe implements ClientModInitializer {
    var l=new LineStylesScreen(mod,t,new TextBox());l.init(size[0],size[1]);layout(l);press(l,"Row");layout(l);press(l,"Image");layout(l);
    var h=new TrackerScreen(mod);h.init(size[0],size[1]);layout(h);press(h,"Trackers");layout(h);press(h,"Widgets");layout(h);
    var auction=new AuctionScreen(mod,d);auction.init(size[0],size[1]);layout(auction);
+   var backdrop=new MenuBackgroundScreen(mod,d);backdrop.init(size[0],size[1]);for(int p=0;p<4;p++){layout(backdrop);press(backdrop,"Next");}for(String tab:new String[]{"Look","Motion","Custom"}){press(backdrop,tab);layout(backdrop);}
    var inventory=new InventoryThemesScreen(mod,d);inventory.init(size[0],size[1]);for(int p=0;p<3;p++){layout(inventory);press(inventory,"Next");}
   }
-  check(layoutChecks==72,"Incomplete layout coverage");mark("72_NATIVE_LAYOUTS_WITHOUT_OVERLAPS");
+  check(layoutChecks==100,"Incomplete layout coverage");mark("100_NATIVE_LAYOUTS_WITHOUT_OVERLAPS");
  }
  private void mark(String message){System.out.println("ECONOMY_NATIVE_PROBE "+message);try{Files.writeString(game().resolve("probe-progress.txt"),message);}catch(Exception ignored){}}
  public void onInitializeClient(){
@@ -88,7 +90,17 @@ public final class NativeProbe implements ClientModInitializer {
    }
    case 16->{Screenshot.grab(client,false);mark("HALLOWEEN_INVENTORY_NATIVE");InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.NEW_YEAR).intensity(2));step++;}
    case 17->{Screenshot.grab(client,false);mark("NEW_YEAR_INVENTORY_NATIVE");client.gui.setScreen(new InventoryThemesScreen(mod,new DashboardScreen(mod)));step++;}
-   case 18->{Screenshot.grab(client,false);InventoryThemes.save(originalInventory);check(frames>30,"Too few native GUI frames");Files.writeString(game().resolve("probe-result.txt"),"PASS 72 responsive native layouts without overlapping/offscreen controls; holiday picker/cancel/save/load, native Christmas/Halloween/New Year inventory; native 26.3 menus, text/images, SDL drag, save/load, live item registry, local-world item/text entities, active glow, winner and hide; frames="+frames);mark("PASS frames="+frames);mod=null;client.stop();}
+   case 18->{Screenshot.grab(client,false);InventoryThemes.save(originalInventory);originalMenu=MenuBackgrounds.current();client.gui.setScreen(new DashboardScreen(mod));click(client,"Settings");click(client,"Backgrounds");check(client.gui.screen() instanceof MenuBackgroundScreen,"Settings background route missing");click(client,"Cherry blossom dawn");step++;}
+   case 19->{Screenshot.grab(client,false);click(client,"Look");click(client,"Blur: Off");click(client,"Cancel");check(MenuBackgrounds.current().scene==originalMenu.scene&&MenuBackgrounds.current().blur==originalMenu.blur,"Background Cancel applied its draft");click(client,"Backgrounds");click(client,"Cherry blossom dawn");click(client,"Look");click(client,"Blur: Off");click(client,"Done");check(MenuBackgrounds.current().scene==MenuScene.CHERRY_DAWN&&MenuBackgrounds.current().blur==1,"Background save failed");check(new MenuBackgroundStore(game().resolve("config/economy-tracker")).load().scene==MenuScene.CHERRY_DAWN,"Background save/load");step++;}
+   case 20->{Screenshot.grab(client,false);client.gui.setScreen(new MenuBackgroundScreen(mod,new DashboardScreen(mod)));var picker=(MenuBackgroundScreen)client.gui.screen();String key=MenuBackgrounds.store().importPng(game().resolve("probe-image.png"));picker.previewOptions().scene=MenuScene.CUSTOM;picker.previewOptions().customImage=key;step++;}
+   case 21->{Screenshot.grab(client,false);click(client,"Done");check(MenuBackgrounds.current().scene==MenuScene.CUSTOM,"Custom background save");client.gui.setScreen(new MenuBackgroundScreen(mod,new DashboardScreen(mod)));step++;}
+   case 22->{
+    var picker=(MenuBackgroundScreen)client.gui.screen();var scenes=MenuScene.values();if(sceneProbe<scenes.length){picker.previewOptions().scene=scenes[sceneProbe++];return;}
+    var failed=MenuBackgroundRenderer.class.getDeclaredField("FAILED");failed.setAccessible(true);check(((java.util.Set<?>)failed.get(null)).isEmpty(),"One or more background textures failed to load");
+    click(client,"Scenes");click(client,"Prev");click(client,"Prev");click(client,"Prev");click(client,"Cherry blossom dawn");picker.previewOptions().blur=0;step++;
+   }
+   case 23->{Screenshot.grab(client,false);MenuBackgrounds.save(originalMenu);check(frames>30,"Too few native GUI frames");Files.writeString(game().resolve("probe-result.txt"),"PASS 100 responsive layouts; scenic background picker/draft/cancel/save/load/custom PNG; all 18 scenic tiles, original/gradient/custom GPU uploads; inventory and existing native menu/world smoke; frames="+frames);mark("PASS frames="+frames);mod=null;client.stop();}
+
   }
  }
 }

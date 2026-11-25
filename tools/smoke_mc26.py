@@ -12,7 +12,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
  futures=[executor.submit(get,CACHE/'assets/objects'/o['hash'][:2]/o['hash'],'https://resources.download.minecraft.net/'+o['hash'][:2]+'/'+o['hash'],o['hash']) for o in selected]
  for future in futures:future.result()
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME') or (ROOT.parent/'.tools/economy-jdk25-path.txt').read_text().strip()
-mod=ROOT/'build/economy-tracker-0.13.1-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
+mod=ROOT/'build/economy-tracker-0.14.0-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
 cp=str(mod)+os.pathsep+(BUILD/'classpath.txt').read_text()
 subprocess.run([str(Path(jdk)/'bin/javac'),'--release','25','-cp',cp,'-d',str(classes),str(ROOT/'tools/mc26-smoke/NativeProbe.java')],check=True)
 (game/'mods').mkdir(parents=True,exist_ok=True)

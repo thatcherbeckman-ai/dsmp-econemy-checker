@@ -1,6 +1,21 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
-Version **0.13.1** makes inventory animations much fuller: **Low / Medium / High** now use 32 / 80 / 128 ambient decorations, with extra New Year confetti, more flakes behind the player model, and three falling speeds. Independent scatter fills the screen instead of placing decorations along a diagonal. Animation off still freezes the scene. The menu also gains evergreen garlands, hanging ornaments, a wreath, more wrapped presents and 96 extra snow particles. Existing Christmas background and snow-animation controls apply to the added decorations.
+Version **0.14.0** adds **O → Settings → Backgrounds**, with a cherry-blossom forest inspired by the reference and **18 original scenic pictures**. Choose blossom dawn/moonlight, lantern gardens, autumn rivers, winter cabins, aurora lakes, misty pines, enchanted forests, alpine sunrise, ocean sunset, tropical lagoons, desert dunes, lavender fields, starry mountains, rainy city, space nebula, floating islands or bamboo forest. Original Christmas, Simple Gradient and Your Imported PNG bring the picker to **21 background options**.
+
+[Menu background preview](downloads/preview-0.14.0-menu-backgrounds.png) — actual Minecraft rendering in the isolated offline test profile.
+
+The picker has four tabs:
+
+- **Scenes**: four pages of choices and a reset to the original background.
+- **Look**: brightness (50–150%), darkness (0–80%), four blur levels, six color tints with adjustable strength, four vignette levels, Cover/Contain fitting and card opacity (45–100%).
+- **Motion**: animation and gentle image pan toggles, Auto/None/Petals/Snow/Fireflies/Stars/Leaves/Rain/Confetti particles, three density levels, speed (25–200%), particle opacity and Auto/Off/Christmas decorations.
+- **Custom**: local PNG import, reuse or clear the selection, refresh cached textures, fitting and zoom (100–150%).
+
+The whole screen and the preview show draft changes live. **Done** or **Esc** saves; **Cancel** returns to the existing background. Selecting a scenic picture starts with a readable dark overlay, translucent cards and gentle pan. Other menus use the saved choice. The original Christmas controls still apply to Original mode; menu backgrounds and inventory themes have independent settings.
+
+PNGs are copied locally and never uploaded. Imports allow **8 MB**, up to **4096 × 4096** and **12 million pixels**, with a limit of **24 images**. The source file stays intact. Imports use bounded, content-addressed filenames; cancelling keeps the imported image available but does not apply it. Preferences save atomically in `config/economy-tracker/menu-background.json`; images live in `config/economy-tracker/menu-backgrounds/`. Corrupt preferences are preserved and reported. Image processing and GPU uploads are cached with a six-texture limit; images are prepared at a maximum of 1024 pixels on their longest side.
+
+The fuller holiday falling effects and Christmas menu decorations from 0.13.1 remain available.
 
 The existing **Inventory themes** section offers: original holiday palettes, themed slot frames and animated decorations for your survival inventory. It retains the cleaner 0.12.1 menus and the name **thatchacats econemy checker**.
 
@@ -16,7 +31,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.13.1 download](downloads/economy-tracker-0.13.1-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.14.0 download](downloads/economy-tracker-0.14.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -176,10 +191,12 @@ ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
 
 `tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. A client-only, official-name inventory mixin replaces just the survival panel draw and label color; Mixin libraries are compiler/runtime dependencies and are not bundled. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
 
-The build runs **116 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+The build runs **125 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
-The 26.3 native smoke **passed**: 72 responsive native menu layouts (320×240, 480×360, 960×700 and 1280×720), with no overlapping or offscreen button/input bounds, plus inventory theme draft cancellation, save/load, native Christmas/Halloween/New Year inventory rendering, menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
+The 26.3 native smoke **passed**: 100 responsive native menu layouts (320×240, 480×360, 960×700 and 1280×720), with no overlapping or offscreen button/input bounds, plus the menu-background picker, cancellation/save/load, custom PNG and GPU uploads for all 18 scenic tiles, Original, Gradient and Custom, plus inventory theme draft cancellation, save/load, native Christmas/Halloween/New Year inventory rendering, menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
 
 Eight inventory regression tests cover default/round-trip preferences, immutable draft isolation, validation, corrupt/oversized files, failed saves, unrelated-file preservation, symlink rejection, distinct bounded artwork, animation freezing, speed, density levels, screen-wide distribution and rendering budgets. `src/mc26/test/java` is specific to the 26.3 build.
+
+Nine menu-background tests cover preferences/defaults, deep-copy draft isolation, invalid settings, corrupt/oversized files, atomic/save failure behavior, PNG import preservation, safe filenames and symlinks, size/dimension limits, image blur/brightness/tint and resizing, bounded/frozen particle geometry, density and packaged scenic atlas geometry. The native smoke also exercises all four picker tabs at four screen sizes and cycles through every background on the real texture manager.
