@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.dsmp.economy.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["InventoryScreenThemeMixin"],
+  "injectors": {"defaultRequire": 1}
+}

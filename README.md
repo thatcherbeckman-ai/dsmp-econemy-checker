@@ -1,14 +1,20 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
-Version **0.12.1** renames the 26.3 mod to **thatchacats econemy checker** and refreshes its menus: wider button grids, consistent gutters, rounded controls, visible keyboard focus, and a separate appearance preview. Sidebar links, module/settings rows, auction controls, text/line editors and HUD layout controls have more space. On smaller GUI sizes the grids compact to keep every action within the screen. Shortened button labels have native tooltips with their full text.
+Version **0.13.0** adds **Inventory themes**: original holiday palettes, themed slot frames and animated decorations for your survival inventory. It retains the cleaner 0.12.1 menus and the name **thatchacats econemy checker**.
 
-[View the updated settings](downloads/preview-0.12.1-settings.png) — native Minecraft 26.3 capture from the isolated test profile, labeled as sample data.
+[Inventory themes preview](downloads/preview-0.13.0-inventory-themes.png) — native Minecraft capture from the isolated offline test profile.
 
-All tracking data, commands, HUD features and existing configuration paths remain compatible. The native Minecraft **26.3 / Java 25** build retains the balance/bet/rakeback trackers, eight-second fading tabs, loans, auction ground holograms with active-bidding glow, current-player welcome banner, Christmas dashboard, and per-line bubble text/images.
+Press **O → Inventory themes**, choose a style, and click **Done**. The picker has a live preview, three pages of choices, animation on/off, Low/Medium/High effects, and speed from 25% to 200%. **Speed** resets to 100%. **Cancel** discards the draft; **Done** or **Esc** saves it. Vanilla is selected by default and restores your normal inventory/resource-pack backdrop.
+
+Choices include **Christmas, Halloween, New Year, Valentine's Day, Lunar New Year, St. Patrick's Day, Easter, Eid, Diwali, Hanukkah, Thanksgiving, Independence Day, Birthday**, and **Spring, Summer, Autumn and Winter**, plus **Vanilla**. Decorative snow, pumpkins, lanterns, hearts, stars and other motifs move gently; animation off freezes them. Intensity and speed do not change item behavior.
+
+The themes replace the survival inventory's panel and slot backgrounds while Minecraft still draws your actual skin, items, empty armor/offhand icons, tooltips and recipe controls. Recipe-book movement uses the screen's actual position. Item textures, slot positions, clicks, crafting and transfers keep their normal behavior. Creative and other container screens retain their existing appearance. Cosmetic preferences save separately in `config/economy-tracker/inventory-themes.json`, with atomic replacement. Corrupt files are retained and reported rather than silently overwritten.
+
+All existing tracking/configuration paths and features remain compatible. The Minecraft **26.3 / Java 25** build still requires Fabric Loader **0.20.1+** and Fabric API for **26.3**.
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.12.1 download](downloads/economy-tracker-0.12.1-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.13.0 download](downloads/economy-tracker-0.13.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -166,10 +172,12 @@ Per-line tests additionally cover legacy settings, independent styles, deep-copy
 ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
 ```
 
-`tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
+`tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. A client-only, official-name inventory mixin replaces just the survival panel draw and label color; Mixin libraries are compiler/runtime dependencies and are not bundled. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
 
-The build runs **108 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+The build runs **115 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
-The 26.3 native smoke **passed**: 60 responsive native menu layouts (320×240, 480×360, 960×700 and 1280×720), with no overlapping or offscreen button/input bounds, plus menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
+The 26.3 native smoke **passed**: 72 responsive native menu layouts (320×240, 480×360, 960×700 and 1280×720), with no overlapping or offscreen button/input bounds, plus inventory theme draft cancellation, save/load, native Christmas/Halloween/New Year inventory rendering, menu and text/image editing, native PNG texture upload, SDL mouse dragging, save/reload, live item registry, in-world player/skin rendering, and the auction hologram's location, active glow, winning bidder and removal. Testing used a disposable offline flat world; live DonutSMP payment capture has not been retested on 26.3.
+
+Seven inventory regression tests cover default/round-trip preferences, immutable draft isolation, validation, corrupt/oversized files, failed saves, unrelated-file preservation, symlink rejection, distinct bounded artwork, animation freezing, speed and rendering budgets. `src/mc26/test/java` is specific to the 26.3 build.

@@ -75,6 +75,7 @@ AuctionAction {
 
     public void onInitializeClient() {
         this.reloadConfig();
+        dev.dsmp.economy.inventory.InventoryThemes.initialize();
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> this.openLedger(client));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             dev.dsmp.economy.ui.AuctionItems.invalidate();
