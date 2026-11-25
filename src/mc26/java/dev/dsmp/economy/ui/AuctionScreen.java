@@ -35,7 +35,7 @@ public final class AuctionScreen extends net.minecraft.client.gui.screens.Screen
         button(right+cw+m.gap(),y+m.step(),cw,m.buttonHeight(),"Hide result",()->act(AuctionService::hide,"Auction hologram removed."));
         button(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",this::onClose);
     }
-    private void field(int x,int y,int w,String value,int max,String placeholder,java.util.function.Consumer<String> setter){var field=new net.minecraft.client.gui.components.EditBox(font,x,y,w,MenuLayout.of(width,height).buttonHeight(),net.minecraft.network.chat.Component.literal(placeholder));field.setMaxLength(max);field.setValue(value);field.setHint(net.minecraft.network.chat.Component.literal(placeholder));field.setResponder(setter);addRenderableWidget(field);}
+    private void field(int x,int y,int w,String value,int max,String placeholder,java.util.function.Consumer<String> setter){var field=new SettingsEditBox(font,x,y,w,MenuLayout.of(width,height).buttonHeight(),net.minecraft.network.chat.Component.literal(placeholder));field.setMaxLength(max);field.setValue(value);field.setHint(net.minecraft.network.chat.Component.literal(placeholder));field.setResponder(setter);addRenderableWidget(field);}
     private void button(int x,int y,int w,int h,String label,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,label.equals("Start")||label.equals("Done"),mod.config.menuAccent,action));}
     private void act(Runnable action,String success){int result=((AuctionAction)(Object)mod).auctionAction(action);notice=result==1?success:"Could not update auction. See chat for details.";rebuildWidgets();}
     @Override public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor g,int mx,int my,float delta){

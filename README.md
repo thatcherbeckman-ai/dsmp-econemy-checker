@@ -1,8 +1,10 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
-Version **0.14.0** adds **O → Settings → Backgrounds**, with a cherry-blossom forest inspired by the reference and **18 original scenic pictures**. Choose blossom dawn/moonlight, lantern gardens, autumn rivers, winter cabins, aurora lakes, misty pines, enchanted forests, alpine sunrise, ocean sunset, tropical lagoons, desert dunes, lavender fields, starry mountains, rainy city, space nebula, floating islands or bamboo forest. Original Christmas, Simple Gradient and Your Imported PNG bring the picker to **21 background options**.
+Version **0.14.1** polishes the complete menu interface with antialiased rounded surfaces, subtle shadows, restrained selection colors, smooth hover transitions, clear keyboard focus, consistent input frames and a larger menu-only Inter font. Primary buttons adapt their text color for bright accents. Sidebar navigation is left aligned, headers and footers have consistent framing, and preview images have clean rounded corners. Full-label tooltips appear only when a caption is shortened. Native typing, cursor movement, text selection and button actions are retained. Menu animation off also disables the hover transition.
 
-[Menu background preview](downloads/preview-0.14.0-menu-backgrounds.png) — actual Minecraft rendering in the isolated offline test profile.
+The existing **Settings → Backgrounds** section offers a cherry-blossom forest inspired by the reference and **18 original scenic pictures**. Choose blossom dawn/moonlight, lantern gardens, autumn rivers, winter cabins, aurora lakes, misty pines, enchanted forests, alpine sunrise, ocean sunset, tropical lagoons, desert dunes, lavender fields, starry mountains, rainy city, space nebula, floating islands or bamboo forest. Original Christmas, Simple Gradient and Your Imported PNG bring the picker to **21 background options**.
+
+[Menu background preview](downloads/preview-0.14.1-polished-menus.png) — actual Minecraft rendering in the isolated offline test profile.
 
 The picker has four tabs:
 
@@ -31,7 +33,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.14.0 download](downloads/economy-tracker-0.14.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.14.1 download](downloads/economy-tracker-0.14.1-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -200,3 +202,5 @@ The 26.3 native smoke **passed**: 100 responsive native menu layouts (320×240, 
 Eight inventory regression tests cover default/round-trip preferences, immutable draft isolation, validation, corrupt/oversized files, failed saves, unrelated-file preservation, symlink rejection, distinct bounded artwork, animation freezing, speed, density levels, screen-wide distribution and rendering budgets. `src/mc26/test/java` is specific to the 26.3 build.
 
 Nine menu-background tests cover preferences/defaults, deep-copy draft isolation, invalid settings, corrupt/oversized files, atomic/save failure behavior, PNG import preservation, safe filenames and symlinks, size/dimension limits, image blur/brightness/tint and resizing, bounded/frozen particle geometry, density and packaged scenic atlas geometry. The native smoke also exercises all four picker tabs at four screen sizes and cycles through every background on the real texture manager.
+
+The 0.14.1 native smoke additionally checks that all four antialiased surface masks upload, the restyled input fields accept typing/backspace, and native keyboard activation still works. Its 100 layout cases cover the same compact and large viewports. HUD/data fonts, financial logic and existing stored data retain their prior behavior.

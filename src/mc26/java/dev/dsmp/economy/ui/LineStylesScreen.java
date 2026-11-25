@@ -35,7 +35,7 @@ public final class LineStylesScreen extends net.minecraft.client.gui.screens.Scr
     }
     private int styleY(){var m=MenuLayout.of(width,height);return m.row(4)+(m.top()>=64?12:6);}
     private static String hex(int color){return String.format(Locale.ROOT,"%06X",color);}
-    private net.minecraft.client.gui.components.EditBox field(int x,int y,int w,String value,int max,String placeholder){var f=new net.minecraft.client.gui.components.EditBox(font,x,y,w,MenuLayout.of(width,height).buttonHeight(),net.minecraft.network.chat.Component.literal(placeholder));f.setMaxLength(max);f.setValue(value);f.setHint(net.minecraft.network.chat.Component.literal(placeholder));addRenderableWidget(f);return f;}
+    private net.minecraft.client.gui.components.EditBox field(int x,int y,int w,String value,int max,String placeholder){var f=new SettingsEditBox(font,x,y,w,MenuLayout.of(width,height).buttonHeight(),net.minecraft.network.chat.Component.literal(placeholder));f.setMaxLength(max);f.setValue(value);f.setHint(net.minecraft.network.chat.Component.literal(placeholder));addRenderableWidget(f);return f;}
     private void button(int x,int y,int w,String label,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,MenuLayout.of(width,height).buttonHeight(),label,label.equals("Done")||label.equals(new String[]{"Text","Row","Image"}[page]),mod.config.menuAccent,action));}
     private boolean fields(){
         if(content==null)return true;

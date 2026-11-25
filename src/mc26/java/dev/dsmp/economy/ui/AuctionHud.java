@@ -13,7 +13,7 @@ public final class AuctionHud {
         try{
             String timer=round.state()==AuctionRound.State.RUNNING?"("+round.countdown(now)+")":switch(round.state()){case ENDED->"Finished";case CANCELLED->"Cancelled";default->"Interrupted";};
             String prefix="x"+round.quantity()+" ",name=FestiveUi.fit(item.name(),230,1),suffix=" - "+timer;
-            int pw=HudFont.width(prefix),nw=HudFont.width(name),sw=HudFont.width(suffix),left=-(pw+nw+sw)/2;
+            int pw=MenuText.width(prefix),nw=MenuText.width(name,true),sw=MenuText.width(suffix),left=-(pw+nw+sw)/2;
             FestiveUi.text(g,prefix,left,0,0xFFFFFFFF,1,false);FestiveUi.text(g,name,left+pw,0,0xFFFF49B9,1,true);FestiveUi.text(g,suffix,left+pw+nw,0,0xFFFFFFFF,1,false);
             var leader=round.leader();String detail;
             int color=0xFFE8ECF5;
@@ -26,5 +26,5 @@ public final class AuctionHud {
             if(AuctionService.error()!=null)centered(g,"Auction storage error - check settings",0,112,0xFFE57885,.7f);
         }finally{pose.popMatrix();}
     }
-    private static void centered(net.minecraft.client.gui.GuiGraphicsExtractor g,String text,int center,int y,int color,float scale){String fitted=FestiveUi.fit(text,330,scale);FestiveUi.text(g,fitted,center-(int)(HudFont.width(fitted)*scale/2),y,color,scale,false);}
+    private static void centered(net.minecraft.client.gui.GuiGraphicsExtractor g,String text,int center,int y,int color,float scale){String fitted=FestiveUi.fit(text,330,scale);FestiveUi.text(g,fitted,center-(int)(MenuText.width(fitted)*scale/2),y,color,scale,false);}
 }

@@ -8,7 +8,7 @@ public final class WelcomeBanner {
     public static int height(int screenHeight){return screenHeight>=340?76:44;}
     public static void draw(net.minecraft.client.gui.GuiGraphicsExtractor g,int x,int y,int width,int height,int accent){
         FestiveUi.panel(g,x,y,width,height,accent);
-        for(int i=0;i<width;i+=8){int alpha=40*(width-i)/width;g.fill(x+i,y+1,x+Math.min(width,i+8),y+height-1,alpha<<24|accent);}
+        UiSurfaces.fill(g,x+1,y+1,width-2,height-2,0x16000000|accent);
         var client=net.minecraft.client.Minecraft.getInstance();int avatarWidth=Math.min(78,width/4);
         if(client.player!=null)net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,x+4,y+2,x+avatarWidth,y+height-2,Math.max(15,(height-8)/2),.0625f,x+avatarWidth/2f,y+height/3f,client.player);
         int textX=x+avatarWidth+8,room=width-avatarWidth-16;

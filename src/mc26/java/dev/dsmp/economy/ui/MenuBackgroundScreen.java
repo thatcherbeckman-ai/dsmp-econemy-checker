@@ -51,10 +51,20 @@ public final class MenuBackgroundScreen extends Screen {
     private void triple(int row,String name,int value,Runnable less,Runnable reset,Runnable more){button(0,3,row,name+" -",false,()->change(less));button(1,3,row,name+": "+value+"%",false,()->change(reset));button(2,3,row,name+" +",false,()->change(more));}
     private void importPng(){LocalImagePicker.choose(path->{if(path==null||Minecraft.getInstance().gui.screen()!=this)return;try{draft.customImage=MenuBackgrounds.store().importPng(Path.of(path));select(MenuScene.CUSTOM);notice="PNG copied locally. Done saves your selection.";}catch(Exception ex){notice="Import failed: "+ex.getMessage();}},error->{if(Minecraft.getInstance().gui.screen()==this)notice=error;});}
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
-        var m=MenuLayout.of(width,height);MenuBackgroundRenderer.background(g,width,height,mod.config,draft);g.fill(0,0,width,m.top()-8,0xA00B0F1A);m.header(g,"Menu backgrounds / "+draft.scene.label);
-        int form=formWidth(m);g.fill(m.margin()-6,m.top()-6,m.margin()+form+6,Math.min(height-24,m.row(7)),0xB00B0F1A);
+        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Menu backgrounds / "+draft.scene.label);
+        int form=formWidth(m);FestiveUi.surface(g,m.margin()-6,m.top()-6,form+12,Math.min(height-24,m.row(tab==1?7:6)+4)-m.top()+6,0xD40D1421);
         int left=width>=780?m.margin()+form+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(7)+m.gap(),w=width-m.margin()-left,h=height-top-32;
-        if(h>=60){g.fill(left,top,left+w,top+h,0xCC0C101B);g.enableScissor(left+4,top+24,left+w-4,top+h-4);g.pose().pushMatrix();g.pose().translate(left+4,top+24);try{MenuBackgroundRenderer.background(g,w-8,h-28,mod.config,draft);}finally{g.pose().popMatrix();g.disableScissor();}FestiveUi.text(g,"LIVE PREVIEW",left+12,top+8,0xFFF3E5F3,.72f,true);int sampleWidth=Math.min(230,w-24),sampleY=top+h-64;g.fill(left+12,sampleY,left+12+sampleWidth,top+h-12,draft.cards*255/100<<24|0x101522);FestiveUi.text(g,"Your menu",left+22,sampleY+10,0xFFF0E6F2,.9f,true);FestiveUi.text(g,"Cards and text stay readable",left+22,sampleY+27,0xFFBAC1D3,.7f,false);}
+        if(h>=60){
+            FestiveUi.panel(g,left,top,w,h,mod.config.menuAccent);
+            int ix=left+8,iy=top+28,iw=w-16,ih=h-36;
+            g.enableScissor(ix,iy,ix+iw,iy+ih);g.pose().pushMatrix();g.pose().translate(ix,iy);
+            try{MenuBackgroundRenderer.background(g,iw,ih,mod.config,draft);}finally{g.pose().popMatrix();g.disableScissor();}
+            UiSurfaces.corners(g,ix,iy,iw,ih,0xFF111827);
+            FestiveUi.text(g,"LIVE PREVIEW",left+14,top+9,0xFFF3E5F3,.72f,true);
+            int sampleWidth=Math.min(250,w-32),sampleY=top+h-68;FestiveUi.surface(g,left+16,sampleY,sampleWidth,48,draft.cards*255/100<<24|0x101522);
+            FestiveUi.text(g,"Your menu",left+28,sampleY+9,0xFFF0E6F2,.9f,true);FestiveUi.text(g,"Cards and text stay readable",left+28,sampleY+27,0xFFBAC1D3,.68f,false);
+        }
+
         m.footer(g,notice);super.extractRenderState(g,mx,my,delta);
     }
     @Override public void onClose(){try{MenuBackgrounds.save(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException|IllegalArgumentException ex){notice="Save failed: "+ex.getMessage();}}

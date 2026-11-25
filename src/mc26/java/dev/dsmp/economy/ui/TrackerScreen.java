@@ -51,7 +51,7 @@ public final class TrackerScreen extends Screen {
     private void grid(int col,int cols,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.x(col,cols),42+row*30,m.cellWidth(col,cols),22,label,selected,mod.config.menuAccent,action));}
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
         FestiveUi.background(g,width,height,mod.config);var m=MenuLayout.of(width,height);
-        int room=m.cancelX()-m.margin()-8;float scale=Math.min(.9f,room/(float)HudFont.width(MenuLayout.BRAND,true));FestiveUi.text(g,MenuLayout.BRAND,m.margin(),12,0xFFF2EDF9,scale,true);
+        int room=m.cancelX()-m.margin()-8;float scale=Math.min(.9f,room/(float)MenuText.width(MenuLayout.BRAND,true));FestiveUi.text(g,MenuLayout.BRAND,m.margin(),12,0xFFF2EDF9,scale,true);
         TrackerRenderer.drawAll(g,mod.config,preview?sample:mod.ledger,mod.viewCycle,width,canvasHeight(),true,preview,mod.wallet.estimated());
         if(dragging>=0){var b=TrackerRenderer.bounds(mod.config,dragging,width,canvasHeight(),true);g.fill(b.x(),b.y(),b.x()+b.width(),b.y()+1,0xFFE3B0CB);}
         m.footer(g,notice);super.extractRenderState(g,mx,my,delta);

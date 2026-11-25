@@ -24,11 +24,11 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
         String[] labels={"New",editor.label(),"Delete","Lines","Preset"};
         Runnable[] actions={()->change(()->editor.add()),()->change(editor::next),()->change(editor::delete),this::lines,()->change(()->editor.reference(net.minecraft.client.Minecraft.getInstance().getUser().getName()))};
         for(int i=0;i<labels.length;i++)button(m.x(i,5),row,m.cellWidth(i,5),labels[i],actions[i]);
-        content=new net.minecraft.client.gui.components.EditBox(font,m.margin(),row+step,m.contentWidth(),22,net.minecraft.network.chat.Component.literal("Text (use \\n for lines)"));
+        content=new SettingsEditBox(font,m.margin(),row+step,m.contentWidth(),22,net.minecraft.network.chat.Component.literal("Text (use \\n for lines)"));
         content.setMaxLength(1024);content.setValue(box==null?"":box.text.replace("\n","\\n"));addRenderableWidget(content);
         int colorY=row+step*2,cell=m.cellWidth(0,6),label=width>=620?34:0;
-        start=new net.minecraft.client.gui.components.EditBox(font,m.x(0,6)+label,colorY,cell-label,22,net.minecraft.network.chat.Component.literal("Start font color"));start.setMaxLength(7);start.setValue(String.format(Locale.ROOT,"%06X",box==null?0x49E8D4:box.startColor));addRenderableWidget(start);
-        end=new net.minecraft.client.gui.components.EditBox(font,m.x(1,6)+label,colorY,cell-label,22,net.minecraft.network.chat.Component.literal("End gradient color"));end.setMaxLength(7);end.setValue(String.format(Locale.ROOT,"%06X",box==null?0x55C900:box.endColor));addRenderableWidget(end);
+        start=new SettingsEditBox(font,m.x(0,6)+label,colorY,cell-label,22,net.minecraft.network.chat.Component.literal("Start font color"));start.setMaxLength(7);start.setValue(String.format(Locale.ROOT,"%06X",box==null?0x49E8D4:box.startColor));addRenderableWidget(start);
+        end=new SettingsEditBox(font,m.x(1,6)+label,colorY,cell-label,22,net.minecraft.network.chat.Component.literal("End gradient color"));end.setMaxLength(7);end.setValue(String.format(Locale.ROOT,"%06X",box==null?0x55C900:box.endColor));addRenderableWidget(end);
         content.setResponder(value->previewFields());start.setResponder(value->previewFields());end.setResponder(value->previewFields());
         button(m.x(2,6),colorY,m.cellWidth(2,6),"Grad: "+new String[]{"Solid","Across","Down"}[box==null?0:box.gradient],()->edit(b->b.gradient=(b.gradient+1)%3));
         button(m.x(3,6),colorY,m.cellWidth(3,6),TextFonts.NAMES[box==null?0:box.font],()->edit(b->b.font=(b.font+1)%4));
