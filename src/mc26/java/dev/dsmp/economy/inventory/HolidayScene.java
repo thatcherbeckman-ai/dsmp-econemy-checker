@@ -30,7 +30,7 @@ public final class HolidayScene {
         c.solid(134,32,9,2,blend(a,b,.5));c.solid(140,30,2,6,blend(a,b,.5));c.solid(142,31,2,4,blend(a,b,.5));c.solid(144,32,1,2,blend(a,b,.5));
         motif(c,t,46,53,120); // Subtle emblem behind the real player model.
         double time=options.time(seconds);
-        int count=8+options.intensity()*6;
+        int count=16+options.intensity()*12;
         for(int i=0;i<count;i++){
             double phase=(i*.61803398875+time*(t.motif==InventoryTheme.Motif.FIREWORK?.12:.055))%1;
             int x=29+(i*19)%42,y=11+(int)(phase*62);
@@ -46,20 +46,28 @@ public final class HolidayScene {
     }
     public static List<Rect> ambient(InventoryOptions options,int width,int height,double seconds){
         if(options.theme()==InventoryTheme.VANILLA||width<=0||height<=0)return List.of();
-        var c=new Canvas(width,height);var t=options.theme();double time=options.time(seconds);int count=8+options.intensity()*8;
+        var c=new Canvas(width,height);var t=options.theme();double time=options.time(seconds);int count=32+options.intensity()*48;
         for(int i=0;i<count;i++){
-            double fraction=(i*.38196601125+time*.024)%1;
-            int x=(int)((i*.61803398875%1)*(width+20))-10,y=(int)(fraction*(height+20))-10;
-            x+=(int)(Math.sin(time*.45+i)*5);
+            int layer=i%3;
+            double fraction=(scatter(i,0x7823)+time*(.018+layer*.008))%1;
+            int x=(int)(scatter(i,0x1431)*(width+20))-10,y=(int)(fraction*(height+20))-10;
+            x+=(int)(Math.sin(time*(.35+layer*.1)+i)*(4+layer*2));
             if(t.motif==InventoryTheme.Motif.TREE){
                 int snow=0x909FE3D6;c.fill(x+2,y,1,5,snow);c.fill(x,y+2,5,1,snow);c.fill(x+1,y+1,3,3,0x409FE3D6);
             }else if(t.motif==InventoryTheme.Motif.FIREWORK){
-                int centerX=(int)((i*.61803398875%1)*width),centerY=(int)((i*.38196601125%1)*height);
+                int centerX=(int)(scatter(i,0x32A9)*width),centerY=(int)(scatter(i,0x68B5)*height);
                 double radius=3+fraction*15;
                 for(int ray=0;ray<8;ray++){double angle=ray*Math.PI/4;c.fill(centerX+(int)(Math.cos(angle)*radius),centerY+(int)(Math.sin(angle)*radius),1,1,0x90000000|((ray&1)==0?t.accent:t.secondary));}
+                // Confetti falls between the expanding fireworks.
+                if((i&3)==0)c.fill(x,y,2,2,0xA0000000|((i&4)==0?t.accent:t.secondary));
             }else motif(c,t,x,y,100);
         }
         return List.copyOf(c.rects);
+    }
+    private static double scatter(int index,int salt){
+        int value=index*0x9E3779B9+salt;
+        value=(value^(value>>>16))*0x45D9F3B;value=(value^(value>>>16))*0x45D9F3B;
+        return Integer.toUnsignedLong(value^(value>>>16))/4294967296d;
     }
     private static void motif(Canvas c,InventoryTheme t,int x,int y,int alpha){
         int a=alpha<<24|t.accent,b=alpha<<24|t.secondary;

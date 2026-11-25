@@ -80,13 +80,13 @@ public final class NativeProbe implements ClientModInitializer {
     var server=client.getSingleplayerServer();server.execute(()->server.getPlayerList().getPlayer(client.player.getUUID()).setGameMode(GameType.SURVIVAL));
     client.gui.setScreen(null);step++;
    }
-   case 14->{if(client.player.hasInfiniteMaterials())return;InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.CHRISTMAS));client.gui.setScreen(new InventoryScreen(client.player));step++;}
+   case 14->{if(client.player.hasInfiniteMaterials())return;InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.CHRISTMAS).intensity(2));client.gui.setScreen(new InventoryScreen(client.player));step++;}
    case 15->{
     check(client.gui.screen() instanceof InventoryScreen,"Vanilla inventory was replaced");
     check(client.player.inventoryMenu.slots.size()==46,"Theme altered inventory slots");Screenshot.grab(client,false);mark("CHRISTMAS_INVENTORY_NATIVE");
-    InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.HALLOWEEN));step++;
+    InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.HALLOWEEN).intensity(2));step++;
    }
-   case 16->{Screenshot.grab(client,false);mark("HALLOWEEN_INVENTORY_NATIVE");InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.NEW_YEAR));step++;}
+   case 16->{Screenshot.grab(client,false);mark("HALLOWEEN_INVENTORY_NATIVE");InventoryThemes.save(InventoryOptions.defaults().theme(InventoryTheme.NEW_YEAR).intensity(2));step++;}
    case 17->{Screenshot.grab(client,false);mark("NEW_YEAR_INVENTORY_NATIVE");client.gui.setScreen(new InventoryThemesScreen(mod,new DashboardScreen(mod)));step++;}
    case 18->{Screenshot.grab(client,false);InventoryThemes.save(originalInventory);check(frames>30,"Too few native GUI frames");Files.writeString(game().resolve("probe-result.txt"),"PASS 72 responsive native layouts without overlapping/offscreen controls; holiday picker/cancel/save/load, native Christmas/Halloween/New Year inventory; native 26.3 menus, text/images, SDL drag, save/load, live item registry, local-world item/text entities, active glow, winner and hide; frames="+frames);mark("PASS frames="+frames);mod=null;client.stop();}
   }

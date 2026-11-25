@@ -37,7 +37,7 @@ class InventoryThemesTest {
             if(theme==InventoryTheme.VANILLA){assertTrue(panel.isEmpty());continue;}
             assertFalse(panel.isEmpty());assertTrue(panel.size()<600);unique.add(panel);
             panel.forEach(r->bounds(r,176,166));
-            for(int[] size:new int[][]{{320,240},{480,360},{960,700},{1280,720}}){var ambient=HolidayScene.ambient(options,size[0],size[1],123);assertTrue(ambient.size()<600);ambient.forEach(r->bounds(r,size[0],size[1]));}
+            for(int[] size:new int[][]{{320,240},{480,360},{960,700},{1280,720}}){var ambient=HolidayScene.ambient(options,size[0],size[1],123);assertTrue(ambient.size()<1800);ambient.forEach(r->bounds(r,size[0],size[1]));}
         }
         assertEquals(InventoryTheme.values().length-1,unique.size());
     }
@@ -47,6 +47,19 @@ class InventoryThemesTest {
             var animated=frozen.animations(true);
             if(theme!=InventoryTheme.VANILLA){assertNotEquals(HolidayScene.panel(animated,1),HolidayScene.panel(animated,17));assertNotEquals(HolidayScene.ambient(animated,640,480,1),HolidayScene.ambient(animated.speed(200),640,480,1));}
             for(double time:new double[]{Double.NaN,Double.POSITIVE_INFINITY,-20,Double.MAX_VALUE})HolidayScene.panel(animated,time).forEach(r->bounds(r,176,166));
+        }
+    }
+    @Test void denserEffectsFillTheViewportInsteadOfFormingADiagonalBand(){
+        for(var theme:InventoryTheme.values()){
+            if(theme==InventoryTheme.VANILLA)continue;
+            var low=InventoryOptions.defaults().theme(theme).intensity(0);
+            var medium=low.intensity(1);var high=low.intensity(2);
+            for(double time:new double[]{0,1,17}){
+                var light=HolidayScene.ambient(low,960,700,time);var normal=HolidayScene.ambient(medium,960,700,time);var full=HolidayScene.ambient(high,960,700,time);
+                assertTrue(normal.size()>light.size(),theme.label);assertTrue(full.size()>normal.size(),theme.label);assertTrue(full.size()>light.size()*2,theme.label);
+                var regions=new java.util.HashSet<Integer>();for(var r:normal){int column=Math.min(2,(r.x()+r.width()/2)*3/960),row=Math.min(2,(r.y()+r.height()/2)*3/700);regions.add(row*3+column);}
+                assertTrue(regions.size()>=8,"Sparse screen coverage: "+theme.label);
+            }
         }
     }
     private static void bounds(HolidayScene.Rect r,int width,int height){assertTrue(r.x()>=0&&r.y()>=0&&r.width()>0&&r.height()>0);assertTrue(r.x()+r.width()<=width&&r.y()+r.height()<=height);}

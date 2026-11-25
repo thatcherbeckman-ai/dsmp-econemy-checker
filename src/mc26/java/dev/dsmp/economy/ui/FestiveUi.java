@@ -13,9 +13,14 @@ public final class FestiveUi {
     private FestiveUi(){}
     public static void background(net.minecraft.client.gui.GuiGraphicsExtractor g,int width,int height,TrackerConfig config){
         var next=new Backdrop(width,height,config.menuAccent,config.festiveBackground);
-        if(!next.equals(key)){key=next;background=ChristmasScene.background(width,height,config.menuAccent,config.festiveBackground);}
+        if(!next.equals(key)){
+            key=next;var scene=new ArrayList<>(ChristmasScene.background(width,height,config.menuAccent,config.festiveBackground));
+            scene.addAll(MenuDecorations.background(width,height,config.festiveBackground));background=List.copyOf(scene);
+        }
         for(var r:background)g.fill(r.x1(),r.y1(),r.x2(),r.y2(),r.color());
-        for(var r:ChristmasScene.weather(width,height,System.nanoTime()/1e9,config.festiveBackground,config.animateSnow))g.fill(r.x1(),r.y1(),r.x2(),r.y2(),r.color());
+        double seconds=System.nanoTime()/1e9;
+        for(var r:ChristmasScene.weather(width,height,seconds,config.festiveBackground,config.animateSnow))g.fill(r.x1(),r.y1(),r.x2(),r.y2(),r.color());
+        for(var r:MenuDecorations.snow(width,height,seconds,config.festiveBackground,config.animateSnow))g.fill(r.x1(),r.y1(),r.x2(),r.y2(),r.color());
     }
     public static String fit(String text,int width,float scale){return HudFont.fit(text,Math.max(0,(int)(width/scale)));}
     public static void text(net.minecraft.client.gui.GuiGraphicsExtractor g,String value,int x,int y,int color,float scale,boolean bold){
