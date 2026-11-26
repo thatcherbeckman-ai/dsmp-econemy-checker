@@ -13,8 +13,8 @@ public final class SettingsEditBox extends EditBox {
     @Override public int getInnerWidth(){return Math.max(1,getWidth()-8);}
     @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
         if(!visible)return;
-        UiSurfaces.fill(g,getX(),getY(),getWidth(),getHeight(),0xF30D1521);
-        UiSurfaces.outline(g,getX(),getY(),getWidth(),getHeight(),isFocused()?0xE0000000|FestiveUi.accent():0x8059677D);
+        UiSurfaces.fill(g,getX(),getY(),getWidth(),getHeight(),dev.dsmp.economy.design.DesignAccess.contrast()?0xFF020812:0xF30D1521);
+        UiSurfaces.outline(g,getX(),getY(),getWidth(),getHeight(),dev.dsmp.economy.design.DesignAccess.contrast()?0xFFE2EBFF:isFocused()?0xE0000000|FestiveUi.accent():0x8059677D);
         drawingText=true;try{super.extractWidgetRenderState(g,mx,my,delta);}finally{drawingText=false;}
     }
 }

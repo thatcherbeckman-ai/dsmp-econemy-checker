@@ -64,7 +64,8 @@ public static void drawAll(GuiGraphicsExtractor graphics, TrackerConfig config, 
         RenderTheme.begin(config);
         long now = System.nanoTime() / 1000000L;
         boolean[] enabled = config.enabledViews();
-        ViewCycle.Frame frame = RenderTheme.frame(cycle.frame(enabled, config.autoCycle, now));
+        ViewCycle.Frame frame = RenderTheme.frame(cycle.frame(enabled, config.autoCycle&&!dev.dsmp.economy.design.DesignAccess.reduced(), now));
+        if(dev.dsmp.economy.design.DesignAccess.reduced())frame=new ViewCycle.Frame(frame.page(),-1,1);
         if (frame.page() >= 0) {
             TrackerRenderer.beginBox(graphics, (TrackerConfig)config, 0, (int)width, (int)height, (boolean)editing);
             if (frame.previous() >= 0) {
@@ -82,7 +83,7 @@ public static void drawAll(GuiGraphicsExtractor graphics, TrackerConfig config, 
                 dotX += 7;
             }
             solid.fill(34, 292, 214, 293, -13287344);
-            int progress = (int)(180.0 * cycle.progress(enabled, config.autoCycle, now));
+            int progress = (int)(180.0 * cycle.progress(enabled, config.autoCycle&&!dev.dsmp.economy.design.DesignAccess.reduced(), now));
             solid.fill(34, 292, 34 + progress, 293, -2974791);
             graphics.pose().popMatrix();
         }

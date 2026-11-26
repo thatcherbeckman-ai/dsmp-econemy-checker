@@ -15,11 +15,14 @@ public final class CharacterComposition {
     public boolean enabled=false,cape=true,shadow=true,textShadow=true,matchLighting=true,nameplate=false;
     public Base base=Base.LEDGE;
     public View view=View.REAR;public Platform platform=Platform.GRASS;public Caption caption=Caption.TOP_CENTER;
+    public boolean freeCaption=false,snapGuides=true;
+    public int captionX=50,captionY=10,lightDirection=225,lightStrength=100,shadowSoftness=50;
     public int size=38,x=50,ground=78,platformSize=100,turn=0,tilt=0,font=0,textSize=100,titleColor=0xFFFFFF,subtitleColor=0xE4D5EB;
     public String title="{player}",subtitle="";
-    public CharacterComposition copy(){var n=new CharacterComposition();n.enabled=enabled;n.nameplate=nameplate;n.sceneryStyle=sceneryStyle;n.base=base;n.matchLighting=matchLighting;n.cape=cape;n.shadow=shadow;n.textShadow=textShadow;n.view=view;n.platform=platform;n.caption=caption;n.size=size;n.x=x;n.ground=ground;n.platformSize=platformSize;n.turn=turn;n.tilt=tilt;n.font=font;n.textSize=textSize;n.titleColor=titleColor;n.subtitleColor=subtitleColor;n.title=title;n.subtitle=subtitle;return n;}
+    public CharacterComposition copy(){var n=new CharacterComposition();n.enabled=enabled;n.freeCaption=freeCaption;n.snapGuides=snapGuides;n.captionX=captionX;n.captionY=captionY;n.lightDirection=lightDirection;n.lightStrength=lightStrength;n.shadowSoftness=shadowSoftness;n.nameplate=nameplate;n.sceneryStyle=sceneryStyle;n.base=base;n.matchLighting=matchLighting;n.cape=cape;n.shadow=shadow;n.textShadow=textShadow;n.view=view;n.platform=platform;n.caption=caption;n.size=size;n.x=x;n.ground=ground;n.platformSize=platformSize;n.turn=turn;n.tilt=tilt;n.font=font;n.textSize=textSize;n.titleColor=titleColor;n.subtitleColor=subtitleColor;n.title=title;n.subtitle=subtitle;return n;}
     public void validate(){
         if(sceneryStyle==null||base==null||view==null||platform==null||caption==null||title==null||subtitle==null)throw new IllegalArgumentException("Invalid character scene");
+        if(captionX<0||captionX>100||captionY<0||captionY>100||lightDirection<0||lightDirection>359||lightStrength<50||lightStrength>150||shadowSoftness<0||shadowSoftness>100)throw new IllegalArgumentException("Invalid scene lighting or caption position");
         if(size<20||size>55||x<0||x>100||ground<55||ground>90||platformSize<50||platformSize>150||turn< -180||turn>180||tilt< -15||tilt>15||font<0||font>=FONTS.length||textSize<50||textSize>200||titleColor<0||titleColor>0xFFFFFF||subtitleColor<0||subtitleColor>0xFFFFFF)throw new IllegalArgumentException("Character scene option is outside its range");
         text(title,120);text(subtitle,240);
     }

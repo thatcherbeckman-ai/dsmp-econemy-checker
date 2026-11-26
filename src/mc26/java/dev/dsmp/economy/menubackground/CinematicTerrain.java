@@ -14,14 +14,14 @@ public final class CinematicTerrain {
     private BlockScenery palette=BlockScenery.of(MenuScene.MINECRAFT_SNOW);
     private MenuScene scenery=MenuScene.MINECRAFT_SNOW;
     private BufferedImage trunk,leaves;
-    private final boolean foreground;
+    private final boolean foreground;private final CharacterComposition lighting;
     private record Vertex(double x,double y,double z,double u,double v){}
     private CinematicTerrain(int w,int h,CharacterComposition options,BufferedImage snow,BufferedImage stone,BufferedImage dirt){
         this(w,h,options,snow,stone,dirt,false);
     }
     private CinematicTerrain(int w,int h,CharacterComposition options,BufferedImage snow,BufferedImage stone,BufferedImage dirt,boolean foreground){
         this.w=w;this.h=h;this.snow=snow;this.stone=stone;this.dirt=dirt;
-        this.foreground=foreground;
+        this.foreground=foreground;this.lighting=options.copy();
         var p=CharacterPlacement.of(options,w,h);focal=h*.95;horizon=h*.34;cx=p.centerX();
         actorZ=focal*1.8/p.bodyHeight();eye=(p.feetY()-horizon)*1.8/p.bodyHeight();
         image=new BufferedImage(w,h,foreground?BufferedImage.TYPE_INT_ARGB:BufferedImage.TYPE_INT_RGB);depth=new double[w*h];Arrays.fill(depth,Double.POSITIVE_INFINITY);
@@ -187,8 +187,8 @@ public final class CinematicTerrain {
             double u=(wa*a.u+wb*b.u+wc*c.u)/inverse,v=(wa*a.v+wb*b.v+wc*c.v)/inverse;
             int rgb=texture.getRGB(Math.clamp((int)(u*texture.getWidth()),0,texture.getWidth()-1),Math.clamp((int)(v*texture.getHeight()),0,texture.getHeight()-1));
             if((rgb>>>24)<96)continue;
-            double fog=Math.min(.87,Math.max(0,(z-9)/155));int result=0;double lightScale=shade;
-            if(shadow&&shade==.97&&z<actorZ+1.3){double worldX=(x+.5-cx)*z/focal;lightScale-=.29*Math.exp(-worldX*worldX*4.5-(z-actorZ)*(z-actorZ)*16);}
+            double fog=Math.min(.87,Math.max(0,(z-9)/155));int result=0;double lightScale=shade*lighting.lightStrength/100d;
+            if(shadow&&shade==.97&&z<actorZ+1.3){double worldX=(x+.5-cx)*z/focal;lightScale-=SceneShadow.opacity(worldX,z-actorZ,lighting);}
             for(int shift=0;shift<=16;shift+=8){int light=(int)((rgb>>shift&255)*lightScale);int sky=palette.fog()>>shift&255;result|=Math.clamp((int)(light*(1-fog)+sky*fog),0,255)<<shift;}
             image.setRGB(x,y,0xFF000000|result);depth[index]=z;
         }

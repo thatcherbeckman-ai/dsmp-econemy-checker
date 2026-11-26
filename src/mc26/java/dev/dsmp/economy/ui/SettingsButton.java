@@ -18,7 +18,7 @@ public final class SettingsButton extends Button {
     public SettingsButton navigation(){leading=true;return this;}
     @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float delta){
         long now=System.nanoTime();float target=isHovered()?1:0;float elapsed=Math.min(.1f,(now-lastFrame)/1e9f);lastFrame=now;
-        hover=MenuBackgrounds.visible().animations?hover+(target-hover)*(1-(float)Math.exp(-elapsed*18)):target;
+        hover=MenuBackgrounds.visible().animations&&!dev.dsmp.economy.design.DesignAccess.reduced()?hover+(target-hover)*(1-(float)Math.exp(-elapsed*18)):target;
         boolean bold=selected||getMessage().getString().equals("Done")||getMessage().getString().equals("Save");float scale=getHeight()>=24?.92f:.82f;
         boolean truncated=MenuText.width(getMessage().getString(),bold)*scale>getWidth()-(leading?24:getWidth()<60?8:14);
         if(truncated!=clipped){clipped=truncated;setTooltip(truncated?Tooltip.create(getMessage()):null);}

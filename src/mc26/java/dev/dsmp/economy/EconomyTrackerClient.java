@@ -77,6 +77,7 @@ AuctionAction {
         this.reloadConfig();
         dev.dsmp.economy.inventory.InventoryThemes.initialize();
         dev.dsmp.economy.menubackground.MenuBackgrounds.initialize();
+        dev.dsmp.economy.design.DesignManager.initialize(this);
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> this.openLedger(client));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             dev.dsmp.economy.ui.AuctionItems.invalidate();
@@ -291,6 +292,7 @@ AuctionAction {
             return false;
         }
         try {
+            dev.dsmp.economy.design.DesignManager.beforeSave(this,"Before settings save");
             this.store.saveConfig(this.config);
             return true;
         }

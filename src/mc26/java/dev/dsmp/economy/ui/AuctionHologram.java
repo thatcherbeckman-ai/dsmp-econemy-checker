@@ -18,7 +18,7 @@ public final class AuctionHologram {
     private static final class VisualItem extends net.minecraft.world.entity.item.ItemEntity {
         VisualItem(net.minecraft.world.level.Level world,double x,double y,double z,net.minecraft.world.item.ItemStack stack){super(world,x,y,z,stack);}
         void auctionGlow(boolean value){setSharedFlag(6,value);}
-        @Override public int getAge(){return tickCount;}
+        @Override public int getAge(){return dev.dsmp.economy.design.DesignAccess.reduced()?0:tickCount;}
     }
     private AuctionHologram(){}
     public static AuctionAnchor capture(){

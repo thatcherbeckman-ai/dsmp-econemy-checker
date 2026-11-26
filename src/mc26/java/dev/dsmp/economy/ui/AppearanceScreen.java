@@ -16,13 +16,17 @@ public final class AppearanceScreen extends Screen {
     private final AppearanceEditor editor;
     private final Ledger sample=Ledger.demo();
     private final ViewCycle cycle=new ViewCycle();
+    private final java.util.Deque<dev.dsmp.economy.appearance.TabAppearance[]> undo=new java.util.ArrayDeque<>(),redo=new java.util.ArrayDeque<>();
+    private dev.dsmp.economy.appearance.TabAppearance[] styles(){return java.util.Arrays.stream(mod.config.appearances).map(dev.dsmp.economy.appearance.TabAppearance::copy).toArray(dev.dsmp.economy.appearance.TabAppearance[]::new);}
+    private void edit(Runnable action){var before=styles();String original=dev.dsmp.economy.design.DesignLook.JSON.toJson(before);action.run();if(!original.equals(dev.dsmp.economy.design.DesignLook.JSON.toJson(mod.config.appearances))){undo.addLast(before);while(undo.size()>64)undo.removeFirst();redo.clear();}rebuildWidgets();}
+    private void history(boolean forward){var from=forward?redo:undo;var to=forward?undo:redo;if(!from.isEmpty()){to.addLast(styles());mod.config.appearances=from.removeLast();}rebuildWidgets();}
     public AppearanceScreen(EconomyTrackerClient mod,Screen parent){
         super(Component.literal(MenuLayout.BRAND+" / Appearance"));this.mod=mod;this.parent=parent;editor=new AppearanceEditor(mod.config);
     }
     private int formWidth(MenuLayout m){return width>=780?Math.min(460,(m.contentWidth()-m.gap()*2)/2):m.contentWidth();}
     @Override protected void init(){
         var m=MenuLayout.of(width,height);int form=formWidth(m);
-        for(var c:editor.controls(this::rebuildWidgets,this::onClose,this::cancel)){
+        for(var c:editor.controls(()->{},this::onClose,this::cancel)){
             int x,y,w;
             if(c.label().equals("Done")||c.label().equals("Cancel")){
                 x=c.label().equals("Done")?m.doneX():m.cancelX();y=m.actionY();w=m.actionWidth();
@@ -32,11 +36,12 @@ public final class AppearanceScreen extends Screen {
                 if(editor.colorRole()<0&&row==4){col=c.x()<100?0:1;cols=2;}
                 x=m.margin()+col*(form+m.gap())/cols;w=(form+m.gap())/cols-m.gap();y=m.row(row);
             }
-            addRenderableWidget(new SettingsButton(x,y,w,m.buttonHeight(),c.label(),c.label().equals("Done"),mod.config.menuAccent,c.action()));
+            addRenderableWidget(new SettingsButton(x,y,w,m.buttonHeight(),c.label(),c.label().equals("Done"),mod.config.menuAccent,c.label().equals("Done")||c.label().equals("Cancel")?c.action():()->edit(c.action())));
         }
+        var back=new SettingsButton(m.doneX()-2*(m.actionWidth()+m.gap()),m.actionY(),m.actionWidth(),m.buttonHeight(),"Undo",false,mod.config.menuAccent,()->history(false));back.active=!undo.isEmpty();addRenderableWidget(back);var forward=new SettingsButton(m.doneX()-m.actionWidth()-m.gap(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Redo",false,mod.config.menuAccent,()->history(true));forward.active=!redo.isEmpty();addRenderableWidget(forward);
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
-        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,editor.heading());
+        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);int room=m.doneX()-2*(m.actionWidth()+m.gap())-m.margin()-m.gap();FestiveUi.text(g,FestiveUi.fit(width<620?"Style":MenuLayout.BRAND,room,.9f),m.margin(),m.top()>=64?15:9,0xFFF2EDF9,.9f,true);if(m.top()>=64)FestiveUi.text(g,FestiveUi.fit(editor.heading(),room,.78f),m.margin(),39,0xFFB8ABC9,.78f,false);
         int x=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin();
         int y=width>=780?m.top():m.row(5)+m.gap();
         int w=width-x-m.margin(),h=height-y-36;

@@ -17,6 +17,7 @@ public final class MenuBackgroundScreen extends Screen {
     private int tab,page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;
     private String notice=MenuBackgrounds.loadError()==null?"Preview updates live. Done saves; Cancel restores your current background.":MenuBackgrounds.loadError();
     public MenuBackgroundScreen(EconomyTrackerClient mod,Screen parent){super(Component.literal(MenuLayout.BRAND+" / Menu backgrounds"));this.mod=mod;this.parent=parent;}
+    public MenuBackgroundScreen openTab(int value){tab=Math.clamp(value,0,3);return this;}
     public MenuBackgroundOptions previewOptions(){return draft;}
     public void sceneSaved(MenuBackgroundOptions saved){draft=saved.copy();page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;notice="Character scene saved. Use the editor for a full-screen preview.";rebuildWidgets();}
     private int formWidth(MenuLayout m){return width>=780?(m.contentWidth()-m.gap()*2)/2:m.contentWidth();}

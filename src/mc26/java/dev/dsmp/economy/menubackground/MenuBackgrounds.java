@@ -14,5 +14,6 @@ public final class MenuBackgrounds {
     public static MenuBackgroundOptions visible(){var screen=Minecraft.getInstance().gui.screen();return screen instanceof dev.dsmp.economy.ui.CharacterSceneScreen scene?scene.previewOptions():screen instanceof dev.dsmp.economy.ui.CharacterPreviewScreen preview?preview.previewOptions():screen instanceof MenuBackgroundScreen picker?picker.previewOptions():current;}
     public static MenuBackgroundStore store(){initialize();return store;}
     public static String loadError(){return loadError;}
-    public static void save(MenuBackgroundOptions options)throws IOException{initialize();if(loadError!=null)throw new IOException(loadError+". Original file retained.");if(options.scene==MenuScene.CUSTOM){if(options.customImage.isEmpty())throw new IOException("Import a PNG first");store.image(options.customImage);}store.save(options);current=options.copy();}
+    public static void install(MenuBackgroundOptions options){options.validate();current=options.copy();}
+    public static void save(MenuBackgroundOptions options)throws IOException{initialize();if(loadError!=null)throw new IOException(loadError+". Original file retained.");if(options.scene==MenuScene.CUSTOM){if(options.customImage.isEmpty())throw new IOException("Import a PNG first");store.image(options.customImage);}dev.dsmp.economy.design.DesignManager.beforeSave("Before scene save");store.save(options);current=options.copy();}
 }

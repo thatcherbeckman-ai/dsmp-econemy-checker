@@ -22,8 +22,8 @@ public final class PlatformSurface {
             g.setColor(new Color(0,0,0,45));g.setStroke(new BasicStroke(2));g.drawLine(16,128,256,228);g.drawLine(256,228,496,128);g.drawLine(256,228,256,bottom);
             if(options.shadow){
                 var old=g.getClip();g.clip(topFace);
-                g.setColor(new Color(15,19,25,28));g.fill(path(230,126,275,130,126,218,75,201));
-                for(int i=12;i>=0;i--){g.setColor(new Color(8,13,20,3+(12-i)*2));g.fill(new Ellipse2D.Double(221-i*2,119-i*.65,70+i*4,17+i*1.3));}
+                g.setColor(new Color(15,19,25,28));double angle=Math.toRadians(options.lightDirection),dx=Math.cos(angle)*120,dy=Math.sin(angle)*54;g.fill(path(232,122,275,126,275+dx,126+dy,232+dx,122+dy));
+                for(int i=12;i>=0;i--){double spread=i*(.5+options.shadowSoftness/50d);g.setColor(new Color(8,13,20,3+(12-i)*2));g.fill(new Ellipse2D.Double(221-spread,119-spread*.35,70+spread*2,17+spread*.7));}
                 g.setClip(old);
             }
             if(options.base!=CharacterComposition.Base.BLOCK&&(options.platform==CharacterComposition.Platform.GRASS||options.platform==CharacterComposition.Platform.MOSS)){
@@ -34,7 +34,7 @@ public final class PlatformSurface {
     }
     private static BufferedImage grade(BufferedImage source,CharacterComposition options,int environment,double brightness){
         var result=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);
-        for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++){int rgb=source.getRGB(x,y),value=rgb&0xFF000000;double tint=options.matchLighting?.17:0;for(int shift=0;shift<=16;shift+=8){int channel=(int)Math.round((rgb>>shift&255)*brightness*(1-tint)+(environment>>shift&255)*tint);value|=Math.clamp(channel,0,255)<<shift;}result.setRGB(x,y,value);}return result;
+        for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++){int rgb=source.getRGB(x,y),value=rgb&0xFF000000;double tint=options.matchLighting?.17:0;for(int shift=0;shift<=16;shift+=8){int channel=(int)Math.round((rgb>>shift&255)*brightness*options.lightStrength/100d*(1-tint)+(environment>>shift&255)*tint);value|=Math.clamp(channel,0,255)<<shift;}result.setRGB(x,y,value);}return result;
     }
     private static Path2D path(double... points){var p=new Path2D.Double();p.moveTo(points[0],points[1]);for(int i=2;i<points.length;i+=2)p.lineTo(points[i],points[i+1]);p.closePath();return p;}
     private static void texture(Graphics2D g,Shape face,BufferedImage texture,AffineTransform transform){var saved=g.getTransform();var clip=g.getClip();g.clip(face);g.transform(transform);g.setPaint(new TexturePaint(texture,new Rectangle(0,0,texture.getWidth(),texture.getHeight())));g.fillRect(-4096,-4096,8192,8192);g.setTransform(saved);g.setClip(clip);}

@@ -10,7 +10,7 @@ import java.util.*;
 
 /** Responsive settings dashboard: read-only overview, explicit HUD controls and loan tools. */
 public final class DashboardScreen extends net.minecraft.client.gui.screens.Screen {
-    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background"};
+    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background","Design tools"};
     private static final int WHITE=0xFFE7EAF3,MUTED=0xFF8993AC,GREEN=0xFF63D9A0,RED=0xFFE57885;
     private record LoanRow(String name,String value,boolean heading){}
     private final EconomyTrackerClient mod;
@@ -35,7 +35,7 @@ public final class DashboardScreen extends net.minecraft.client.gui.screens.Scre
     private void button(int x,int y,int w,int h,String label,boolean active,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,active,mod.config.menuAccent,action));}
     private void toggle(MenuLayout.Dashboard d,int y,boolean value,java.util.function.Consumer<Boolean> set){button(width-108,y,40,d.controlHeight(),"ON",value,()->change(()->set.accept(true)));button(width-58,y,40,d.controlHeight(),"OFF",!value,()->change(()->set.accept(false)));}
     private void change(Runnable action){action.run();rebuildWidgets();}
-    private void navigate(int target){commitDraft();if(target==9){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new InventoryThemesScreen(mod,this));return;}if(target==2){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AppearanceScreen(mod,this));return;}if(target==3){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TextBoxesScreen(mod,this));return;}if(target==8){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AuctionScreen(mod,this));return;}if(target==4){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TrackerScreen(mod));return;}page=target;notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";rebuildWidgets();}
+    private void navigate(int target){commitDraft();if(target==11){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new DesignToolsScreen(mod,this));return;}if(target==9){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new InventoryThemesScreen(mod,this));return;}if(target==2){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AppearanceScreen(mod,this));return;}if(target==3){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TextBoxesScreen(mod,this));return;}if(target==8){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new AuctionScreen(mod,this));return;}if(target==4){net.minecraft.client.Minecraft.getInstance().gui.setScreen(new TrackerScreen(mod));return;}page=target;notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";rebuildWidgets();}
     private void commitDraft(){if(name!=null){nameDraft=name.getValue();amountDraft=amount.getValue();}}
     private void initLoans(MenuLayout.Dashboard d){
         int gap=d.gap(),h=d.controlHeight(),half=(d.contentWidth()-gap)/2,y=d.bodyTop();

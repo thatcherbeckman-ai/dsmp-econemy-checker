@@ -1,5 +1,26 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.17.0** adds the seven requested design tools. There is no new background hotkey.
+
+Open **O → Design tools**:
+
+- **Profiles**: name and save a complete appearance, then switch using a row's **Use** button. Profiles include scenery/character/captions, menu accent, HUD appearance/layout/text boxes, inventory theme and accessibility. Saving an existing name updates it (case insensitive); select a row to delete it. Up to 24 local profiles are kept. Applying a profile saves immediately and makes a backup of the previous look.
+- **Backups**: the previous committed appearance is backed up automatically before settings, scene, inventory-theme and accessibility saves. Up to 12 recent, distinct backups are kept; rows show local dates/times. **Restore** applies the chosen look and backs up the current one first. **Backup now** creates an explicit snapshot. Profile/restore actions are immediate and are not undone by the tools screen's Cancel button.
+- **Access**: menu text at 100%, 115% or 130%, stronger contrast and a global reduced-motion setting. Access changes preview in the tools screen; **Done** saves, **Cancel** discards them. Reduced motion freezes background pan/particles, inventory decorations, character idle motion, hover transitions and world-item display animation, and stops automatic HUD rotation/fades. Individual animation preferences stay saved and resume when reduced motion is turned off. HUD/custom-caption font sizes retain their own settings.
+- **Search**: search design settings by multiple words, including fonts, colors, skin/angle, drag, shadows, blur, inventory themes, profiles and accessibility. Results open the relevant editor/tab.
+
+Open **O → Player background → Edit scene**:
+
+- **Undo/Redo** buttons keep up to 64 draft changes. They cover scenery, fonts/colors/captions, lighting, positions and drag gestures. New edits after Undo replace the redo branch. A drag is one undo step. **Cancel** still discards the draft; **Done/Esc** saves it.
+- **Layout → Drag scene** opens a full-window editing canvas. Drag the character or the title/subtitle group, with alignment guides and optional snapping. The regular right-hand preview can also be dragged on roomy GUI sizes. **Back/Esc** returns to the unsaved editor draft. Caption presets remain available; selecting a preset restores its fixed alignment. Free positions and guide settings save with the scene and profiles.
+- **Light** adds direction, strength and shadow softness controls, plus background blur, a shadow toggle and a lighting reset. Changes preview live. The lighting controls update the cosmetic render state and projected ground/shadows; the real player/camera remains unchanged.
+
+The **Appearance** panel editor also has Undo/Redo for panel sizes, colors, opacity and design. Its Cancel button restores the appearance from when that editor opened.
+
+Profiles and backups are stored locally in `config/economy-tracker/designs/{profiles,backups}`. They use an explicit cosmetic-field allowlist and never contain or restore tracking/message/server preferences, balances, bet records, loans or other recorded data. Appearance application validates the files first, stages all replacements and rolls back completed replacements if a write fails. Accessibility is stored separately in `config/economy-tracker/accessibility.json`. Invalid/linked/oversized files are preserved and reported. Local PNG references keep using their existing image folders; profiles do not upload or duplicate pictures.
+
+[Design tools preview](downloads/preview-0.17.0-design-tools.png) · [Scene drag/lighting preview](downloads/preview-0.17.0-scene-editor.png) — real Minecraft captures from an isolated offline test account.
+
 Version **0.16.2** reduces Cinematic foregrounds to a low, narrow ledge beneath the character. Tall side banks are removed. The scenery stays visible above and beside the footing, with soft edges rather than a floor covering the whole lower picture. Each scene gets matching ground: rocky shore for starry mountains, pale sand for beaches, snow for winter, moss/petals for blossoms, purple flower details for lavender, stone paving for the city and bamboo path, and amethyst tones for the nebula. Ground colors follow the illustrated scene when Scenery lighting is enabled.
 
 All mod-menu buttons are also shorter and narrower, with a width limit on broad controls. Button labels use a slightly smaller type size; long labels keep their hover tooltips. Pointer bounds match the smaller visible buttons, and keyboard activation remains native. The surrounding layout spacing is retained.
@@ -70,7 +91,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.16.2 download](downloads/economy-tracker-0.16.2-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.17.0 download](downloads/economy-tracker-0.17.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -230,7 +251,7 @@ ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
 
 `tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. A client-only, official-name inventory mixin replaces just the survival panel draw and label color; Mixin libraries are compiler/runtime dependencies and are not bundled. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
 
-The build runs **140 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+The build runs **152 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
@@ -249,3 +270,5 @@ The cinematic terrain checks cover all 18 earlier scenery palettes, safe image b
 The 0.16.1 native check covers 140 responsive layouts including the new sidebar section and button-free presentation at four GUI sizes. It verifies Edit scene/Cancel return, Start, Enter staying in presentation, Esc returning to the same menu, repeated Start/Esc, unchanged saved scene bytes and unchanged real-player pose. A model test covers independent temporary scene defaults and preserving existing captions/views.
 
 The 0.16.2 foreground check covers all 18 scenes at two sizes: no pixels above the small footing, clear side edges, under 14% foreground coverage in the tested compositions, solid support at the feet and scenery lighting colors. Native checks retain 140 responsive layouts and additionally check that compact button hitboxes exclude their former corners, accept center clicks and still respond to the keyboard.
+
+The 0.17.0 design checks cover profile allowlisting/independent copies and name overwrite, file/name/count limits, bounded/deduplicated backup retention across restarts, corrupt/symlink preservation, staged multi-file save failure, accessibility validation, undo/redo branches and limits, drag clamping/snapping, lighting serialization/shadows and multiword search. Native verification includes 164 responsive layouts, profile save/use/delete, actual backup restoration, accessibility preview/cancel/save and reduced motion, search opening the Light tab, character/caption drag with one-gesture Undo/Redo, panel appearance Undo/Redo and lighting/blur persistence. A ledger snapshot is checked before and after profile/restore actions.

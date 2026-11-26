@@ -51,24 +51,35 @@ public final class CharacterSceneRenderer {
         state.pose=Pose.STANDING;state.bodyRot=options.view.yaw+options.turn;state.yRot=0;state.xRot=-3;
         state.walkAnimationPos=state.walkAnimationSpeed=state.deathTime=state.swimAmount=state.fallFlyingTimeInTicks=state.swingAnimation=0;
         state.isCrouching=state.isFallFlying=state.isVisuallySwimming=state.isPassenger=state.isUsingItem=state.isInvisible=state.isInvisibleToPlayer=state.isUpsideDown=state.isFullyFrozen=state.isAutoSpinAttack=state.isInWater=state.isBaby=state.hasRedOverlay=state.isSpectator=false;
-        state.ageInTicks=background.animations?(float)((System.nanoTime()/1e9)%4096*20):0;state.displayFireAnimation=false;state.outlineColor=0;state.nameTag=null;state.scoreText=null;state.leashStates=null;state.shadowPieces.clear();
+        state.ageInTicks=background.animations&&!dev.dsmp.economy.design.DesignAccess.reduced()?(float)((System.nanoTime()/1e9)%4096*20):0;state.displayFireAnimation=false;state.outlineColor=0;state.nameTag=null;state.scoreText=null;state.leashStates=null;state.shadowPieces.clear();
         state.headEquipment=state.chestEquipment=state.legsEquipment=state.feetEquipment=state.rightHandItemStack=state.leftHandItemStack=ItemStack.EMPTY;
         state.headItem.clear();state.heldOnHead.clear();state.rightHandItemState.clear();state.leftHandItemState.clear();state.wornHeadType=null;state.wornHeadProfile=null;
         state.mainArm=HumanoidArm.RIGHT;state.rightArmPose=state.leftArmPose=HumanoidModel.ArmPose.EMPTY;state.parrotOnLeftShoulder=state.parrotOnRightShoulder=null;
         state.showHat=state.showJacket=state.showLeftPants=state.showRightPants=state.showLeftSleeve=state.showRightSleeve=true;
-        state.showCape=options.cape;state.capeFlap=state.capeLean=state.capeLean2=0;state.shouldApplyFlyingYRot=false;state.arrowCount=state.stingerCount=0;var light=SceneLighting.of(background.scene);state.lightCoords=options.matchLighting&&client.level!=null?(light.block()<<4|light.sky()<<20):0xF000F0;return state;
+        state.showCape=options.cape;state.capeFlap=state.capeLean=state.capeLean2=0;state.shouldApplyFlyingYRot=false;state.arrowCount=state.stingerCount=0;var light=SceneLighting.of(background.scene);int sky=options.matchLighting?light.sky():15,block=options.matchLighting?light.block():15;sky=Math.clamp(Math.round(sky*options.lightStrength/100f),0,15);block=Math.clamp(Math.round(block*options.lightStrength/100f),0,15);state.lightCoords=block<<4|sky<<20;return state;
     }
     private static Component component(String value,int font){return switch(font){case 0->MenuText.text(value,true);case 1->MenuText.text(value,false);case 2->TextFonts.text(value,3);default->Component.literal(value);};}
-    private static void caption(GuiGraphicsExtractor g,int ox,int oy,int w,int h,CharacterComposition c){
+    public record CaptionBounds(int x,int y,int width,int height){public boolean contains(double px,double py){return width>0&&height>0&&px>=x&&px<=x+width&&py>=y&&py<=y+height;}}
+    private record CaptionLayout(String[] titles,String[] subtitles,float main,float sub,int titleHeight,CaptionBounds bounds,int align){}
+    private static CaptionLayout captionLayout(int ox,int oy,int w,int h,CharacterComposition c){
         String player=Minecraft.getInstance().getUser().getName();String[] title=c.title.replace("{player}",player).split("\n",-1),subtitle=c.subtitle.replace("{player}",player).split("\n",-1);
-        float main=2.3f*c.textSize/100f,sub=1.05f*c.textSize/100f;int margin=Math.max(12,w/20),available=w-margin*2;
-        var font=Minecraft.getInstance().font;int widest=1;for(var line:title)widest=Math.max(widest,font.width(component(line,c.font)));main=Math.min(main,available/(float)widest);
-        widest=1;for(var line:subtitle)widest=Math.max(widest,font.width(component(line,c.font)));sub=Math.min(sub,available/(float)widest);
-        int th=c.title.isEmpty()?0:(int)(title.length*14*main),sh=c.subtitle.isEmpty()?0:(int)(subtitle.length*14*sub),total=th+sh+(th>0&&sh>0?8:0);
-        float fit=Math.min(1,Math.max(1,h*.48f)/Math.max(1,total));main*=fit;sub*=fit;th=(int)(th*fit);sh=(int)(sh*fit);total=th+sh+(th>0&&sh>0?8:0);
+        float main=2.3f*c.textSize/100f,sub=1.05f*c.textSize/100f;int margin=Math.max(12,w/20),available=Math.max(1,w-margin*2);var font=Minecraft.getInstance().font;
+        int widest=1;for(String line:title)widest=Math.max(widest,font.width(component(line,c.font)));main=Math.min(main,available/(float)widest);
+        widest=1;for(String line:subtitle)widest=Math.max(widest,font.width(component(line,c.font)));sub=Math.min(sub,available/(float)widest);
+        int th=c.title.isEmpty()?0:(int)(title.length*14*main),sh=c.subtitle.isEmpty()?0:(int)(subtitle.length*14*sub),gap=th>0&&sh>0?8:0,total=th+sh+gap;
+        float fit=Math.min(1,Math.max(1,h*.48f)/Math.max(1,total));main*=fit;sub*=fit;th=(int)(th*fit);sh=(int)(sh*fit);total=th+sh+gap;
+        int blockWidth=0;if(!c.title.isEmpty())for(String line:title)blockWidth=Math.max(blockWidth,Math.round(font.width(component(line,c.font))*main));if(!c.subtitle.isEmpty())for(String line:subtitle)blockWidth=Math.max(blockWidth,Math.round(font.width(component(line,c.font))*sub));
+        int align=c.freeCaption?1:c.caption.ordinal()%3,x=align==0?ox+margin:align==1?ox+(w-blockWidth)/2:ox+w-margin-blockWidth;
         int y=oy+(c.caption.ordinal()<3?Math.max(12,h/10):Math.max(8,h-h/12-total));
-        if(!c.title.isEmpty())for(String line:title){line(g,component(line,c.font),ox,y,w,margin,main,c.titleColor,c.caption.ordinal()%3,c.textShadow);y+=(int)(14*main);}
-        if(!c.subtitle.isEmpty()){if(th>0)y+=8;for(String line:subtitle){line(g,component(line,c.font),ox,y,w,margin,sub,c.subtitleColor,c.caption.ordinal()%3,c.textShadow);y+=(int)(14*sub);}}
+        if(c.freeCaption){x=ox+Math.round(w*c.captionX/100f)-blockWidth/2;y=oy+Math.round(h*c.captionY/100f);}
+        x=Math.clamp(x,ox+4,Math.max(ox+4,ox+w-blockWidth-4));y=Math.clamp(y,oy+4,Math.max(oy+4,oy+h-total-4));
+        return new CaptionLayout(title,subtitle,main,sub,th,new CaptionBounds(x,y,blockWidth,total),align);
     }
-    private static void line(GuiGraphicsExtractor g,Component text,int ox,int y,int w,int margin,float scale,int color,int align,boolean shadow){int width=Math.round(Minecraft.getInstance().font.width(text)*scale),x=align==0?ox+margin:align==1?ox+(w-width)/2:ox+w-margin-width;g.pose().pushMatrix();g.pose().translate(x,y);g.pose().scale(scale);try{g.text(Minecraft.getInstance().font,text,0,0,0xFF000000|color,shadow);}finally{g.pose().popMatrix();}}
+    public static CaptionBounds captionBounds(int x,int y,int w,int h,CharacterComposition c){return captionLayout(x,y,w,h,c).bounds;}
+    private static void caption(GuiGraphicsExtractor g,int ox,int oy,int w,int h,CharacterComposition c){
+        var layout=captionLayout(ox,oy,w,h,c);var box=layout.bounds;int y=box.y;
+        if(!c.title.isEmpty())for(String line:layout.titles){captionLine(g,component(line,c.font),box.x,y,box.width,layout.main,c.titleColor,layout.align,c.textShadow);y+=(int)(14*layout.main);}
+        if(!c.subtitle.isEmpty()){if(layout.titleHeight>0)y+=8;for(String line:layout.subtitles){captionLine(g,component(line,c.font),box.x,y,box.width,layout.sub,c.subtitleColor,layout.align,c.textShadow);y+=(int)(14*layout.sub);}}
+    }
+    private static void captionLine(GuiGraphicsExtractor g,Component text,int x,int y,int w,float scale,int color,int align,boolean shadow){int width=Math.round(Minecraft.getInstance().font.width(text)*scale);x+=align==0?0:align==1?(w-width)/2:w-width;g.pose().pushMatrix();g.pose().translate(x,y);g.pose().scale(scale);try{g.text(Minecraft.getInstance().font,text,0,0,0xFF000000|color,shadow);}finally{g.pose().popMatrix();}}
 }

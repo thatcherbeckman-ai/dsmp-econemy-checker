@@ -17,8 +17,9 @@ public final class InventoryThemes {
     }
     public static InventoryOptions current(){return current;}
     public static String loadError(){return loadError;}
+    public static void install(InventoryOptions options){current=java.util.Objects.requireNonNull(options);}
     public static void save(InventoryOptions options)throws IOException {
         initialize();if(loadError!=null)throw new IOException(loadError+". Original file retained; see config/economy-tracker/inventory-themes.json.");
-        store.save(options);current=options;
+        dev.dsmp.economy.design.DesignManager.beforeSave("Before inventory change");store.save(options);current=options;
     }
 }

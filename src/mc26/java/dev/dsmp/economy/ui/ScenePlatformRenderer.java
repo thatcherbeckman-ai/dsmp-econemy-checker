@@ -14,7 +14,7 @@ import java.util.*;
 
 /** Loads the game's current block textures; no game assets are copied into the mod. */
 final class ScenePlatformRenderer {
-    private record Key(CharacterComposition.Platform platform,CharacterComposition.Base base,MenuScene scene,boolean lighting,boolean shadow,int height){}
+    private record Key(CharacterComposition.Platform platform,CharacterComposition.Base base,MenuScene scene,boolean lighting,boolean shadow,int height,int direction,int strength,int softness){}
     private record Texture(Identifier id,int height){}
     private static final Map<Key,Texture> CACHE=new LinkedHashMap<>(12,.75f,true);private static final Set<Key> FAILED=new HashSet<>();private static int serial;
     private ScenePlatformRenderer(){}
@@ -23,7 +23,7 @@ final class ScenePlatformRenderer {
         int width=options.base==CharacterComposition.Base.BLOCK?size:(int)(size*(options.base==CharacterComposition.Base.DECK?3.2:2.7));
         float scale=width/512f;int top=feet-Math.round(PlatformSurface.FOOT_Y*scale);
         int height=options.base==CharacterComposition.Base.BLOCK?512:Math.clamp(((int)Math.ceil((viewportBottom-top)/scale+32)+127)/128*128,512,2048);
-        var key=new Key(options.platform,options.base,scene,options.matchLighting,options.shadow,height);var texture=CACHE.get(key);
+        var key=new Key(options.platform,options.base,scene,options.matchLighting,options.shadow,height,options.lightDirection,options.lightStrength,options.shadowSoftness);var texture=CACHE.get(key);
         if(texture==null&&!FAILED.contains(key))try{texture=create(key,options);CACHE.put(key,texture);while(CACHE.size()>10){var first=CACHE.keySet().iterator().next();Minecraft.getInstance().getTextureManager().release(CACHE.remove(first).id);}}
         catch(Exception ex){if(FAILED.size()>=32)FAILED.clear();FAILED.add(key);org.slf4j.LoggerFactory.getLogger("CharacterPlatform").warn("Platform texture unavailable",ex);}
         if(texture!=null)g.blit(RenderPipelines.GUI_TEXTURED,texture.id,cx-width/2,top,0,0,width,Math.round(texture.height*scale),512,texture.height,512,texture.height,0xFFFFFFFF);
