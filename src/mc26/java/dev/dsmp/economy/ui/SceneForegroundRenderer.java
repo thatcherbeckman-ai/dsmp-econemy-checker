@@ -21,7 +21,7 @@ final class SceneForegroundRenderer {
     static void draw(GuiGraphicsExtractor g,int x,int y,int w,int h,MenuBackgroundOptions options){
         if(w<24||h<40)return;var c=options.character;var key=new Key(options.scene,w,h,c.size,c.x,c.ground,c.platformSize,c.platform,c.shadow,c.matchLighting);var id=CACHE.get(key);
         if(id==null&&!FAILED.contains(key))try{
-            var p=BlockScenery.of(options.scene);var textures=new HashMap<String,BufferedImage>();
+            var p=BlockScenery.foreground(options.scene);var textures=new HashMap<String,BufferedImage>();
             for(var name:new String[]{p.top(),p.side(),p.rock()})if(!textures.containsKey(name))try(var input=Minecraft.getInstance().getResourceManager().open(Identifier.fromNamespaceAndPath("minecraft","textures/block/"+name+".png"))){var texture=ImageIO.read(input);if(texture==null)throw new IOException("Invalid foreground texture");textures.put(name,texture);}
             double scale=Math.min(1,1024d/Math.max(w,h));var image=CinematicTerrain.foreground(Math.max(1,(int)(w*scale)),Math.max(1,(int)(h*scale)),c,options.scene,textures);
             var bytes=new ByteArrayOutputStream();ImageIO.write(image,"PNG",bytes);var nativeImage=NativeImage.read(new ByteArrayInputStream(bytes.toByteArray()));var texture=new DynamicTexture(()->"Cinematic scene foreground",nativeImage);

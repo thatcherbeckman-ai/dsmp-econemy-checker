@@ -1,5 +1,13 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.16.2** reduces Cinematic foregrounds to a low, narrow ledge beneath the character. Tall side banks are removed. The scenery stays visible above and beside the footing, with soft edges rather than a floor covering the whole lower picture. Each scene gets matching ground: rocky shore for starry mountains, pale sand for beaches, snow for winter, moss/petals for blossoms, purple flower details for lavender, stone paving for the city and bamboo path, and amethyst tones for the nebula. Ground colors follow the illustrated scene when Scenery lighting is enabled.
+
+All mod-menu buttons are also shorter and narrower, with a width limit on broad controls. Button labels use a slightly smaller type size; long labels keep their hover tooltips. Pointer bounds match the smaller visible buttons, and keyboard activation remains native. The surrounding layout spacing is retained.
+
+The update applies to **Player background → Edit scene → Scenery → Style: Cinematic**. **Start** and **Esc** keep their existing behavior.
+
+[Updated foreground and compact buttons](downloads/preview-0.16.2-player-background.png) — isolated offline test profile.
+
 Version **0.16.1** adds **Player background** directly to the O-key menu sidebar. Open **O → Player background**, then **Start** to show your saved player scene across the full game window. This view has no buttons or menu panels. Press **Esc** to return to the same Player background section. **Edit scene** opens the existing scenery/character/text editor, and the section includes a live preview.
 
 Starting or leaving the view does not save preferences, turn the character layer on behind other menus, move your real player or change the game camera. If a character scene has not been created yet, a temporary cherry-blossom scene is used. Saved scene choices, angles, captions and formatting are retained. The normal editor's Full preview/Save PNG controls remain available separately.
@@ -62,7 +70,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.16.1 download](downloads/economy-tracker-0.16.1-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.16.2 download](downloads/economy-tracker-0.16.2-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -222,7 +230,7 @@ ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
 
 `tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. A client-only, official-name inventory mixin replaces just the survival panel draw and label color; Mixin libraries are compiler/runtime dependencies and are not bundled. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
 
-The build runs **139 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+The build runs **140 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
@@ -239,3 +247,5 @@ Nine character-scene regression tests cover migration from older preferences, at
 The cinematic terrain checks cover all 18 earlier scenery palettes, safe image bounds, independent draft copies, reference-preset persistence, projected footing and transparent/feathered foreground geometry for all six pictures in the latest reference. The native diagnostic cycles all 18 illustrated and block sceneries through the real texture manager and verifies cinematic/name-label save/load and clean PNG capture alongside the existing 132 layout checks. Game block textures are loaded from the active resource manager, never distributed in the mod.
 
 The 0.16.1 native check covers 140 responsive layouts including the new sidebar section and button-free presentation at four GUI sizes. It verifies Edit scene/Cancel return, Start, Enter staying in presentation, Esc returning to the same menu, repeated Start/Esc, unchanged saved scene bytes and unchanged real-player pose. A model test covers independent temporary scene defaults and preserving existing captions/views.
+
+The 0.16.2 foreground check covers all 18 scenes at two sizes: no pixels above the small footing, clear side edges, under 14% foreground coverage in the tested compositions, solid support at the feet and scenery lighting colors. Native checks retain 140 responsive layouts and additionally check that compact button hitboxes exclude their former corners, accept center clicks and still respond to the keyboard.

@@ -37,7 +37,7 @@ public final class FestiveUi {
         UiSurfaces.shadow(g,x,y,w,h);UiSurfaces.fill(g,x,y,w,h,blend(base,0xFF303C53,hover*(primary?.08f:.32f)));
         UiSurfaces.outline(g,x,y,w,h,focused?0xFFE0D9FF:blend(border,0xFFC8BFF1,hover*.6f));
         if(selected&&!primary&&w>=60)UiSurfaces.fill(g,x+4,y+Math.max(4,(h-14)/2),3,Math.min(14,h-8),tone);
-        float scale=h>=24?.98f:.88f;boolean bold=primary||selected;String shown=MenuText.fit(label,Math.max(0,(int)((w-(w<60?10:20))/scale)),bold);int textWidth=Math.round(MenuText.width(shown,bold)*scale);
+        float scale=h>=24?.92f:.82f;boolean bold=primary||selected;String shown=MenuText.fit(label,Math.max(0,(int)((w-(leading?24:w<60?8:14))/scale)),bold);int textWidth=Math.round(MenuText.width(shown,bold)*scale);
         int brightness=((base>>16&255)*299+(base>>8&255)*587+(base&255)*114)/1000;
         int color=!enabled?0xFF728098:primary?(brightness>145?0xFF101726:0xFFFFFFFF):selected?0xFFF0EAFE:0xFFDCE5F4;
         text(g,shown,leading?x+16:x+Math.max(w<60?4:8,(w-textWidth)/2),y+Math.max(2,(h-11)/2),color,scale,bold);

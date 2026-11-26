@@ -42,10 +42,25 @@ class CinematicTerrainTest {
     @Test void illustratedForegroundKeepsTheSkyTransparentAndSupportsTheCharactersFeet(){
         var options=new MenuBackgroundOptions();options.character.enabled=true;options.character.size=36;options.character.ground=83;
         for(var scene:new MenuScene[]{MenuScene.LAVENDER_FIELDS,MenuScene.STARRY_MOUNTAINS,MenuScene.RAINY_CITY,MenuScene.SPACE_NEBULA,MenuScene.FLOATING_ISLANDS,MenuScene.BAMBOO_FOREST}){
-            options.scene=scene;assertTrue(CinematicTerrain.usesIllustrated(options));var palette=BlockScenery.of(scene);var textures=new java.util.HashMap<String,BufferedImage>();for(var name:new String[]{palette.top(),palette.side(),palette.rock()})textures.put(name,texture());
+            options.scene=scene;assertTrue(CinematicTerrain.usesIllustrated(options));var palette=BlockScenery.foreground(scene);var textures=new java.util.HashMap<String,BufferedImage>();for(var name:new String[]{palette.top(),palette.side(),palette.rock()})textures.put(name,texture());
             var image=CinematicTerrain.foreground(192,140,options.character,scene,textures);var p=CharacterPlacement.of(options.character,192,140);
             assertEquals(0,image.getRGB(96,0)>>>24);assertTrue((image.getRGB(p.centerX(),p.feetY()+2)>>>24)>240);assertTrue((image.getRGB(96,139)>>>24)>240);
             boolean feathered=false;for(int y=0;y<140;y++)for(int x=0;x<192;x++){int alpha=image.getRGB(x,y)>>>24;if(alpha>5&&alpha<240)feathered=true;}assertTrue(feathered,"The ridge must feather into the illustrated background");
+        }
+    }
+    @Test void matchingForegroundLeavesEveryScenicViewOpenAboveAndBesideTheFooting(){
+        var options=new MenuBackgroundOptions();options.character.enabled=true;options.character.size=36;options.character.ground=83;
+        assertEquals("stone",BlockScenery.foreground(MenuScene.STARRY_MOUNTAINS).top());assertEquals("sand",BlockScenery.foreground(MenuScene.OCEAN_SUNSET).top());assertEquals("snow",BlockScenery.foreground(MenuScene.WINTER_CABIN).top());assertEquals("mossy_stone_bricks",BlockScenery.foreground(MenuScene.BAMBOO_FOREST).top());
+        for(var scene:MenuScene.values())if(!scene.atlas.isEmpty())for(int[] size:new int[][]{{192,140},{320,180}}){
+            var palette=BlockScenery.foreground(scene);var textures=new java.util.HashMap<String,BufferedImage>();for(var name:new String[]{palette.top(),palette.side(),palette.rock()})textures.put(name,texture());
+            var image=CinematicTerrain.foreground(size[0],size[1],options.character,scene,textures);var p=CharacterPlacement.of(options.character,size[0],size[1]);int visible=0;
+            for(int y=0;y<size[1];y++)for(int x=0;x<size[0];x++){
+                int alpha=image.getRGB(x,y)>>>24;if(y<p.feetY()-Math.max(5,size[1]*.025))assertEquals(0,alpha,"Raised blocks obscured "+scene);if(alpha>0)visible++;
+                if(x==0||x==size[0]-1)assertEquals(0,alpha,"A side wall covered the edge of "+scene);
+            }
+            assertTrue(visible<size[0]*size[1]*.14,"Foreground covered too much of "+scene);assertEquals(255,image.getRGB(p.centerX(),p.feetY()+2)>>>24);
+            var unlit=options.character.copy();unlit.matchLighting=false;var neutral=CinematicTerrain.foreground(size[0],size[1],unlit,scene,textures);
+            assertNotEquals(neutral.getRGB(p.centerX(),size[1]-1),image.getRGB(p.centerX(),size[1]-1),"Scene colors were not applied for "+scene);
         }
     }
 }

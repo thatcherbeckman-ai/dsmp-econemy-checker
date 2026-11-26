@@ -43,18 +43,24 @@ public final class CinematicTerrain {
     /** A short, transparent foreground ridge; the detailed illustrated sky and scenery remain visible. */
     public static BufferedImage foreground(int w,int h,CharacterComposition options,MenuScene scene,Map<String,BufferedImage> textures){
         if(w<1||h<1||w>1024||h>1024)throw new IllegalArgumentException("Foreground image must fit 1024 pixels");
-        var p=BlockScenery.of(scene);var top=textures.get(p.top());if(p.top().equals("grass_block_top"))top=tint(top,0x8CAD73);
+        var p=BlockScenery.foreground(scene);var top=textures.get(p.top());if(p.accent()!=0)top=groundAccents(top,p.accent());
         var result=new CinematicTerrain(w,h,options,top,textures.get(p.rock()),textures.get(p.side()),true);
-        result.palette=p;result.scenery=scene;result.shadow=options.shadow;result.terrain();
-        int environment=SceneLighting.of(scene).color();
+        result.palette=BlockScenery.of(scene);result.scenery=scene;result.shadow=options.shadow;result.terrain();
+        var placement=CharacterPlacement.of(options,w,h);double start=placement.feetY()-Math.max(5,h*.025),rise=Math.max(1,placement.feetY()-start);
+        double halfWidth=Math.min(w*.27,Math.max(24,placement.bodyHeight()*.85));int environment=p.color();
         for(int y=0;y<h;y++)for(int x=0;x<w;x++){
             int index=y*w+x;double z=result.depth[index];if(!Double.isFinite(z)){result.image.setRGB(x,y,0);continue;}
-            double t=Math.clamp((z-result.actorZ-1.2)/3.7,0,1),fade=1-t*t*(3-2*t);int alpha=(int)(255*fade),rgb=result.image.getRGB(x,y),value=alpha<<24;
-            for(int shift=0;shift<=16;shift+=8){double tint=options.matchLighting?.24:0;int channel=(int)((rgb>>shift&255)*(1-tint)+(environment>>shift&255)*tint);value|=channel<<shift;}
+            double t=Math.clamp((z-result.actorZ-1.2)/3.7,0,1),fade=1-t*t*(3-2*t);
+            // The ridge stays at the feet and fades at the sides. No raised banks can cover
+            // the landscape, even with a different character position or a wide viewport.
+            double up=Math.clamp((y-start)/rise,0,1),side=Math.clamp((Math.abs(x-placement.centerX())-halfWidth*.72)/(halfWidth*.28),0,1);
+            fade*=up*up*(3-2*up)*(1-side*side*(3-2*side));int alpha=(int)(255*fade),rgb=result.image.getRGB(x,y),value=alpha<<24;
+            for(int shift=0;shift<=16;shift+=8){double tint=options.matchLighting?.58:0;int channel=(int)((rgb>>shift&255)*(1-tint)+(environment>>shift&255)*tint);value|=channel<<shift;}
             result.image.setRGB(x,y,value);
         }
         return result.image;
     }
+    private static BufferedImage groundAccents(BufferedImage texture,int color){var result=new BufferedImage(texture.getWidth(),texture.getHeight(),BufferedImage.TYPE_INT_ARGB);var g=result.createGraphics();try{g.drawImage(texture,0,0,null);g.setColor(new Color(color));for(int i=0;i<9;i++){int x=(i*7+3)%texture.getWidth(),y=(i*11+5)%texture.getHeight();g.fillRect(x,y,1+i%2,1);}}finally{g.dispose();}return result;}
     private static BufferedImage tint(BufferedImage image,int color){var tinted=new BufferedImage(image.getWidth(),image.getHeight(),BufferedImage.TYPE_INT_ARGB);for(int y=0;y<image.getHeight();y++)for(int x=0;x<image.getWidth();x++){int rgb=image.getRGB(x,y),value=rgb&0xFF000000;for(int shift=0;shift<=16;shift+=8)value|=((rgb>>shift&255)*(color>>shift&255)/255)<<shift;tinted.setRGB(x,y,value);}return tinted;}
     /** Apply the reference composition explicitly; ordinary scenery selections keep the draft. */
     public static void preset(MenuBackgroundOptions options){
@@ -78,6 +84,7 @@ public final class CinematicTerrain {
         }finally{g.dispose();}
     }
     private double height(int x,int z){
+        if(foreground)return 0;
         // The near ridge remains flat under the character. Beyond it, discrete snow shelves
         // descend into a valley and rise into ridged peaks, rather than a single plinth.
         double edge=actorZ+3.8+1.5*Math.sin(x*.57)+.45*Math.cos(x*1.6);
