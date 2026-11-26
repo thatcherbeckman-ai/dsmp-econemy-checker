@@ -13,7 +13,7 @@ public final class TrackingControlsScreen extends WindowedScreen {
     private String notice="Save applies these changes. Cancel keeps your current controls.";
     public TrackingControlsScreen(EconomyTrackerClient mod,Screen parent){super(Component.literal(MenuLayout.BRAND+" / Tracking controls"));this.mod=mod;this.parent=parent;}
     private void off(int row,String label,boolean disabled,Runnable action){var m=MenuLayout.of(width,height);var button=new SettingsButton(m.margin(),m.row(row),m.contentWidth(),m.buttonHeight(),label,disabled,mod.config.menuAccent,()->{action.run();rebuildWidgets();});button.active=!disabled;addRenderableWidget(button);}
-    @Override protected void initMenu(){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Save",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->Minecraft.getInstance().gui.setScreen(parent)));
+    @Override protected void initMenu(){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Save",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->MenuNavigation.open(parent)));
         off(1,draft.betRecordingOff?"Bet recording: off":"Turn off bet recording",draft.betRecordingOff,()->draft.betRecordingOff=true);
         off(3,draft.profitHidden?"Profit: hidden":"Hide profit",draft.profitHidden,()->draft.profitHidden=true);
         off(5,draft.playerResultsHidden?"Player results: hidden":"Hide player results",draft.playerResultsHidden,()->draft.playerResultsHidden=true);
@@ -24,6 +24,6 @@ public final class TrackingControlsScreen extends WindowedScreen {
         FestiveUi.textFit(g,"Hide profit totals and result-related In/Out figures in the HUD and overview.",m.margin()+8,m.row(2)+5,m.contentWidth()-16,0xFFCED9EB,.7f,false);
         FestiveUi.textFit(g,"Hide player nets, win/loss lists, recent results and rakeback.",m.margin()+8,m.row(4)+5,m.contentWidth()-16,0xFFCED9EB,.7f,false);
         m.footer(g,TrackingControls.error()==null?notice:TrackingControls.error());super.drawMenu(g,mx,my,delta);}
-    @Override public void onClose(){try{TrackingControls.save(draft);mod.clearResultIntents();Minecraft.getInstance().gui.setScreen(parent);}catch(Exception ex){notice=ex.getMessage();}}
+    @Override public void onClose(){try{TrackingControls.save(draft);mod.clearResultIntents();MenuNavigation.open(parent);}catch(Exception ex){notice=ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}
 }

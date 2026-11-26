@@ -18,6 +18,6 @@ public final class SceneCanvasScreen extends Screen {
     @Override public boolean mouseClicked(MouseButtonEvent event,boolean doubled){if(super.mouseClicked(event,doubled))return true;return event.button()==InputConstants.MOUSE_BUTTON_LEFT&&drag.click(viewport(),event.x(),event.y());}
     @Override public boolean mouseDragged(MouseButtonEvent event,double dx,double dy){return drag.drag(viewport(),event.x(),event.y())||super.mouseDragged(event,dx,dy);}
     @Override public boolean mouseReleased(MouseButtonEvent event){return drag.release()||super.mouseReleased(event);}
-    @Override public void onClose(){drag.release();Minecraft.getInstance().gui.setScreen(parent);}
+    @Override public void onClose(){drag.release();MenuNavigation.open(parent);}
     @Override public boolean isPauseScreen(){return false;}
 }

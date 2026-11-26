@@ -11,7 +11,7 @@ public final class MenuBackgrounds {
     private MenuBackgrounds(){}
     public static void initialize(){if(store!=null)return;store=new MenuBackgroundStore(FabricLoader.getInstance().getConfigDir().resolve("economy-tracker"));try{current=store.load();}catch(IOException ex){loadError=ex.getMessage();org.slf4j.LoggerFactory.getLogger("MenuBackgrounds").warn("Original menu background preferences retained",ex);}}
     public static MenuBackgroundOptions current(){return current.copy();}
-    public static MenuBackgroundOptions visible(){var screen=Minecraft.getInstance().gui.screen();return screen instanceof dev.dsmp.economy.ui.CharacterSceneScreen scene?scene.previewOptions():screen instanceof dev.dsmp.economy.ui.CharacterPreviewScreen preview?preview.previewOptions():screen instanceof MenuBackgroundScreen picker?picker.previewOptions():current;}
+    public static MenuBackgroundOptions visible(){var screen=dev.dsmp.economy.ui.MenuNavigation.active();return screen instanceof dev.dsmp.economy.ui.CharacterSceneScreen scene?scene.previewOptions():screen instanceof dev.dsmp.economy.ui.CharacterPreviewScreen preview?preview.previewOptions():screen instanceof MenuBackgroundScreen picker?picker.previewOptions():current;}
     public static MenuBackgroundStore store(){initialize();return store;}
     public static String loadError(){return loadError;}
     public static void install(MenuBackgroundOptions options){options.validate();current=options.copy();}

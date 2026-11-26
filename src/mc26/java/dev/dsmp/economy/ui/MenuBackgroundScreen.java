@@ -11,13 +11,15 @@ import java.util.Arrays;
 
 /** A live cosmetic draft, with separate scene, appearance, motion and PNG controls. */
 public final class MenuBackgroundScreen extends WindowedScreen {
-    private static final String[] TABS={"Scenes","Look","Motion","Custom"};
+    private static final String[] TABS={"Scenes","Look","Motion","Custom","Colors","Themes"};
     private final EconomyTrackerClient mod;private final Screen parent;
     private MenuBackgroundOptions draft=MenuBackgrounds.current();
+    private net.minecraft.client.gui.components.EditBox hexColor;
+    private int themePage;
     private int tab,page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;
     private String notice=MenuBackgrounds.loadError()==null?"Preview updates live. Done saves; Cancel restores your current background.":MenuBackgrounds.loadError();
     public MenuBackgroundScreen(EconomyTrackerClient mod,Screen parent){super(Component.literal(MenuLayout.BRAND+" / Menu backgrounds"));this.mod=mod;this.parent=parent;}
-    public MenuBackgroundScreen openTab(int value){tab=Math.clamp(value,0,3);return this;}
+    public MenuBackgroundScreen openTab(int value){tab=Math.clamp(value,0,5);return this;}
     public MenuBackgroundOptions previewOptions(){return draft;}
     public void sceneSaved(MenuBackgroundOptions saved){draft=saved.copy();page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;notice="Character scene saved. Use the editor for a full-screen preview.";rebuildWidgets();}
     private int formWidth(MenuLayout m){return width>=780?(m.contentWidth()-m.gap()*2)/2:m.contentWidth();}
@@ -25,11 +27,11 @@ public final class MenuBackgroundScreen extends WindowedScreen {
     private void change(Runnable action){int previousTab=tab;action.run();if(tab!=previousTab)tabTransition(tab-previousTab);draft.validate();rebuildWidgets();}
     private void select(MenuScene scene){change(()->{if(draft.scene==MenuScene.ORIGINAL&&scene!=MenuScene.ORIGINAL){draft.overlay=30;draft.cards=80;draft.vignette=1;draft.parallax=true;}draft.scene=scene;});}
     @Override protected void initMenu(){
-        var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->Minecraft.getInstance().gui.setScreen(parent)));
-        for(int i=0;i<TABS.length;i++){int target=i;button(i,4,0,TABS[i],tab==i,()->change(()->tab=target));}
+        var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->MenuNavigation.open(parent)));
+        for(int i=0;i<TABS.length;i++){int target=i;button(i,TABS.length,0,TABS[i],tab==i,()->change(()->tab=target));}
         if(tab==0){
             var scenes=MenuScene.values();for(int i=0;i<6&&page*6+i<scenes.length;i++){var scene=scenes[page*6+i];button(i%2,2,1+i/2,scene.label,draft.scene==scene,()->select(scene));}
-            int pages=(scenes.length+5)/6;button(0,3,4,"Prev",false,()->change(()->page=Math.floorMod(page-1,pages)));button(1,3,4,"Page "+(page+1)+" / "+pages,false,()->change(()->page=(page+1)%pages));button(2,3,4,"Next",false,()->change(()->page=(page+1)%pages));button(0,2,5,"Reset background",false,()->change(()->{draft=new MenuBackgroundOptions();page=0;}));button(1,2,5,"Character scene",false,()->Minecraft.getInstance().gui.setScreen(new CharacterSceneScreen(mod,this,draft)));
+            int pages=(scenes.length+5)/6;button(0,3,4,"Prev",false,()->change(()->page=Math.floorMod(page-1,pages)));button(1,3,4,"Page "+(page+1)+" / "+pages,false,()->change(()->page=(page+1)%pages));button(2,3,4,"Next",false,()->change(()->page=(page+1)%pages));button(0,2,5,"Reset background",false,()->change(()->{draft=new MenuBackgroundOptions();page=0;}));button(1,2,5,"Character scene",false,()->MenuNavigation.open(new CharacterSceneScreen(mod,this,draft)));
         }else if(tab==1){
             triple(1,"Brightness",draft.brightness,()->draft.brightness=Math.max(50,draft.brightness-10),()->draft.brightness=100,()->draft.brightness=Math.min(150,draft.brightness+10));
             triple(2,"Darkness",draft.overlay,()->draft.overlay=Math.max(0,draft.overlay-5),()->draft.overlay=30,()->draft.overlay=Math.min(80,draft.overlay+5));
@@ -43,15 +45,26 @@ public final class MenuBackgroundScreen extends WindowedScreen {
             button(0,2,3,"Density: "+MenuBackgroundOptions.DENSITIES[draft.density],false,()->change(()->draft.density=(draft.density+1)%3));button(1,2,3,"Decor: "+MenuBackgroundOptions.DECORATIONS[draft.decorations],false,()->change(()->draft.decorations=(draft.decorations+1)%3));
             triple(4,"Speed",draft.speed,()->draft.speed=Math.max(25,draft.speed-25),()->draft.speed=100,()->draft.speed=Math.min(200,draft.speed+25));
             triple(5,"Particles",draft.particleOpacity,()->draft.particleOpacity=Math.max(20,draft.particleOpacity-10),()->draft.particleOpacity=65,()->draft.particleOpacity=Math.min(100,draft.particleOpacity+10));
-        }else{
+        }else if(tab==3){
             button(0,1,1,"Import PNG",true,this::importPng);button(0,2,2,"Use imported image",false,()->{if(draft.customImage.isEmpty())notice="Import a PNG first (up to 8 MB).";else select(MenuScene.CUSTOM);});button(1,2,2,"Clear selection",false,()->change(()->{draft.customImage="";if(draft.scene==MenuScene.CUSTOM)draft.scene=MenuScene.ORIGINAL;}));
             button(0,2,3,"Refresh images",false,()->{MenuBackgroundRenderer.refresh();notice="Background textures refreshed.";});button(1,2,3,draft.contain?"Fit: Contain":"Fit: Cover",false,()->change(()->draft.contain=!draft.contain));
             triple(4,"Zoom",draft.zoom,()->draft.zoom=Math.max(100,draft.zoom-10),()->draft.zoom=100,()->draft.zoom=Math.min(150,draft.zoom+10));
             button(0,1,5,"Reset all background options",false,()->change(()->{draft=new MenuBackgroundOptions();page=0;}));
+        }else if(tab==4){
+            for(int i=0;i<WindowBackdrop.NAMES.length;i++){int color=WindowBackdrop.COLORS[i];button(i%3,3,1+i/3,WindowBackdrop.NAMES[i],draft.scene==MenuScene.SOLID&&draft.solidColor==color,()->change(()->WindowBackdrop.solid(draft,color)));}
+            hexColor=new SettingsEditBox(font,m.margin(),m.row(4),formWidth(m),m.buttonHeight(),net.minecraft.network.chat.Component.literal("Background color: RRGGBB"));hexColor.setMaxLength(7);hexColor.setValue(String.format(java.util.Locale.ROOT,"%06X",draft.solidColor));addRenderableWidget(hexColor);
+            button(0,2,5,"Use hex color",true,()->{try{int rgb=dev.dsmp.economy.text.TextBox.rgb(hexColor.getValue());change(()->WindowBackdrop.solid(draft,rgb));}catch(IllegalArgumentException ex){notice=ex.getMessage();}});
+            button(1,2,5,"Festive menu",false,()->change(()->{draft.scene=MenuScene.ORIGINAL;draft.solidColor=0x301316;}));
+        }else{
+            var themes=dev.dsmp.economy.inventory.InventoryTheme.values();int pages=(themes.length+8)/9;themePage=Math.floorMod(themePage,pages);
+            for(int i=0;i<9&&themePage*9+i<themes.length;i++){var theme=themes[themePage*9+i];button(i%3,3,1+i/3,theme==dev.dsmp.economy.inventory.InventoryTheme.VANILLA?"Festive menu":theme.label,draft.scene==MenuScene.HOLIDAY&&draft.menuTheme==theme,()->change(()->WindowBackdrop.holiday(draft,theme)));}
+            button(0,3,4,"Prev themes",false,()->change(()->themePage=Math.floorMod(themePage-1,pages)));button(1,3,4,"Themes "+(themePage+1)+" / "+pages,false,()->change(()->themePage=(themePage+1)%pages));button(2,3,4,"Next themes",false,()->change(()->themePage=(themePage+1)%pages));
+            button(0,2,5,"Animation: "+(draft.animations?"on":"off"),draft.animations,()->change(()->draft.animations=!draft.animations));button(1,2,5,"Density: "+MenuBackgroundOptions.DENSITIES[draft.density],false,()->change(()->draft.density=(draft.density+1)%3));
+            triple(6,"Speed",draft.speed,()->draft.speed=Math.max(25,draft.speed-25),()->draft.speed=100,()->draft.speed=Math.min(200,draft.speed+25));
         }
     }
     private void triple(int row,String name,int value,Runnable less,Runnable reset,Runnable more){button(0,3,row,name+" -",false,()->change(less));button(1,3,row,name+": "+value+"%",false,()->change(reset));button(2,3,row,name+" +",false,()->change(more));}
-    private void importPng(){LocalImagePicker.choose(path->{if(path==null||Minecraft.getInstance().gui.screen()!=this)return;try{draft.customImage=MenuBackgrounds.store().importPng(Path.of(path));select(MenuScene.CUSTOM);notice="PNG copied locally. Done saves your selection.";}catch(Exception ex){notice="Import failed: "+ex.getMessage();}},error->{if(Minecraft.getInstance().gui.screen()==this)notice=error;});}
+    private void importPng(){LocalImagePicker.choose(path->{if(path==null||!MenuNavigation.isOpen(this))return;try{draft.customImage=MenuBackgrounds.store().importPng(Path.of(path));select(MenuScene.CUSTOM);notice="PNG copied locally. Done saves your selection.";}catch(Exception ex){notice="Import failed: "+ex.getMessage();}},error->{if(MenuNavigation.isOpen(this))notice=error;});}
     @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Menu backgrounds / "+draft.scene.label);
         int form=formWidth(m);FestiveUi.surface(g,m.margin()-6,m.top()-6,form+12,Math.min(height-24,m.row(tab==1?7:6)+4)-m.top()+6,0xD40D1421);
@@ -69,6 +82,6 @@ public final class MenuBackgroundScreen extends WindowedScreen {
 
         m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
-    @Override public void onClose(){try{MenuBackgrounds.save(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException|IllegalArgumentException ex){notice="Save failed: "+ex.getMessage();}}
+    @Override public void onClose(){try{MenuBackgrounds.save(draft);MenuNavigation.open(parent);}catch(java.io.IOException|IllegalArgumentException ex){notice="Save failed: "+ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}
 }

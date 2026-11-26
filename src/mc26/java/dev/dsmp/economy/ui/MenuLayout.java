@@ -19,6 +19,7 @@ public record MenuLayout(int width,int height,int margin,int gap,int buttonHeigh
     public int cancelX(){return width-margin-actionWidth();}
     public int actionY(){return top>=64?14:8;}
     public void header(GuiGraphicsExtractor g,String subtitle){
+        if(FestiveUi.embedded()){FestiveUi.textFit(g,subtitle,margin,top>=64?15:9,doneX()-margin-gap,0xFFB8ABC9,.78f,false);return;}
         int room=doneX()-margin-gap;
         float scale=Math.min(.94f,room/(float)Math.max(1,MenuText.width(BRAND,true)));
         FestiveUi.text(g,BRAND,margin,top>=64?15:9,0xFFF2EDF9,scale,true);

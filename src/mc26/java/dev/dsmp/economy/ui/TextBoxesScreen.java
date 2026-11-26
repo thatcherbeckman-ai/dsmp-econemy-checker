@@ -6,7 +6,7 @@ import dev.dsmp.economy.text.*;
 import java.util.Locale;
 
 /** Add/edit text, then drag it anywhere in the preview canvas. */
-public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Screen {
+public final class TextBoxesScreen extends WindowedScreen {
     private final EconomyTrackerClient mod;
     private final net.minecraft.client.gui.screens.Screen parent;
     private final TextBoxEditor editor;
@@ -17,7 +17,8 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
     public TextBoxesScreen(EconomyTrackerClient mod,net.minecraft.client.gui.screens.Screen parent) {
         super(net.minecraft.network.chat.Component.literal(MenuLayout.BRAND+" / Text boxes"));this.mod=mod;this.parent=parent;editor=new TextBoxEditor(mod.config);
     }
-    @Override protected void init() {
+    @Override protected boolean fullScreenWorkspace(){return true;}
+    @Override protected void initMenu() {
         TextBox box=editor.selected();var m=MenuLayout.of(width,height);
         button(m.doneX(),8,m.actionWidth(),"Done",this::onClose);button(m.cancelX(),8,m.actionWidth(),"Cancel",this::cancel);
         int row=42,step=30;
@@ -44,7 +45,7 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
     private void button(int x,int y,int width,String label,Runnable action){
         addRenderableWidget(new SettingsButton(x,y,width,22,label,label.equals("Done"),mod.config.menuAccent,action));
     }
-    private void lines(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}net.minecraft.client.Minecraft.getInstance().gui.setScreen(new LineStylesScreen(mod,this,box));}
+    private void lines(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}MenuNavigation.open(new LineStylesScreen(mod,this,box));}
     private boolean fields() {
         try { editor.fields(content.getValue(),start.getValue(),end.getValue());return true; }
         catch(IllegalArgumentException ex){notice=ex.getMessage();return false;}
@@ -52,7 +53,7 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
     private void previewFields(){if(fields())notice="Drag below. Use \\n for a new line.";}
     private void change(Runnable action){if(!fields())return;try{action.run();dragging=null;rebuildWidgets();}catch(IllegalArgumentException ex){notice=ex.getMessage();}}
     private void edit(java.util.function.Consumer<TextBox> action){change(()->{if(editor.selected()!=null)action.accept(editor.selected());});}
-    @Override public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics,int mx,int my,float delta){
+    @Override protected void drawMenu(net.minecraft.client.gui.GuiGraphicsExtractor graphics,int mx,int my,float delta){
         FestiveUi.background(graphics,width,height,mod.config);
         TextBox box=editor.selected();
         var m=MenuLayout.of(width,height);String title="TEXT BOXES / "+editor.label()+(box==null?"":"  "+Math.round(box.size*100)+"%");
@@ -60,23 +61,23 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
         if(width>=620){FestiveUi.text(graphics,"Start",m.x(0,6),109,0xFFB6ABC8,.7f,false);FestiveUi.text(graphics,"End",m.x(1,6),109,0xFFB6ABC8,.7f,false);}
         TrackerRenderer.drawAll(graphics,mod.config,mod.ledger,mod.viewCycle,width,height-24,true,false,mod.wallet.estimated());
         TextHud.outline(graphics,box,width,height-24);
-        super.extractRenderState(graphics,mx,my,delta);
+        super.drawMenu(graphics,mx,my,delta);
         m.footer(graphics,notice);
     }
-    @Override public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event,boolean doubleClick){
-        if(super.mouseClicked(event,doubleClick))return true;
+    @Override protected boolean menuMouseClicked(net.minecraft.client.input.MouseButtonEvent event,boolean doubleClick){
+        if(super.menuMouseClicked(event,doubleClick))return true;
         if(event.button()!=com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT||event.y()<TextLayout.EDITOR_TOP||event.y()>=height-24||!fields())return false;
         for(int i=mod.config.textBoxes.size()-1;i>=0;i--){var box=mod.config.textBoxes.get(i);var bounds=TextHud.bounds(box,width,height-24,true);
             if(bounds.contains(event.x(),event.y())){editor.select(box.id);dragging=box;offsetX=event.x()-bounds.x();offsetY=event.y()-bounds.y();rebuildWidgets();return true;}}
         return false;
     }
-    @Override public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event,double dx,double dy){
-        if(dragging==null)return super.mouseDragged(event,dx,dy);
+    @Override protected boolean menuMouseDragged(net.minecraft.client.input.MouseButtonEvent event,double dx,double dy){
+        if(dragging==null)return super.menuMouseDragged(event,dx,dy);
         var bounds=TextHud.bounds(dragging,width,height-24,true);
         TextLayout.drag(dragging,bounds,event.x(),event.y(),offsetX,offsetY,width,height-24,true);return true;
     }
-    @Override public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event){if(dragging!=null){dragging=null;return true;}return super.mouseReleased(event);}
-    @Override public void onClose(){if(!fields())return;if(mod.saveConfig()){if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);}else notice="Save failed. Retry Done or use Cancel.";}
-    private void cancel(){editor.cancel();net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);}
+    @Override protected boolean menuMouseReleased(net.minecraft.client.input.MouseButtonEvent event){if(dragging!=null){dragging=null;return true;}return super.menuMouseReleased(event);}
+    @Override public void onClose(){if(!fields())return;if(mod.saveConfig()){if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();MenuNavigation.open(parent);}else notice="Save failed. Retry Done or use Cancel.";}
+    private void cancel(){editor.cancel();MenuNavigation.open(parent);}
     @Override public boolean isPauseScreen(){return false;}
 }

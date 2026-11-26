@@ -9,11 +9,16 @@ import net.minecraft.sounds.SoundEvents;
 
 /** Keeps native widgets in one coordinate space; rendering and every pointer event use its inverse. */
 public abstract class WindowedScreen extends Screen {
-    private MenuWindow window;private final TabMotion motion=new TabMotion();
+    private MenuWindow window;private DashboardScreen dashboardHost;private boolean embedded;private final TabMotion motion=new TabMotion();
     protected WindowedScreen(Component title){super(title);}
     public final MenuWindow menuWindow(){return window;}
-    private void configure(){window=MenuWindow.of(width,height);width=window.width();height=window.height();}
-    @Override protected final void init(){if(window==null){configure();motion.start(System.nanoTime(),1);}initMenu();}
+    protected boolean fullScreenWorkspace(){return false;}
+    public final DashboardScreen dashboardHost(){return dashboardHost;}
+    public final boolean isEmbedded(){return embedded;}
+    final void attach(DashboardScreen host,int w,int h){dashboardHost=host;embedded=true;init(w,h);}
+    final void renderPanel(GuiGraphicsExtractor g,int mx,int my,float delta){FestiveUi.embedded(true);float offset=slideWholeMenu()?tabOffset():0;g.pose().pushMatrix();g.pose().translate(offset,0);try{drawMenu(g,(int)(mx-offset),my,delta);}finally{g.pose().popMatrix();FestiveUi.embedded(false);}}
+    private void configure(){window=embedded||fullScreenWorkspace()?new MenuWindow(width,height,width,height,1,0,0):MenuWindow.of(width,height);width=window.width();height=window.height();}
+    @Override protected final void init(){if(window==null){configure();if(!embedded)motion.start(System.nanoTime(),1);}initMenu();}
     @Override protected final void repositionElements(){configure();super.rebuildWidgets();}
     protected abstract void initMenu();
     protected boolean slideWholeMenu(){return true;}
@@ -22,12 +27,13 @@ public abstract class WindowedScreen extends Screen {
     @Override public final void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){}
     @Override public final void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
         if(window==null)return;
+        if(fullScreenWorkspace()&&!embedded){drawMenu(g,mx,my,delta);return;}
         g.fill(0,0,window.viewportWidth(),window.viewportHeight(),0x35000000);
         int x=Math.round(window.x()),y=Math.round(window.y()),w=Math.round(width*window.scale()),h=Math.round(height*window.scale());
         UiSurfaces.shadow(g,x-2,y-2,w+4,h+4);UiSurfaces.fill(g,x-2,y-2,w+4,h+4,0xED351417);UiSurfaces.outline(g,x-2,y-2,w+4,h+4,0xB57E3837);
         g.enableScissor(x,y,x+w,y+h);g.pose().pushMatrix();g.pose().translate(window.x(),window.y());g.pose().scale(window.scale());
         FestiveUi.windowed(true);
-        try{float offset=slideWholeMenu()?tabOffset():0;g.pose().pushMatrix();g.pose().translate(offset,0);try{drawMenu(g,(int)(window.localX(mx)-offset),(int)window.localY(my),delta);}finally{g.pose().popMatrix();}MenuChrome.lights(g,width,height);}
+        try{float offset=slideWholeMenu()?tabOffset():0;g.pose().pushMatrix();g.pose().translate(offset,0);try{drawMenu(g,(int)(window.localX(mx)-offset),(int)window.localY(my),delta);}finally{g.pose().popMatrix();}if(FestiveUi.decorated())MenuChrome.lights(g,width,height);}
         finally{FestiveUi.windowed(false);g.pose().popMatrix();g.disableScissor();}
     }
     protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){super.extractRenderState(g,mx,my,delta);}

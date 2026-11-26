@@ -7,6 +7,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 final class MenuChrome {
     private static final int[] BULBS={0xFFFFD25E,0xFFDB5A58,0xFF65CC7C,0xFFF27CB4};
     static void lights(GuiGraphicsExtractor g,int width,int height){
+        var options=dev.dsmp.economy.menubackground.MenuBackgrounds.visible();
+        if(options.scene==dev.dsmp.economy.menubackground.MenuScene.HOLIDAY&&options.menuTheme!=dev.dsmp.economy.inventory.InventoryTheme.CHRISTMAS){for(var r:dev.dsmp.economy.inventory.HolidayScene.header(dev.dsmp.economy.menubackground.WindowBackdrop.animation(options),width))g.fill(r.x(),r.y(),r.x()+r.width(),r.y()+r.height(),r.color());for(int x=12;x<width-8;x+=24)UiSurfaces.fill(g,x,height-3,3,3,0xFF000000|options.menuTheme.secondary);return;}
         int previous=3;for(int x=0;x<width;x++){int y=3+(int)Math.round(2*Math.sin(x*.045));g.fill(x,Math.min(y,previous),x+1,Math.max(y,previous)+1,0xFF36764E);previous=y;}
         for(int i=0,x=12;x<width-6;i++,x+=25){int y=5+(int)Math.round(2*Math.sin(x*.045)),c=BULBS[i%4];g.fill(x,y-2,x+1,y+2,0xFF456E42);UiSurfaces.fill(g,x-4,y,8,9,0x23000000|c&0xFFFFFF);UiSurfaces.fill(g,x-2,y+1,4,6,c);g.fill(x-1,y+2,x,y+4,0xAFFFFFFF);}
         for(int i=0,x=18;x<width-12;i++,x+=30)UiSurfaces.fill(g,x,height-3,3,3,BULBS[i%4]);

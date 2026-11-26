@@ -64,6 +64,7 @@ public final class HolidayScene {
         }
         return List.copyOf(c.rects);
     }
+    public static List<Rect> header(InventoryOptions options,int width){if(options.theme()==InventoryTheme.VANILLA||width<1)return List.of();var canvas=new Canvas(width,12);for(int x=12;x<width-8;x+=36)motif(canvas,options.theme(),x,1,220);return List.copyOf(canvas.rects);}
     private static double scatter(int index,int salt){
         int value=index*0x9E3779B9+salt;
         value=(value^(value>>>16))*0x45D9F3B;value=(value^(value>>>16))*0x45D9F3B;

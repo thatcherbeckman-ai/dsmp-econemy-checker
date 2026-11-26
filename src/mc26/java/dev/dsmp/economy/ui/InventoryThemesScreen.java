@@ -25,7 +25,7 @@ public final class InventoryThemesScreen extends WindowedScreen {
     private void change(Runnable action){action.run();rebuildWidgets();}
     private void button(int x,int y,int w,int h,String label,boolean selected,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,selected,mod.config.menuAccent,action));}
     @Override protected void initMenu(){
-        var m=MenuLayout.of(width,height);button(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,this::onClose);button(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,()->Minecraft.getInstance().gui.setScreen(parent));
+        var m=MenuLayout.of(width,height);button(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,this::onClose);button(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,()->MenuNavigation.open(parent));
         var themes=InventoryTheme.values();int from=page*PAGE_SIZE;
         for(int i=0;i<PAGE_SIZE&&from+i<themes.length;i++){var theme=themes[from+i];button(x(m,i%2,2),m.row(i/2),cell(m,2),m.buttonHeight(),theme.label,draft.theme()==theme,()->change(()->draft=draft.theme(theme)));}
         button(x(m,0,3),m.row(3),cell(m,3),m.buttonHeight(),"Prev",false,()->change(()->page=Math.floorMod(page-1,pages())));
@@ -60,6 +60,6 @@ public final class InventoryThemesScreen extends WindowedScreen {
         }
         m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
-    @Override public void onClose(){try{InventoryThemes.save(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException ex){notice="Save failed: "+ex.getMessage();}}
+    @Override public void onClose(){try{InventoryThemes.save(draft);MenuNavigation.open(parent);}catch(java.io.IOException ex){notice="Save failed: "+ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}
 }

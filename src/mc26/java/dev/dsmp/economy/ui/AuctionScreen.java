@@ -56,6 +56,6 @@ public final class AuctionScreen extends WindowedScreen {
         var found=results();int from=page*rows();for(int i=0;i<rows()&&from+i<found.size();i++){var e=found.get(from+i);g.item(e.stack(),m.margin()+5,listTop()+i*m.step()+(m.buttonHeight()-16)/2);if(e.id().equals(selected))g.fill(m.margin(),listTop()+i*m.step()+3,m.margin()+2,listTop()+i*m.step()+m.buttonHeight()-3,0xFFFF65C3);}
         FestiveUi.text(g,"Page "+(page+1)+" / "+pages(),m.margin(),actionTop()+m.step()+7,0xFFA7A7BC,.7f,false);
     }
-    @Override public void onClose(){net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);}
+    @Override public void onClose(){MenuNavigation.open(parent);}
     @Override public boolean isPauseScreen(){return false;}
 }

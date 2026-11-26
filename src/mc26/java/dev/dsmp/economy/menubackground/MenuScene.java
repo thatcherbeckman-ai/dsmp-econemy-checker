@@ -1,7 +1,7 @@
 package dev.dsmp.economy.menubackground;
 
 public enum MenuScene {
-    ORIGINAL("Original Christmas","",0,Particles.AUTO),
+    ORIGINAL("Festive menu","",0,Particles.NONE),
     CHERRY_DAWN("Cherry blossom dawn","spring",0,Particles.PETALS),
     CHERRY_DUSK("Cherry blossom moonlight","spring",1,Particles.PETALS),
     LANTERN_GARDEN("Lantern garden","spring",2,Particles.PETALS),
@@ -22,7 +22,9 @@ public enum MenuScene {
     BAMBOO_FOREST("Bamboo forest","fantasy",5,Particles.FIREFLIES),
     GRADIENT("Simple gradient","",0,Particles.NONE),
     CUSTOM("Your imported PNG","",0,Particles.PETALS),
-    MINECRAFT_SNOW("Minecraft snow overlook","",0,Particles.NONE);
+    MINECRAFT_SNOW("Minecraft snow overlook","",0,Particles.NONE),
+    SOLID("Solid color","",0,Particles.NONE),
+    HOLIDAY("Seasonal / holiday theme","",0,Particles.NONE);
     public enum Particles {AUTO,NONE,PETALS,SNOW,FIREFLIES,STARS,LEAVES,RAIN,CONFETTI}
     public final String label,atlas;public final int tile;public final Particles particles;
     MenuScene(String label,String atlas,int tile,Particles particles){this.label=label;this.atlas=atlas;this.tile=tile;this.particles=particles;}

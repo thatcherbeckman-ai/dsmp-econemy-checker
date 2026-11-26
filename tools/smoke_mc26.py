@@ -12,14 +12,15 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
  futures=[executor.submit(get,CACHE/'assets/objects'/o['hash'][:2]/o['hash'],'https://resources.download.minecraft.net/'+o['hash'][:2]+'/'+o['hash'],o['hash']) for o in selected]
  for future in futures:future.result()
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME') or (ROOT.parent/'.tools/economy-jdk25-path.txt').read_text().strip()
-mod=ROOT/'build/economy-tracker-0.18.0-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
+probe_name=os.environ.get('ECONOMY_NATIVE_PROBE','NativeProbe');assert probe_name in ('NativeProbe','PanelProbe')
+mod=ROOT/'build/economy-tracker-0.19.0-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
 cp=str(mod)+os.pathsep+(BUILD/'classpath.txt').read_text()
-subprocess.run([str(Path(jdk)/'bin/javac'),'--release','25','-cp',cp,'-d',str(classes),str(ROOT/'tools/mc26-smoke/NativeProbe.java')],check=True)
+subprocess.run([str(Path(jdk)/'bin/javac'),'--release','25','-cp',cp,'-d',str(classes),str(ROOT/'tools/mc26-smoke'/f'{probe_name}.java')],check=True)
 (game/'mods').mkdir(parents=True,exist_ok=True)
 for source,name in [(mod,'economy-tracker.jar'),(CACHE/'lib/fabric-api-0.166.2+26.3.jar','fabric-api.jar')]:shutil.copy2(source,game/'mods'/name)
 with zipfile.ZipFile(game/'mods/probe.jar','w',zipfile.ZIP_DEFLATED) as z:
  for path in classes.rglob('*.class'):z.write(path,path.relative_to(classes).as_posix())
- z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'economy_native_probe','version':'1','environment':'client','entrypoints':{'client':['dev.dsmp.economy.probe.NativeProbe']},'depends':{'economy_tracker':'>=0.12.0','fabric-api':'*'}}))
+ z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'economy_native_probe','version':'1','environment':'client','entrypoints':{'client':['dev.dsmp.economy.probe.'+probe_name]},'depends':{'economy_tracker':'>=0.12.0','fabric-api':'*'}}))
 meta=json.loads((CACHE/'version.json').read_text());libraries=[CACHE/'lib'/Path(x['downloads']['artifact']['path']).name for x in meta['libraries'] if x.get('downloads',{}).get('artifact')]
 cp=os.pathsep.join(map(str,[CACHE/'fabric-loader.jar',CACHE/'client.jar',*libraries,*sorted((CACHE/'loader-libs').glob('*.jar'))]))
 options=game/'options.txt';text=options.read_text() if options.exists() else '';text='\n'.join(line for line in text.splitlines() if not line.startswith(('guiScale:','soundCategory_master:','renderDistance:','simulationDistance:','maxFps:','enableVsync:','pauseOnLostFocus:')))+'\nguiScale:1\nsoundCategory_master:0.0\nrenderDistance:4\nsimulationDistance:5\nmaxFps:30\nenableVsync:false\npauseOnLostFocus:false\n';options.write_text(text)

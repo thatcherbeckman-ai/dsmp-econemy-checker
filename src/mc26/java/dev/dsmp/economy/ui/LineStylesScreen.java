@@ -47,9 +47,9 @@ public final class LineStylesScreen extends WindowedScreen {
     private void change(Runnable action){if(!fields())return;try{int previousPage=page;action.run();if(page!=previousPage)tabTransition(page-previousPage);box.validate();rebuildWidgets();}catch(IllegalArgumentException ex){notice=ex.getMessage();}}
     private void edit(java.util.function.Consumer<LineStyle> action){change(()->action.accept(style()));}
     private void importImage(){if(!fields())return;int selectedLine=line;LocalImagePicker.choose(selected->{
-        if(net.minecraft.client.Minecraft.getInstance().gui.screen()!=this||selected==null)return;
+        if(!MenuNavigation.isOpen(this)||selected==null)return;
         try{String key=TextImages.importPng(Path.of(selected));box.editLine(selectedLine).image=key;notice="Image imported for this line.";rebuildWidgets();}catch(Exception ex){notice="Could not import PNG: "+ex.getMessage();}
-    },error->{if(net.minecraft.client.Minecraft.getInstance().gui.screen()==this)notice=error;});}
+    },error->{if(MenuNavigation.isOpen(this))notice=error;});}
     private void folder(){try{Files.createDirectories(TextImages.store().directory());if(!org.lwjgl.sdl.SDLMisc.SDL_OpenURL(TextImages.store().directory().toUri().toString()))throw new java.io.IOException("Folder could not be opened");}catch(Exception ex){notice="Images folder: "+TextImages.store().directory();}}
     @Override protected void drawMenu(net.minecraft.client.gui.GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Line design / "+(line+1)+" of "+box.lines().length);var s=style();int form=styleY();
@@ -60,7 +60,7 @@ public final class LineStylesScreen extends WindowedScreen {
         if(height-previewTop>=70){FestiveUi.panel(g,m.margin(),previewTop,m.contentWidth(),height-previewTop-30,0x625084);FestiveUi.text(g,"PREVIEW",m.margin()+10,previewTop+8,0xFFAAA3BF,.65f,true);StyledTextHud.preview(g,box,m.margin()+10,previewTop+25,m.contentWidth()-20,height-previewTop-60);}
         m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
-    @Override public void onClose(){if(fields())net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);}
-    private void cancel(){box.restore(original);net.minecraft.client.Minecraft.getInstance().gui.setScreen(parent);}
+    @Override public void onClose(){if(fields())MenuNavigation.open(parent);}
+    private void cancel(){box.restore(original);MenuNavigation.open(parent);}
     @Override public boolean isPauseScreen(){return false;}
 }
