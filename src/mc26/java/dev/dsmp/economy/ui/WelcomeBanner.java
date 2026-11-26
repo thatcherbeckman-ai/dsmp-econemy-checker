@@ -13,8 +13,8 @@ public final class WelcomeBanner {
         if(client.player!=null)net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,x+4,y+2,x+avatarWidth,y+height-2,Math.max(15,(height-8)/2),.0625f,x+avatarWidth/2f,y+height/3f,client.player);
         int textX=x+avatarWidth+8,room=width-avatarWidth-16;
         String user=client.getUser().getName();float size=height>=70?1.5f:1f;
-        String welcome=FestiveUi.fit("Welcome, "+user,room,size);
-        FestiveUi.text(g,welcome,textX,y+(height>=70?22:9),0xFFD9BDFF,size,true);
-        FestiveUi.text(g,FestiveUi.fit("Have a great time on DonutSMP!",room,.75f),textX,y+(height>=70?45:26),0xFFAAA3C3,.75f,false);
+        String welcome="Welcome, "+user;
+        FestiveUi.textFit(g,welcome,textX,y+(height>=70?22:9),room,0xFFD9BDFF,size,true);
+        FestiveUi.textFit(g,"Have a great time on DonutSMP!",textX,y+(height>=70?45:26),room,0xFFAAA3C3,.75f,false);
     }
 }

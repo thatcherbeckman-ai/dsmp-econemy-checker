@@ -1,5 +1,11 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.17.1** keeps complete menu labels visible. Buttons fit the full label without adding an ellipsis; longer labels can use two lines when that gives a larger, clearer text size. Menu headings, descriptions, captions, status messages and welcome text use their full strings with width-aware sizing. Editable text fields retain their normal scrolling behavior.
+
+The dashboard sidebar buttons are left aligned at a four-pixel inset, narrower and capped at 18 pixels tall. The brand is also left aligned; the separate T badge is removed so the name and subtitle have room. The arrangement respects the existing 100%, 115% and 130% accessibility text options. These are cosmetic changes; saved preferences and recorded data keep their existing format.
+
+[Full-label sidebar preview](downloads/preview-0.17.1-full-label-sidebar.png) — isolated offline test profile.
+
 Version **0.17.0** adds the seven requested design tools. There is no new background hotkey.
 
 Open **O → Design tools**:
@@ -91,7 +97,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.17.0 download](downloads/economy-tracker-0.17.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.17.1 download](downloads/economy-tracker-0.17.1-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -251,7 +257,7 @@ ECONOMY_JAVA25=/path/to/jdk-25 python3 tools/build_mc26.py
 
 `tools/prepare_mc26.py` caches the hash-checked official 26.3 client SDK, Fabric Loader 0.20.1 and Fabric API 0.166.2+26.3. `ECONOMY_MC26_CACHE` selects the cache directory. The compiler-only SDK copy exposes exactly the five methods covered by the release's **official-namespace access widener**; the SDK/game classes are never bundled. The native adapter sources live under `src/mc26/java`. A client-only, official-name inventory mixin replaces just the survival panel draw and label color; Mixin libraries are compiler/runtime dependencies and are not bundled. Shared data/business classes and existing assets come from the checksum-pinned 0.11.0 JAR, while the native classes are built against the real SDK, without API stand-ins.
 
-The build runs **152 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
+The build runs **156 regression tests on Java 25** and repeats them against the packaged deliverable. It rejects stale intermediary Minecraft references and bundled SDK/API fixtures. Fifty-one data/business classes, including the existing stores and financial logic, remain byte-for-byte identical to the 1.21.11 release.
 
 `python3 tools/smoke_mc26.py` starts an isolated offline test profile with a separate **test-only** Fabric diagnostic mod, using SDL's offscreen OpenGL driver. It exercises native menu rendering, bubble text/images, PNG texture upload, SDL mouse dragging, saving/reloading, and a local flat-world auction. Synthetic data is labeled in captures; the diagnostic mod is excluded from release JARs. The profile never connects to DonutSMP or pays players. Runtime progress/results are written under `build/mc26/smoke-game/`; the log is `build/mc26/native-runtime.log`. Audio assets and online authentication services are outside that smoke's scope.
 
@@ -272,3 +278,5 @@ The 0.16.1 native check covers 140 responsive layouts including the new sidebar 
 The 0.16.2 foreground check covers all 18 scenes at two sizes: no pixels above the small footing, clear side edges, under 14% foreground coverage in the tested compositions, solid support at the feet and scenery lighting colors. Native checks retain 140 responsive layouts and additionally check that compact button hitboxes exclude their former corners, accept center clicks and still respond to the keyboard.
 
 The 0.17.0 design checks cover profile allowlisting/independent copies and name overwrite, file/name/count limits, bounded/deduplicated backup retention across restarts, corrupt/symlink preservation, staged multi-file save failure, accessibility validation, undo/redo branches and limits, drag clamping/snapping, lighting serialization/shadows and multiword search. Native verification includes 164 responsive layouts, profile save/use/delete, actual backup restoration, accessibility preview/cancel/save and reduced motion, search opening the Light tab, character/caption drag with one-gesture Undo/Redo, panel appearance Undo/Redo and lighting/blur persistence. A ledger snapshot is checked before and after profile/restore actions.
+
+The 0.17.1 label checks cover unbroken names, Unicode, whole-word wrapping and compact dimensions across accessibility scales. The native suite runs 492 menu layout cases (four GUI sizes at three text scales), checks full button-label preservation and text bounds, verifies the compact four-pixel sidebar alignment, and retains profile, backup, drag, lighting, accessibility and Start/Esc checks.

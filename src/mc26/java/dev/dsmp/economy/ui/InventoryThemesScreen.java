@@ -43,7 +43,7 @@ public final class InventoryThemesScreen extends Screen {
         int left=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(6)+m.gap();
         int w=width-m.margin()-left,h=height-top-32;
         if(h>=60){
-            FestiveUi.panel(g,left,top,w,h,0x625084);FestiveUi.text(g,FestiveUi.fit(draft.theme().label+" / PREVIEW",w-24,.78f),left+12,top+10,0xFFDED5EE,.78f,true);
+            FestiveUi.panel(g,left,top,w,h,0x625084);FestiveUi.textFit(g,draft.theme().label+" / PREVIEW",left+12,top+10,w-24,0xFFDED5EE,.78f,true);
             float scale=Math.min(2f,Math.min((w-24)/176f,(h-40)/166f));int x=left+(int)((w-176*scale)/2),y=top+30+(int)((h-34-166*scale)/2);
             g.enableScissor(left+4,top+24,left+w-4,top+h-4);
             try{

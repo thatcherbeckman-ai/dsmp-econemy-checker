@@ -6,7 +6,7 @@ from prepare_mc26 import prepare
 ROOT=Path(__file__).resolve().parents[1];CACHE=prepare();BUILD=ROOT/'build/mc26';BUILD.mkdir(parents=True,exist_ok=True)
 BASE=ROOT/'downloads/economy-tracker-0.11.0-mc1.21.11.jar'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest()=='c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c'
-VERSION='0.17.0'
+VERSION='0.17.1'
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME')
 prepared=ROOT.parent/'.tools/economy-jdk25-path.txt'
 if not jdk and prepared.exists():jdk=prepared.read_text().strip()

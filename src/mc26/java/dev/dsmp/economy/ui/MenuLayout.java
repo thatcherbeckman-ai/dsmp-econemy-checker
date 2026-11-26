@@ -26,7 +26,7 @@ public record MenuLayout(int width,int height,int margin,int gap,int buttonHeigh
     }
     public void footer(GuiGraphicsExtractor g,String notice){
         FestiveUi.surface(g,margin-4,height-24,width-margin*2+8,20,0xDB0D1421);
-        FestiveUi.text(g,FestiveUi.fit(notice,contentWidth()-8,.68f),margin,height-16,0xFFB5AEC6,.68f,false);
+        FestiveUi.textFit(g,notice,margin,height-16,contentWidth()-8,0xFFB5AEC6,.68f,false);
     }
     public record Dashboard(int width,int height,int sidebar,int left,int contentWidth,int rowHeight,int bodyTop,int gap){
         public static Dashboard of(int width,int height){

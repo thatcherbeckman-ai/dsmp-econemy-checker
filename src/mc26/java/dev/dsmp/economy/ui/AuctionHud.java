@@ -12,9 +12,9 @@ public final class AuctionHud {
         var pose=g.pose();pose.pushMatrix();pose.translate(center,top);pose.scale(scale);
         try{
             String timer=round.state()==AuctionRound.State.RUNNING?"("+round.countdown(now)+")":switch(round.state()){case ENDED->"Finished";case CANCELLED->"Cancelled";default->"Interrupted";};
-            String prefix="x"+round.quantity()+" ",name=FestiveUi.fit(item.name(),230,1),suffix=" - "+timer;
+            String prefix="x"+round.quantity()+" ",name=item.name(),suffix=" - "+timer;
             int pw=MenuText.width(prefix),nw=MenuText.width(name,true),sw=MenuText.width(suffix),left=-(pw+nw+sw)/2;
-            FestiveUi.text(g,prefix,left,0,0xFFFFFFFF,1,false);FestiveUi.text(g,name,left+pw,0,0xFFFF49B9,1,true);FestiveUi.text(g,suffix,left+pw+nw,0,0xFFFFFFFF,1,false);
+            pose.pushMatrix();pose.scale(Math.min(1,330f/Math.max(1,pw+nw+sw)));try{FestiveUi.text(g,prefix,left,0,0xFFFFFFFF,1,false);FestiveUi.text(g,name,left+pw,0,0xFFFF49B9,1,true);FestiveUi.text(g,suffix,left+pw+nw,0,0xFFFFFFFF,1,false);}finally{pose.popMatrix();}
             var leader=round.leader();String detail;
             int color=0xFFE8ECF5;
             if(round.state()==AuctionRound.State.RUNNING)detail=leader.map(b->b.player()+" - "+Money.format(b.cents(),false)).orElse("No bids yet");
@@ -26,5 +26,5 @@ public final class AuctionHud {
             if(AuctionService.error()!=null)centered(g,"Auction storage error - check settings",0,112,0xFFE57885,.7f);
         }finally{pose.popMatrix();}
     }
-    private static void centered(net.minecraft.client.gui.GuiGraphicsExtractor g,String text,int center,int y,int color,float scale){String fitted=FestiveUi.fit(text,330,scale);FestiveUi.text(g,fitted,center-(int)(MenuText.width(fitted)*scale/2),y,color,scale,false);}
+    private static void centered(net.minecraft.client.gui.GuiGraphicsExtractor g,String text,int center,int y,int color,float scale){float fitted=Math.min(scale,330f/Math.max(1,MenuText.width(text)));FestiveUi.text(g,text,center-(int)(MenuText.width(text)*fitted/2),y,color,fitted,false);}
 }

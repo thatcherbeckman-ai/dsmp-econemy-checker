@@ -56,7 +56,7 @@ public final class TextBoxesScreen extends net.minecraft.client.gui.screens.Scre
         FestiveUi.background(graphics,width,height,mod.config);
         TextBox box=editor.selected();
         var m=MenuLayout.of(width,height);String title="TEXT BOXES / "+editor.label()+(box==null?"":"  "+Math.round(box.size*100)+"%");
-        FestiveUi.text(graphics,FestiveUi.fit(title,m.doneX()-m.margin()-8,.84f),m.margin(),14,0xFFEAF2F8,.84f,true);
+        FestiveUi.textFit(graphics,title,m.margin(),14,m.doneX()-m.margin()-8,0xFFEAF2F8,.84f,true);
         if(width>=620){FestiveUi.text(graphics,"Start",m.x(0,6),109,0xFFB6ABC8,.7f,false);FestiveUi.text(graphics,"End",m.x(1,6),109,0xFFB6ABC8,.7f,false);}
         TrackerRenderer.drawAll(graphics,mod.config,mod.ledger,mod.viewCycle,width,height-24,true,false,mod.wallet.estimated());
         TextHud.outline(graphics,box,width,height-24);

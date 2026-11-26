@@ -17,7 +17,8 @@ public final class FestiveUi {
         g.fillGradient(0,0,width,Math.min(62,height),0x9C0A0E18,0x000A0E18);
         g.fillGradient(0,Math.max(0,height-32),width,height,0x000A0E18,0x850A0E18);
     }
-    public static String fit(String text,int width,float scale){return MenuText.fit(text,Math.max(0,(int)(width/scale)),false);}
+    public static void textFit(GuiGraphicsExtractor g,String value,int x,int y,int width,int color,float preferred,boolean bold){float scale=Math.min(preferred,Math.max(1,width)/(float)Math.max(1,MenuText.width(value,bold)));text(g,value,x,y,color,scale,bold);}
+    static dev.dsmp.economy.design.FullLabel.Fit labelLayout(String value,int w,int h,boolean bold,boolean leading){return dev.dsmp.economy.design.FullLabel.fit(value,Math.max(1,w-(leading?16:w<60?8:14)),Math.max(1,h-4),h>=24?.92f:.82f,11*dev.dsmp.economy.design.DesignAccess.scale(),line->MenuText.width(line,bold));}
     public static void text(GuiGraphicsExtractor g,String value,int x,int y,int color,float scale,boolean bold){
         var pose=g.pose();pose.pushMatrix();pose.translate(x,y);pose.scale(scale*dev.dsmp.economy.design.DesignAccess.scale());
         try{g.text(Minecraft.getInstance().font,MenuText.text(value,bold),0,0,color,false);}finally{pose.popMatrix();}
@@ -38,10 +39,11 @@ public final class FestiveUi {
         UiSurfaces.shadow(g,x,y,w,h);UiSurfaces.fill(g,x,y,w,h,blend(base,0xFF303C53,hover*(primary?.08f:.32f)));
         UiSurfaces.outline(g,x,y,w,h,focused?0xFFE0D9FF:blend(border,0xFFC8BFF1,hover*.6f));
         if(selected&&!primary&&w>=60)UiSurfaces.fill(g,x+4,y+Math.max(4,(h-14)/2),3,Math.min(14,h-8),tone);
-        float scale=h>=24?.92f:.82f;boolean bold=primary||selected;String shown=MenuText.fit(label,Math.max(0,(int)((w-(leading?24:w<60?8:14))/scale)),bold);int textWidth=Math.round(MenuText.width(shown,bold)*scale);
+        boolean bold=primary||selected;var layout=labelLayout(label,w,h,bold,leading);float scale=layout.scale();
         int brightness=((base>>16&255)*299+(base>>8&255)*587+(base&255)*114)/1000;
         int color=!enabled?0xFF728098:primary?(brightness>145?0xFF101726:0xFFFFFFFF):selected?0xFFF0EAFE:0xFFDCE5F4;
         if(dev.dsmp.economy.design.DesignAccess.contrast()){UiSurfaces.fill(g,x,y,w,h,selected?0xFF263A5A:0xFF081322);UiSurfaces.outline(g,x,y,w,h,0xFFDCE9FF);color=0xFFFFFFFF;}
-        text(g,shown,leading?x+16:x+Math.max(w<60?4:8,(w-textWidth)/2),y+Math.max(2,(h-11)/2),color,scale,bold);
+        float lineHeight=layout.lineHeight()*scale;int top=y+Math.max(2,Math.round((h-layout.lines().size()*lineHeight)/2));
+        for(int i=0;i<layout.lines().size();i++){String line=layout.lines().get(i);int textWidth=Math.round(MenuText.width(line,bold)*scale);text(g,line,leading?x+10:x+(w-textWidth)/2,top+Math.round(i*lineHeight),color,scale,bold);}
     }
 }

@@ -44,14 +44,14 @@ public final class AuctionScreen extends net.minecraft.client.gui.screens.Screen
         FestiveUi.text(g,"ITEM PICKER",m.margin(),m.top()-5,0xFFB6A4DE,.65f,true);FestiveUi.text(g,"QUANTITY",right,m.top()-5,0xFFB6A4DE,.65f,true);FestiveUi.text(g,"SECONDS",right+cw+m.gap(),m.top()-5,0xFFB6A4DE,.65f,true);
         String selectedName;try{selectedName=AuctionItems.find(selected).name();}catch(IllegalArgumentException ex){selectedName=selected;}
         int infoTop=listTop()+8,previewTop=infoTop+24;
-        FestiveUi.text(g,FestiveUi.fit("Selected: "+selectedName,rh,.78f),right,infoTop,0xFFE5C6F2,.78f,true);
+        FestiveUi.textFit(g,"Selected: "+selectedName,right,infoTop,rh,0xFFE5C6F2,.78f,true);
         var r=AuctionService.current();int available=actionTop()-previewTop-m.gap();
         if(r!=null&&available>=85)AuctionHud.drawLot(g,r,right+rh/2,previewTop,Math.min(.75f,rh/350f),System.currentTimeMillis());
-        else if(r!=null&&available>=12)FestiveUi.text(g,FestiveUi.fit(r.state()+" / "+r.bids().size()+" bidders",rh,.7f),right,previewTop,0xFFA7A7BC,.7f,false);
-        if(r!=null){int bidY=previewTop+100,count=Math.max(0,(actionTop()-m.gap()-bidY)/18);var bids=r.ranking();for(int i=0;i<Math.min(count,bids.size());i++){var bid=bids.get(i);FestiveUi.text(g,FestiveUi.fit((i+1)+". "+bid.player()+"  "+dev.dsmp.economy.core.Money.format(bid.cents(),false),rh,.75f),right,bidY+i*18,0xFFBFC4D9,.75f,false);}}
+        else if(r!=null&&available>=12)FestiveUi.textFit(g,r.state()+" / "+r.bids().size()+" bidders",right,previewTop,rh,0xFFA7A7BC,.7f,false);
+        if(r!=null){int bidY=previewTop+100,count=Math.max(0,(actionTop()-m.gap()-bidY)/18);var bids=r.ranking();for(int i=0;i<Math.min(count,bids.size());i++){var bid=bids.get(i);FestiveUi.textFit(g,(i+1)+". "+bid.player()+"  "+dev.dsmp.economy.core.Money.format(bid.cents(),false),right,bidY+i*18,rh,0xFFBFC4D9,.75f,false);}}
         String status=AuctionService.error()!=null?AuctionService.error():notice;
-        FestiveUi.text(g,FestiveUi.fit(status,m.contentWidth(),.65f),m.margin(),height-34,0xFFE6B6CE,.65f,false);
-        FestiveUi.text(g,FestiveUi.fit("Local display. Deliver items/refunds yourself; pause Auto bets for refunds.",m.contentWidth(),.65f),m.margin(),height-18,0xFFA7A7BC,.65f,false);
+        FestiveUi.textFit(g,status,m.margin(),height-34,m.contentWidth(),0xFFE6B6CE,.65f,false);
+        FestiveUi.textFit(g,"Local display. Deliver items/refunds yourself; pause Auto bets for refunds.",m.margin(),height-18,m.contentWidth(),0xFFA7A7BC,.65f,false);
         super.extractRenderState(g,mx,my,delta);
         var found=results();int from=page*rows();for(int i=0;i<rows()&&from+i<found.size();i++){var e=found.get(from+i);g.item(e.stack(),m.margin()+5,listTop()+i*m.step()+(m.buttonHeight()-16)/2);if(e.id().equals(selected))g.fill(m.margin(),listTop()+i*m.step()+3,m.margin()+2,listTop()+i*m.step()+m.buttonHeight()-3,0xFFFF65C3);}
         FestiveUi.text(g,"Page "+(page+1)+" / "+pages(),m.margin(),actionTop()+m.step()+7,0xFFA7A7BC,.7f,false);

@@ -55,7 +55,7 @@ public final class LineStylesScreen extends net.minecraft.client.gui.screens.Scr
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Line design / "+(line+1)+" of "+box.lines().length);var s=style();int form=styleY();
         if(page==0){FestiveUi.text(g,"FONT COLOR",m.x(0,3),form-10,0xFFAAA3BF,.6f,true);FestiveUi.text(g,"GRADIENT END",m.x(1,3),form-10,0xFFAAA3BF,.6f,true);FestiveUi.text(g,"Scale "+Math.round(s.textSize*100)+"%",m.x(2,3),form+m.step()*2+7,0xFFDBD1EE,.7f,false);}
         if(page==1){String[] titles={"BACKGROUND","BULLET","SIDE NOTE"};for(int i=0;i<3;i++)FestiveUi.text(g,titles[i],m.x(i,3),form-10,0xFFAAA3BF,.6f,true);FestiveUi.text(g,"Opacity "+s.backgroundOpacity,m.x(2,3),form+m.step()*2+7,0xFFDBD1EE,.7f,false);}
-        if(page==2){TextImages.draw(g,s.image,m.margin(),form+m.step()*2,20,0xFFFFFFFF);FestiveUi.text(g,FestiveUi.fit(TextImages.label(s.image),m.contentWidth()-30,.7f),m.margin()+28,form+m.step()*2+6,0xFFDBD1EE,.7f,false);}
+        if(page==2){TextImages.draw(g,s.image,m.margin(),form+m.step()*2,20,0xFFFFFFFF);FestiveUi.textFit(g,TextImages.label(s.image),m.margin()+28,form+m.step()*2+6,m.contentWidth()-30,0xFFDBD1EE,.7f,false);}
         int previewTop=form+m.step()*3+4;
         if(height-previewTop>=70){FestiveUi.panel(g,m.margin(),previewTop,m.contentWidth(),height-previewTop-30,0x625084);FestiveUi.text(g,"PREVIEW",m.margin()+10,previewTop+8,0xFFAAA3BF,.65f,true);StyledTextHud.preview(g,box,m.margin()+10,previewTop+25,m.contentWidth()-20,height-previewTop-60);}
         m.footer(g,notice);super.extractRenderState(g,mx,my,delta);

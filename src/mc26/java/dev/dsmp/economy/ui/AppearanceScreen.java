@@ -41,7 +41,7 @@ public final class AppearanceScreen extends Screen {
         var back=new SettingsButton(m.doneX()-2*(m.actionWidth()+m.gap()),m.actionY(),m.actionWidth(),m.buttonHeight(),"Undo",false,mod.config.menuAccent,()->history(false));back.active=!undo.isEmpty();addRenderableWidget(back);var forward=new SettingsButton(m.doneX()-m.actionWidth()-m.gap(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Redo",false,mod.config.menuAccent,()->history(true));forward.active=!redo.isEmpty();addRenderableWidget(forward);
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
-        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);int room=m.doneX()-2*(m.actionWidth()+m.gap())-m.margin()-m.gap();FestiveUi.text(g,FestiveUi.fit(width<620?"Style":MenuLayout.BRAND,room,.9f),m.margin(),m.top()>=64?15:9,0xFFF2EDF9,.9f,true);if(m.top()>=64)FestiveUi.text(g,FestiveUi.fit(editor.heading(),room,.78f),m.margin(),39,0xFFB8ABC9,.78f,false);
+        var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);int room=m.doneX()-2*(m.actionWidth()+m.gap())-m.margin()-m.gap();FestiveUi.textFit(g,width<620?"Style":MenuLayout.BRAND,m.margin(),m.top()>=64?15:9,room,0xFFF2EDF9,.9f,true);if(m.top()>=64)FestiveUi.textFit(g,editor.heading(),m.margin(),39,room,0xFFB8ABC9,.78f,false);
         int x=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin();
         int y=width>=780?m.top():m.row(5)+m.gap();
         int w=width-x-m.margin(),h=height-y-36;

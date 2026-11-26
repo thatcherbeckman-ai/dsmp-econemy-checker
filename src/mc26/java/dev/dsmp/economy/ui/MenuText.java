@@ -13,9 +13,4 @@ final class MenuText {
     static Component text(String value,boolean bold){return Component.literal(value).withStyle(style->style.withFont(bold?BOLD:NORMAL));}
     static int width(String value){return width(value,false);}
     static int width(String value,boolean bold){return Math.round(Minecraft.getInstance().font.width(text(value,bold))*dev.dsmp.economy.design.DesignAccess.scale());}
-    static String fit(String value,int available,boolean bold){
-        if(width(value,bold)<=available)return value;String ellipsis="\u2026";if(width(ellipsis,bold)>available)return "";
-        int end=value.length();while(end>0&&width(value.substring(0,end)+ellipsis,bold)>available)end=value.offsetByCodePoints(end,-1);
-        return value.substring(0,end)+ellipsis;
-    }
 }
