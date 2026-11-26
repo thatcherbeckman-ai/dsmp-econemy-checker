@@ -17,8 +17,7 @@ public final class CharacterSceneScreen extends Screen {
     private int tab,page;private EditBox title,subtitle,titleColor,subtitleColor;
     private String notice="Your skin, scenery and text. Done saves; Cancel keeps your current menu.";
     public CharacterSceneScreen(EconomyTrackerClient mod,Screen parent,MenuBackgroundOptions source){
-        super(Component.literal(MenuLayout.BRAND+" / Character scene"));this.mod=mod;this.parent=parent;draft=source.copy();
-        if(!draft.character.enabled){draft.character.enabled=true;if(draft.scene==MenuScene.ORIGINAL){draft.scene=MenuScene.CHERRY_DAWN;draft.overlay=15;draft.cards=85;draft.vignette=1;}}
+        super(Component.literal(MenuLayout.BRAND+" / Character scene"));this.mod=mod;this.parent=parent;draft=source.playerView();
         page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;
     }
     public MenuBackgroundOptions previewOptions(){return draft;}

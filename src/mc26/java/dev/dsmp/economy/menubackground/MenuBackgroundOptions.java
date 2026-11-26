@@ -13,6 +13,8 @@ public final class MenuBackgroundOptions {
     public static final int[] TINT_COLORS={0,0xF2A6BE,0xA997DC,0x68B9AD,0xEBC17A,0x344779};
     public static final String[] LEVELS={"Off","Low","Medium","High"},DENSITIES={"Low","Medium","High"},DECORATIONS={"Auto","Off","Christmas"};
     public MenuBackgroundOptions copy(){var n=new MenuBackgroundOptions();n.scene=scene;n.brightness=brightness;n.overlay=overlay;n.blur=blur;n.tint=tint;n.tintAmount=tintAmount;n.vignette=vignette;n.cards=cards;n.zoom=zoom;n.animations=animations;n.parallax=parallax;n.contain=contain;n.particles=particles;n.density=density;n.speed=speed;n.particleOpacity=particleOpacity;n.decorations=decorations;n.customImage=customImage;n.character=character.copy();return n;}
+    /** A temporary visible composition; opening a player view does not save or enable menu layers. */
+    public MenuBackgroundOptions playerView(){var view=copy();if(!view.character.enabled&&view.scene==MenuScene.ORIGINAL){view.scene=MenuScene.CHERRY_DAWN;view.overlay=15;view.cards=85;view.vignette=1;}view.character.enabled=true;return view;}
     public void validate(){
         if(character==null)throw new IllegalArgumentException("Invalid character scene preferences");character.validate();
         if(scene==null||particles==null||customImage==null||(!customImage.isEmpty()&&!customImage.matches("[0-9a-f]{64}\\.png")))throw new IllegalArgumentException("Invalid menu background selection");

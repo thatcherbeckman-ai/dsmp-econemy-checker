@@ -7,6 +7,11 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CharacterSceneTest {
+    @Test void startingAPlayerViewCreatesAnIndependentVisibleSceneWithoutChangingPreferences(){
+        var saved=new MenuBackgroundOptions();var view=saved.playerView();view.validate();assertTrue(view.character.enabled);assertEquals(MenuScene.CHERRY_DAWN,view.scene);assertFalse(saved.character.enabled);assertEquals(MenuScene.ORIGINAL,saved.scene);
+        saved.scene=MenuScene.STARRY_MOUNTAINS;saved.character.title="My caption";saved.character.view=CharacterComposition.View.RIGHT;view=saved.playerView();assertEquals(saved.scene,view.scene);assertEquals("My caption",view.character.title);assertEquals(saved.character.view,view.character.view);view.character.title="Changed in preview";assertEquals("My caption",saved.character.title);assertFalse(saved.character.enabled);
+        saved.scene=MenuScene.ORIGINAL;saved.character.enabled=true;assertEquals(MenuScene.ORIGINAL,saved.playerView().scene);
+    }
     @Test void oldMenuPreferencesDefaultToNoCharacter(@TempDir Path dir)throws Exception{
         Files.writeString(dir.resolve("menu-background.json"),"{\"scene\":\"CHERRY_DAWN\",\"overlay\":25}");var options=new MenuBackgroundStore(dir).load();assertFalse(options.character.enabled);assertEquals(MenuScene.CHERRY_DAWN,options.scene);assertEquals(25,options.overlay);options.validate();
     }
