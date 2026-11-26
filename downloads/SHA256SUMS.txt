@@ -17,6 +17,7 @@ e1bef3827e8e7bd53ee7c3ea5dc993a2e70bd3a8bede1d1691d2ceff79162dce  economy-tracke
 9e4dc0e7f7bfbac54a16a5b6bf145f3e9059ad89875ae85aae677b5fc608af39  economy-tracker-0.18.0-mc26.3.jar
 5a53081dd33ced5d6a7434ab804339a9135228dfbbd2be3461bcd93ea5131766  economy-tracker-0.19.0-mc26.3.jar
 4aef2ac76920d159b9d78779e380f68b3a34989970e6a2913e4bcde09a5d86a1  economy-tracker-0.2.0-mc1.21.11.jar
+eb7d3a746e20c245881e5695f97ba607adec6d6dafba6c83a4e311b0bfb47296  economy-tracker-0.20.0-mc26.3.jar
 534d580b2e0cfcb47204226d5919789ce78692304f79ba9c5bd96a053e8f837c  economy-tracker-0.3.0-mc1.21.11.jar
 c0a78dc33f1746c938fe6ae2b168fb3afd1fc8c62d9f12474833515a7eefcfc0  economy-tracker-0.4.0-mc1.21.11.jar
 ad452f3bdd629594f218aaeb349b9cca5ede238bf064772373a508400b804840  economy-tracker-0.4.1-mc1.21.11.jar
@@ -33,7 +34,7 @@ a2ca79ff5124bc1bfe08dafbb8ba6afd11bb5dc9e6269e7089b8be6347083de7  economy-tracke
 5e53ce46269dc5347a70457fcc060ca2fdcc0f1cb02182aa1d6e791fc1896417  economy-tracker-0.8.0-mc1.21.11.jar
 6447e1a2ae3da343a15b80e4f4221d5c82c6b009d1c3ad57fa5b1bc7d7a125c7  economy-tracker-0.9.0-mc1.21.11.jar
 c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c  economy-tracker-1.21.11.jar
-5a53081dd33ced5d6a7434ab804339a9135228dfbbd2be3461bcd93ea5131766  economy-tracker-26.3.jar
+eb7d3a746e20c245881e5695f97ba607adec6d6dafba6c83a4e311b0bfb47296  economy-tracker-26.3.jar
 be9952e61f25f97c0f87ae5954b0e4597cde5f84e766dadae9dc27855b7a235e  preview-0.11.0-text-lines.png
 9dfe17c96d0cd436ee912de89b7288e054c33881ae8d5acc0dcbfe2b033656c1  preview-0.12.1-settings.png
 6f65bdadd7bd304cb478b4900b92bb3749e0411ae12ad93c518fec2e26981e3b  preview-0.13.0-inventory-themes.png
@@ -55,5 +56,8 @@ a38d85aef14552a53252cb27372feef9e95c18ffc4cd67007cdc88f99d5725f5  preview-0.17.2
 98b9c4fa7e6c72c4dbadf89ac2d8c12fcd4290776f269666eb49a3fcf826688d  preview-0.19.0-menu-holidays.png
 4a4e093e17f4019b69c16a128813c199a07a90547e14aee46fc7953bbde14b26  preview-0.19.0-menu-seasons.png
 c1e99dfdda2a5b1f5427dc6611e8bec3bf0d2ed79f997470b73d0b06cfb5265e  preview-0.19.0-right-panel.png
+c8b12953ca334c23c7b5c56c4babde7fbac5d6c296305ad0d0e956884288dd29  preview-0.20.0-multiline-text.png
+f4b7890b5eac0b92e0fa50761bf3ad08b280ae6fc643f9a4a88ddefabc07d1a2  preview-0.20.0-text-colors.png
+1956d8c031ed5464d542f60bff1e89fa4fed6230b961257011a88aded6a02237  preview-0.20.0-text-presets.png
 5a25bd3d9904e5668993cc36b81a8e7001ae903920d301497f40650d9c6ce9fc  preview-0.9.0-modules.png
 0b05074c3354fa723d32389dcf26ed859a922210c4c4bbbc3101dfd0ad7da30b  preview-0.9.0-overview.png

@@ -16,7 +16,7 @@ public final class TextHud {
     private static int width(String text,int font) { return TextFonts.width(text,font); }
     private static net.minecraft.network.chat.Component component(String text,int font) { return TextFonts.text(text,font); }
     public static TextLayout.Measure measure(TextBox box) {
-        if(!box.lineStyles.isEmpty()){var layout=StyledTextHud.layout(box);return new TextLayout.Measure(java.util.List.of(),layout.width(),layout.height());}
+        if(!box.lineStyles.isEmpty()||TextTypography.active(box)){var layout=StyledTextHud.layout(box);return new TextLayout.Measure(java.util.List.of(),layout.width(),layout.height());}
         Cached cached=CACHE.get(box);
         if(cached==null||!cached.text().equals(box.text)||cached.font()!=box.font) {
             cached=new Cached(box.text,box.font,TextLayout.measure(box,s->width(s,box.font))); CACHE.put(box,cached);
@@ -28,7 +28,7 @@ public final class TextHud {
         for(var box:config.textBoxes)if(box.visible||editing)drawBox(graphics,box,width,height,editing);
     }
     private static void drawBox(net.minecraft.client.gui.GuiGraphicsExtractor graphics,TextBox box,int width,int height,boolean editing) {
-        if(!box.lineStyles.isEmpty()){StyledTextHud.draw(graphics,box,width,height,editing);return;}
+        if(!box.lineStyles.isEmpty()||TextTypography.active(box)){StyledTextHud.draw(graphics,box,width,height,editing);return;}
         var measure=measure(box); var bounds=TextLayout.bounds(box,measure,width,height,editing);
         background(graphics,box,bounds);
         net.minecraft.client.gui.Font font=net.minecraft.client.Minecraft.getInstance().font;
@@ -62,9 +62,9 @@ public final class TextHud {
         if(box.backgroundStyle!=0&&box.backgroundOpacity>0) {
             int alpha=box.visible?box.backgroundOpacity:box.backgroundOpacity/3;
             if(box.backgroundStyle==1) {
-                GlassPane.fill(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),alpha<<24|0x17373D);
+                GlassPane.fill(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),alpha<<24|(box.customBackground?box.backgroundColor:0x17373D));
                 GlassPane.border(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),(box.visible?180:60)<<24);
-            } else graphics.fill(bounds.x(),bounds.y(),bounds.x()+bounds.width(),bounds.y()+bounds.height(),alpha<<24|0x0B1018);
+            } else UiSurfaces.card(graphics,bounds.x(),bounds.y(),bounds.width(),bounds.height(),alpha<<24|(box.customBackground?box.backgroundColor:0x0B1018));
         }
     }
     private static int opacity(int color,boolean visible) { return visible?color:color&0xFFFFFF|0x55000000; }

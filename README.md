@@ -1,5 +1,22 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.20.0** adds a larger **Text** editor and a new **Style** editor under **O → Text boxes**. Select or create a box, then choose **Text** for real multiline editing: Enter inserts a new line, with the existing limits of 24 lines, 160 characters per logical line and 1,024 characters per box. Valid edits preview live; Cancel restores the previous content and styling.
+
+**Style** stays in the right-hand panel and provides:
+
+- **Fonts**: direct Inter, Inter bold, Minecraft and Bubble choices, plus bold, italic, size and alignment controls.
+- **Colors**: 24 named color swatches over two pages, with custom six-digit RGB hex colors for the start, end, outline, shadow and background.
+- **Gradient**: Solid, Across or Down, start/end color selection, color swapping and six ready-made gradient pairs.
+- **Effects**: outline thickness and color, shadow color/offset, glass or rounded panel backgrounds, and background opacity.
+- **Spacing**: letter spacing, line gaps and text opacity.
+- **Presets**: 12 text styles—Neon Mint, Sunset, Ocean, Gold, Candy, Frost, Lava, Lavender, Emerald, Mono, Bubble Pop and Soft Rose.
+
+Whole-box font/color controls also update existing custom row overrides, so the result appears immediately. Use **Lines** for individual row designs. Presets change styling while preserving the wording, box ID, placement, scale, inline pictures, notes and row shapes. The live preview can show the first three lines or the full box, and uses the same renderer/layout as the HUD. Vertical gradients respect the dashboard's scaled panel bounds.
+
+The Style editor has up to 32 **Undo/Redo** steps. **Done** returns to the text-box editor; the parent editor's **Done/Save** writes the settings. **Cancel** restores the style/content draft. Existing text boxes load with compatible defaults, and style options are included in normal settings and appearance profiles. Financial models, wallet/history, recording controls and other economy data are unchanged. The 1.21.11 release is unchanged.
+
+[Multiline editor](downloads/preview-0.20.0-multiline-text.png) · [Text-style presets](downloads/preview-0.20.0-text-presets.png) · [Expanded color palette](downloads/preview-0.20.0-text-colors.png) — native Minecraft captures, isolated offline sample profile.
+
 Version **0.19.0** keeps the left sidebar in place when you open its sections. Appearance, text boxes, HUD layout, auctions, inventory themes and design tools now render in the **right-hand panel**. Nested settings and their Done/Cancel controls stay there too. Pointer events, text entry and dragging use the same panel transform as rendering, including small Minecraft GUI sizes. Explicit scene full previews and Player background → Start still fill the screen and return to the same dashboard/editor.
 
 Each page keeps its own save rules. **Done or the dashboard Save button applies the active page**. **Cancel** discards that page's draft. Switching to a different sidebar section discards its unsaved page draft; this is shown in the dashboard footer. Saved loan edits and immediate profile/restore actions keep their existing behavior. Reclicking an active editor section does not discard it.
@@ -135,7 +152,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.19.0 download](downloads/economy-tracker-0.19.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.20.0 download](downloads/economy-tracker-0.20.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -324,3 +341,5 @@ The 0.17.2 checks cover the four rolling balance ranges, exact/partial/missing o
 The 0.18.0 checks add centered-window bounds and coordinate round trips across small/large viewports, monotone slide completion/restarts/reduced motion, and transformed native player-preview bounds. All **179 regression tests** pass against sources and the packaged JAR. Native checks cover **552 menu layouts**, real inverse-scaled navigation and moving-body control clicks, outside-click rejection, stable tab/dialog rebuilds, the UI sound category, all six rounded-surface masks, player previews, existing scene/HUD workflows and balance-history/recording-off behavior. Native audio output is silent in the isolated smoke profile; the pop uses Minecraft’s built-in UI sound asset.
 
 The 0.19.0 unit suite passes **190 tests**, including right-panel coordinate transforms, exact solid-color pixels, real menu image effects, RGB validation/migration/copy/persistence, independent menu holiday choices, bounded/frozen/distinct motifs and palette restoration. The focused native check passes **145 panel cases** across all 12 sidebar sections, four sizes and three text scales, plus nested return, pointer/text entry, draft cancellation, solid/hex live preview/save/reload, holiday preview/animation/save/cancel, inventory independence, presentation return and unchanged recorded data. The broader native regression suite includes **576 responsive layouts** and the existing editor, profile, scene and history/recording-off checks. These are isolated offline checks; they do not connect to a live DonutSMP account. Financial core, wallet/history, loan, auction and recording-opt-out model classes remain byte-for-byte unchanged.
+
+The 0.20.0 suite passes **199 tests** against both compiled sources and the packaged JAR. New checks cover legacy defaults, complete style copy/restore and settings round trips, preset content/position/image preservation, atomic invalid edits, bounded Undo/Redo, Unicode-aware letter spacing, scaled effect padding, measured drag bounds, override propagation and validation. A focused native check passes **72 style layouts** at four sizes and three text scales, plus real multiline Enter/typing, both swatch pages and custom hex input, preset Undo/Redo, vertical-gradient clipping in the scaled panel, effects/spacing/bold/italic, persistence and both style/content cancellation. The broader native regression suite passes **576 layouts** and retains editor/profile/scene/history checks. Diagnostic profiles stay offline and are excluded from release JARs.

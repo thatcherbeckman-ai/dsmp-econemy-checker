@@ -22,9 +22,9 @@ public final class TextBoxesScreen extends WindowedScreen {
         TextBox box=editor.selected();var m=MenuLayout.of(width,height);
         button(m.doneX(),8,m.actionWidth(),"Done",this::onClose);button(m.cancelX(),8,m.actionWidth(),"Cancel",this::cancel);
         int row=42,step=30;
-        String[] labels={"New",editor.label(),"Delete","Lines","Preset"};
-        Runnable[] actions={()->change(()->editor.add()),()->change(editor::next),()->change(editor::delete),this::lines,()->change(()->editor.reference(net.minecraft.client.Minecraft.getInstance().getUser().getName()))};
-        for(int i=0;i<labels.length;i++)button(m.x(i,5),row,m.cellWidth(i,5),labels[i],actions[i]);
+        String[] labels={"New",editor.label(),"Delete","Text","Lines","Style","Preset"};
+        Runnable[] actions={()->change(()->editor.add()),()->change(editor::next),()->change(editor::delete),this::contentEditor,this::lines,this::styleEditor,()->change(()->editor.reference(net.minecraft.client.Minecraft.getInstance().getUser().getName()))};
+        for(int i=0;i<labels.length;i++)button(m.x(i,labels.length),row,m.cellWidth(i,labels.length),labels[i],actions[i]);
         content=new SettingsEditBox(font,m.margin(),row+step,m.contentWidth(),22,net.minecraft.network.chat.Component.literal("Text (use \\n for lines)"));
         content.setMaxLength(1024);content.setValue(box==null?"":box.text.replace("\n","\\n"));addRenderableWidget(content);
         int colorY=row+step*2,cell=m.cellWidth(0,6),label=width>=620?34:0;
@@ -45,6 +45,8 @@ public final class TextBoxesScreen extends WindowedScreen {
     private void button(int x,int y,int width,String label,Runnable action){
         addRenderableWidget(new SettingsButton(x,y,width,22,label,label.equals("Done"),mod.config.menuAccent,action));
     }
+    private void contentEditor(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}MenuNavigation.open(new TextContentScreen(mod,this,box));}
+    private void styleEditor(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}MenuNavigation.open(new TextStyleScreen(mod,this,box));}
     private void lines(){if(!fields())return;var box=editor.selected();if(box==null){notice="Create a text box first.";return;}MenuNavigation.open(new LineStylesScreen(mod,this,box));}
     private boolean fields() {
         try { editor.fields(content.getValue(),start.getValue(),end.getValue());return true; }
