@@ -18,6 +18,7 @@ public final class MenuBackgroundScreen extends Screen {
     private String notice=MenuBackgrounds.loadError()==null?"Preview updates live. Done saves; Cancel restores your current background.":MenuBackgrounds.loadError();
     public MenuBackgroundScreen(EconomyTrackerClient mod,Screen parent){super(Component.literal(MenuLayout.BRAND+" / Menu backgrounds"));this.mod=mod;this.parent=parent;}
     public MenuBackgroundOptions previewOptions(){return draft;}
+    public void sceneSaved(MenuBackgroundOptions saved){draft=saved.copy();page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;notice="Character scene saved. Use the editor for a full-screen preview.";rebuildWidgets();}
     private int formWidth(MenuLayout m){return width>=780?(m.contentWidth()-m.gap()*2)/2:m.contentWidth();}
     private void button(int col,int columns,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);int fw=formWidth(m),x=m.margin()+col*(fw+m.gap())/columns,w=(fw+m.gap())/columns-m.gap();addRenderableWidget(new SettingsButton(x,m.row(row),w,m.buttonHeight(),label,selected,mod.config.menuAccent,action));}
     private void change(Runnable action){action.run();draft.validate();rebuildWidgets();}
@@ -27,7 +28,7 @@ public final class MenuBackgroundScreen extends Screen {
         for(int i=0;i<TABS.length;i++){int target=i;button(i,4,0,TABS[i],tab==i,()->change(()->tab=target));}
         if(tab==0){
             var scenes=MenuScene.values();for(int i=0;i<6&&page*6+i<scenes.length;i++){var scene=scenes[page*6+i];button(i%2,2,1+i/2,scene.label,draft.scene==scene,()->select(scene));}
-            int pages=(scenes.length+5)/6;button(0,3,4,"Prev",false,()->change(()->page=Math.floorMod(page-1,pages)));button(1,3,4,"Page "+(page+1)+" / "+pages,false,()->change(()->page=(page+1)%pages));button(2,3,4,"Next",false,()->change(()->page=(page+1)%pages));button(0,1,5,"Reset background",false,()->change(()->{draft=new MenuBackgroundOptions();page=0;}));
+            int pages=(scenes.length+5)/6;button(0,3,4,"Prev",false,()->change(()->page=Math.floorMod(page-1,pages)));button(1,3,4,"Page "+(page+1)+" / "+pages,false,()->change(()->page=(page+1)%pages));button(2,3,4,"Next",false,()->change(()->page=(page+1)%pages));button(0,2,5,"Reset background",false,()->change(()->{draft=new MenuBackgroundOptions();page=0;}));button(1,2,5,"Character scene",false,()->Minecraft.getInstance().gui.setScreen(new CharacterSceneScreen(mod,this,draft)));
         }else if(tab==1){
             triple(1,"Brightness",draft.brightness,()->draft.brightness=Math.max(50,draft.brightness-10),()->draft.brightness=100,()->draft.brightness=Math.min(150,draft.brightness+10));
             triple(2,"Darkness",draft.overlay,()->draft.overlay=Math.max(0,draft.overlay-5),()->draft.overlay=30,()->draft.overlay=Math.min(80,draft.overlay+5));
@@ -58,7 +59,7 @@ public final class MenuBackgroundScreen extends Screen {
             FestiveUi.panel(g,left,top,w,h,mod.config.menuAccent);
             int ix=left+8,iy=top+28,iw=w-16,ih=h-36;
             g.enableScissor(ix,iy,ix+iw,iy+ih);g.pose().pushMatrix();g.pose().translate(ix,iy);
-            try{MenuBackgroundRenderer.background(g,iw,ih,mod.config,draft);}finally{g.pose().popMatrix();g.disableScissor();}
+            try{MenuBackgroundRenderer.background(g,iw,ih,mod.config,draft);}finally{g.pose().popMatrix();}CharacterSceneRenderer.draw(g,ix,iy,iw,ih,draft);g.disableScissor();
             UiSurfaces.corners(g,ix,iy,iw,ih,0xFF111827);
             FestiveUi.text(g,"LIVE PREVIEW",left+14,top+9,0xFFF3E5F3,.72f,true);
             int sampleWidth=Math.min(250,w-32),sampleY=top+h-68;FestiveUi.surface(g,left+16,sampleY,sampleWidth,48,draft.cards*255/100<<24|0x101522);

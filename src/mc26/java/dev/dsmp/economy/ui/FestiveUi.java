@@ -10,8 +10,9 @@ public final class FestiveUi {
     private static int accent=0x8B6CF2;
     private FestiveUi(){}
     public static int accent(){return accent;}
-    public static void background(GuiGraphicsExtractor g,int width,int height,TrackerConfig config){
-        accent=config.menuAccent;MenuBackgroundRenderer.background(g,width,height,config,MenuBackgrounds.visible());
+    public static void background(GuiGraphicsExtractor g,int width,int height,TrackerConfig config){background(g,width,height,config,true);}
+    public static void background(GuiGraphicsExtractor g,int width,int height,TrackerConfig config,boolean character){
+        accent=config.menuAccent;var options=MenuBackgrounds.visible();MenuBackgroundRenderer.background(g,width,height,config,options);if(character)CharacterSceneRenderer.draw(g,0,0,width,height,options);
         g.fillGradient(0,0,width,Math.min(62,height),0x9C0A0E18,0x000A0E18);
         g.fillGradient(0,Math.max(0,height-32),width,height,0x000A0E18,0x850A0E18);
     }
