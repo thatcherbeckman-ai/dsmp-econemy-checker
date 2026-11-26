@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 /** The existing appearance controller with a roomy grid and a separate sample preview. */
-public final class AppearanceScreen extends Screen {
+public final class AppearanceScreen extends WindowedScreen {
     private final EconomyTrackerClient mod;
     private final Screen parent;
     private final AppearanceEditor editor;
@@ -18,13 +18,13 @@ public final class AppearanceScreen extends Screen {
     private final ViewCycle cycle=new ViewCycle();
     private final java.util.Deque<dev.dsmp.economy.appearance.TabAppearance[]> undo=new java.util.ArrayDeque<>(),redo=new java.util.ArrayDeque<>();
     private dev.dsmp.economy.appearance.TabAppearance[] styles(){return java.util.Arrays.stream(mod.config.appearances).map(dev.dsmp.economy.appearance.TabAppearance::copy).toArray(dev.dsmp.economy.appearance.TabAppearance[]::new);}
-    private void edit(Runnable action){var before=styles();String original=dev.dsmp.economy.design.DesignLook.JSON.toJson(before);action.run();if(!original.equals(dev.dsmp.economy.design.DesignLook.JSON.toJson(mod.config.appearances))){undo.addLast(before);while(undo.size()>64)undo.removeFirst();redo.clear();}rebuildWidgets();}
+    private void edit(Runnable action){var before=styles();String original=dev.dsmp.economy.design.DesignLook.JSON.toJson(before);String heading=editor.heading();action.run();if(!heading.equals(editor.heading()))tabTransition(1);if(!original.equals(dev.dsmp.economy.design.DesignLook.JSON.toJson(mod.config.appearances))){undo.addLast(before);while(undo.size()>64)undo.removeFirst();redo.clear();}rebuildWidgets();}
     private void history(boolean forward){var from=forward?redo:undo;var to=forward?undo:redo;if(!from.isEmpty()){to.addLast(styles());mod.config.appearances=from.removeLast();}rebuildWidgets();}
     public AppearanceScreen(EconomyTrackerClient mod,Screen parent){
         super(Component.literal(MenuLayout.BRAND+" / Appearance"));this.mod=mod;this.parent=parent;editor=new AppearanceEditor(mod.config);
     }
     private int formWidth(MenuLayout m){return width>=780?Math.min(460,(m.contentWidth()-m.gap()*2)/2):m.contentWidth();}
-    @Override protected void init(){
+    @Override protected void initMenu(){
         var m=MenuLayout.of(width,height);int form=formWidth(m);
         for(var c:editor.controls(()->{},this::onClose,this::cancel)){
             int x,y,w;
@@ -40,7 +40,7 @@ public final class AppearanceScreen extends Screen {
         }
         var back=new SettingsButton(m.doneX()-2*(m.actionWidth()+m.gap()),m.actionY(),m.actionWidth(),m.buttonHeight(),"Undo",false,mod.config.menuAccent,()->history(false));back.active=!undo.isEmpty();addRenderableWidget(back);var forward=new SettingsButton(m.doneX()-m.actionWidth()-m.gap(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Redo",false,mod.config.menuAccent,()->history(true));forward.active=!redo.isEmpty();addRenderableWidget(forward);
     }
-    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+    @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);int room=m.doneX()-2*(m.actionWidth()+m.gap())-m.margin()-m.gap();FestiveUi.textFit(g,width<620?"Style":MenuLayout.BRAND,m.margin(),m.top()>=64?15:9,room,0xFFF2EDF9,.9f,true);if(m.top()>=64)FestiveUi.textFit(g,editor.heading(),m.margin(),39,room,0xFFB8ABC9,.78f,false);
         int x=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin();
         int y=width>=780?m.top():m.row(5)+m.gap();
@@ -51,7 +51,7 @@ public final class AppearanceScreen extends Screen {
             try{TrackerRenderer.drawAll(g,editor.previewConfig(),sample,cycle,w-12,h-34,false,true,false);}
             finally{g.pose().popMatrix();g.disableScissor();}
         }
-        m.footer(g,editor.notice());super.extractRenderState(g,mx,my,delta);
+        m.footer(g,editor.notice());super.drawMenu(g,mx,my,delta);
     }
     @Override public void onClose(){
         if(mod.saveConfig()){if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();Minecraft.getInstance().gui.setScreen(parent);}else editor.failedSave();

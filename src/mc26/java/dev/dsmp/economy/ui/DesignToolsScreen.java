@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import java.util.*;
 
 /** Local appearance library, recovery, accessibility and searchable design settings. */
-public final class DesignToolsScreen extends Screen {
+public final class DesignToolsScreen extends WindowedScreen {
     private static final String[] TABS={"Profiles","Backups","Access","Search"};
     private final EconomyTrackerClient mod;private final Screen parent;private AccessOptions access=DesignAccess.current();
     private int tab,page;private String name="My look",query="",selected="",notice="Profiles and restores save immediately. Accessibility saves with Done.";private EditBox input;
@@ -23,9 +23,9 @@ public final class DesignToolsScreen extends Screen {
     private void io(Throwing operation){try{operation.run();}catch(Exception ex){notice=ex.getMessage()==null?"Could not update the design":ex.getMessage();}rebuildWidgets();}
     private interface Throwing{void run()throws Exception;}
     private void button(int col,int cols,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.x(col,cols),m.row(row),m.cellWidth(col,cols),m.buttonHeight(),label,selected,mod.config.menuAccent,action));}
-    @Override protected void init(){
+    @Override protected void initMenu(){
         var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->Minecraft.getInstance().gui.setScreen(parent)));
-        for(int i=0;i<TABS.length;i++){int target=i;button(i,4,0,TABS[i],tab==i,()->{tab=target;page=0;selected="";rebuildWidgets();});}
+        for(int i=0;i<TABS.length;i++){int target=i;button(i,4,0,TABS[i],tab==i,()->{if(tab!=target)tabTransition(target-tab);tab=target;page=0;selected="";rebuildWidgets();});}
         input=null;
         if(tab==0||tab==1){
             try{entries=DesignManager.archive().list(tab==1);}catch(Exception ex){entries=List.of();notice=ex.getMessage();}int pages=Math.max(1,(entries.size()+2)/3);page=Math.clamp(page,0,pages-1);
@@ -47,7 +47,7 @@ public final class DesignToolsScreen extends Screen {
     }
     private void apply(boolean backup,String id){io(()->{if(id.isEmpty())throw new IllegalArgumentException("Select a design first");var entry=DesignManager.archive().load(backup,id);DesignManager.apply(mod,entry.look());access=DesignAccess.current();if(parent instanceof DashboardScreen dashboard)dashboard.checkpoint();notice=(backup?"Restored ":"Applied ")+entry.name()+". Previous look backed up.";});}
     private void open(SettingSearch.Item item){Screen screen=switch(item.target()){case "privacy"->new TrackingControlsScreen(mod,this);case "scene"->new CharacterSceneScreen(mod,this,MenuBackgrounds.current()).openTab(item.tab());case "background"->new MenuBackgroundScreen(mod,this).openTab(item.tab());case "appearance"->new AppearanceScreen(mod,this);case "text"->new TextBoxesScreen(mod,this);case "layout"->new TrackerScreen(mod);case "inventory"->new InventoryThemesScreen(mod,this);default->null;};if(screen==null){tab=item.tab();page=0;rebuildWidgets();}else Minecraft.getInstance().gui.setScreen(screen);}
-    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){FestiveUi.background(g,width,height,mod.config,false);var m=MenuLayout.of(width,height);m.header(g,"Design tools / "+TABS[tab]);FestiveUi.surface(g,m.margin()-5,m.top()-5,m.contentWidth()+10,Math.min(height-26,m.row(7))-m.top()+5,DesignAccess.contrast()?0xFF07101B:0xDC0D1421);m.footer(g,notice);super.extractRenderState(g,mx,my,delta);}
+    @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){FestiveUi.background(g,width,height,mod.config,false);var m=MenuLayout.of(width,height);m.header(g,"Design tools / "+TABS[tab]);FestiveUi.surface(g,m.margin()-5,m.top()-5,m.contentWidth()+10,Math.min(height-26,m.row(7))-m.top()+5,DesignAccess.contrast()?0xFF07101B:0xDC0D1421);m.footer(g,notice);super.drawMenu(g,mx,my,delta);}
     @Override public void onClose(){try{DesignManager.saveAccess(mod,access);Minecraft.getInstance().gui.setScreen(parent);}catch(Exception ex){notice=ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}
 }

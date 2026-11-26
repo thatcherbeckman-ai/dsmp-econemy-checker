@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 /** A live cosmetic draft, with separate scene, appearance, motion and PNG controls. */
-public final class MenuBackgroundScreen extends Screen {
+public final class MenuBackgroundScreen extends WindowedScreen {
     private static final String[] TABS={"Scenes","Look","Motion","Custom"};
     private final EconomyTrackerClient mod;private final Screen parent;
     private MenuBackgroundOptions draft=MenuBackgrounds.current();
@@ -22,9 +22,9 @@ public final class MenuBackgroundScreen extends Screen {
     public void sceneSaved(MenuBackgroundOptions saved){draft=saved.copy();page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;notice="Character scene saved. Use the editor for a full-screen preview.";rebuildWidgets();}
     private int formWidth(MenuLayout m){return width>=780?(m.contentWidth()-m.gap()*2)/2:m.contentWidth();}
     private void button(int col,int columns,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);int fw=formWidth(m),x=m.margin()+col*(fw+m.gap())/columns,w=(fw+m.gap())/columns-m.gap();addRenderableWidget(new SettingsButton(x,m.row(row),w,m.buttonHeight(),label,selected,mod.config.menuAccent,action));}
-    private void change(Runnable action){action.run();draft.validate();rebuildWidgets();}
+    private void change(Runnable action){int previousTab=tab;action.run();if(tab!=previousTab)tabTransition(tab-previousTab);draft.validate();rebuildWidgets();}
     private void select(MenuScene scene){change(()->{if(draft.scene==MenuScene.ORIGINAL&&scene!=MenuScene.ORIGINAL){draft.overlay=30;draft.cards=80;draft.vignette=1;draft.parallax=true;}draft.scene=scene;});}
-    @Override protected void init(){
+    @Override protected void initMenu(){
         var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->Minecraft.getInstance().gui.setScreen(parent)));
         for(int i=0;i<TABS.length;i++){int target=i;button(i,4,0,TABS[i],tab==i,()->change(()->tab=target));}
         if(tab==0){
@@ -52,7 +52,7 @@ public final class MenuBackgroundScreen extends Screen {
     }
     private void triple(int row,String name,int value,Runnable less,Runnable reset,Runnable more){button(0,3,row,name+" -",false,()->change(less));button(1,3,row,name+": "+value+"%",false,()->change(reset));button(2,3,row,name+" +",false,()->change(more));}
     private void importPng(){LocalImagePicker.choose(path->{if(path==null||Minecraft.getInstance().gui.screen()!=this)return;try{draft.customImage=MenuBackgrounds.store().importPng(Path.of(path));select(MenuScene.CUSTOM);notice="PNG copied locally. Done saves your selection.";}catch(Exception ex){notice="Import failed: "+ex.getMessage();}},error->{if(Minecraft.getInstance().gui.screen()==this)notice=error;});}
-    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+    @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Menu backgrounds / "+draft.scene.label);
         int form=formWidth(m);FestiveUi.surface(g,m.margin()-6,m.top()-6,form+12,Math.min(height-24,m.row(tab==1?7:6)+4)-m.top()+6,0xD40D1421);
         int left=width>=780?m.margin()+form+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(7)+m.gap(),w=width-m.margin()-left,h=height-top-32;
@@ -67,7 +67,7 @@ public final class MenuBackgroundScreen extends Screen {
             FestiveUi.text(g,"Your menu",left+28,sampleY+9,0xFFF0E6F2,.9f,true);FestiveUi.text(g,"Cards and text stay readable",left+28,sampleY+27,0xFFBAC1D3,.68f,false);
         }
 
-        m.footer(g,notice);super.extractRenderState(g,mx,my,delta);
+        m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
     @Override public void onClose(){try{MenuBackgrounds.save(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException|IllegalArgumentException ex){notice="Save failed: "+ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}

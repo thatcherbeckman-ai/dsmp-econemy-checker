@@ -10,7 +10,7 @@ public final class WelcomeBanner {
         FestiveUi.panel(g,x,y,width,height,accent);
         UiSurfaces.fill(g,x+1,y+1,width-2,height-2,0x16000000|accent);
         var client=net.minecraft.client.Minecraft.getInstance();int avatarWidth=Math.min(78,width/4);
-        if(client.player!=null)net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,x+4,y+2,x+avatarWidth,y+height-2,Math.max(15,(height-8)/2),.0625f,x+avatarWidth/2f,y+height/3f,client.player);
+        if(client.player!=null)GuiEntities.player(g,x+4,y+2,x+avatarWidth,y+height-2,Math.max(15,(height-8)/2),.0625f,x+avatarWidth/2f,y+height/3f,client.player);
         int textX=x+avatarWidth+8,room=width-avatarWidth-16;
         String user=client.getUser().getName();float size=height>=70?1.5f:1f;
         String welcome="Welcome, "+user;

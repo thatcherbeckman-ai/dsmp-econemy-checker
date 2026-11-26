@@ -14,6 +14,7 @@ c33a39039f286b8f296d86c038e50ed50b8dce9750498c21d84893f8967f5a2f  economy-tracke
 f16c2f57308a331b1c77d65fb5bc517447f68ce56c9c08250d9994ad07309db1  economy-tracker-0.17.0-mc26.3.jar
 60f8ca2640978b3e10f7000fb3f0af95ee1c45295650599f476fd6287598960d  economy-tracker-0.17.1-mc26.3.jar
 e1bef3827e8e7bd53ee7c3ea5dc993a2e70bd3a8bede1d1691d2ceff79162dce  economy-tracker-0.17.2-mc26.3.jar
+9e4dc0e7f7bfbac54a16a5b6bf145f3e9059ad89875ae85aae677b5fc608af39  economy-tracker-0.18.0-mc26.3.jar
 4aef2ac76920d159b9d78779e380f68b3a34989970e6a2913e4bcde09a5d86a1  economy-tracker-0.2.0-mc1.21.11.jar
 534d580b2e0cfcb47204226d5919789ce78692304f79ba9c5bd96a053e8f837c  economy-tracker-0.3.0-mc1.21.11.jar
 c0a78dc33f1746c938fe6ae2b168fb3afd1fc8c62d9f12474833515a7eefcfc0  economy-tracker-0.4.0-mc1.21.11.jar
@@ -31,7 +32,7 @@ a2ca79ff5124bc1bfe08dafbb8ba6afd11bb5dc9e6269e7089b8be6347083de7  economy-tracke
 5e53ce46269dc5347a70457fcc060ca2fdcc0f1cb02182aa1d6e791fc1896417  economy-tracker-0.8.0-mc1.21.11.jar
 6447e1a2ae3da343a15b80e4f4221d5c82c6b009d1c3ad57fa5b1bc7d7a125c7  economy-tracker-0.9.0-mc1.21.11.jar
 c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c  economy-tracker-1.21.11.jar
-e1bef3827e8e7bd53ee7c3ea5dc993a2e70bd3a8bede1d1691d2ceff79162dce  economy-tracker-26.3.jar
+9e4dc0e7f7bfbac54a16a5b6bf145f3e9059ad89875ae85aae677b5fc608af39  economy-tracker-26.3.jar
 be9952e61f25f97c0f87ae5954b0e4597cde5f84e766dadae9dc27855b7a235e  preview-0.11.0-text-lines.png
 9dfe17c96d0cd436ee912de89b7288e054c33881ae8d5acc0dcbfe2b033656c1  preview-0.12.1-settings.png
 6f65bdadd7bd304cb478b4900b92bb3749e0411ae12ad93c518fec2e26981e3b  preview-0.13.0-inventory-themes.png
@@ -48,5 +49,6 @@ bcfaf589f07d7a55c5e3e5c6d33e64d3f4b0f1642225f2dd21962d99abf144d5  preview-0.17.0
 8070141448837242f48586dbe7cb0f54234131e7422ca9b1f92f844f8c5c0c04  preview-0.17.1-full-label-sidebar.png
 fa62c1af73462169bb8ecc2ee59b231f03ecdb46c12b7fd8d63f6a3d6bfc9e44  preview-0.17.2-balance-history.png
 a38d85aef14552a53252cb27372feef9e95c18ffc4cd67007cdc88f99d5725f5  preview-0.17.2-tracking-controls.png
+5954e47d02a35482bc010497734a98d153be20f15d6d0c8eca319d7f2256bba1  preview-0.18.0-windowed-menu.png
 5a25bd3d9904e5668993cc36b81a8e7001ae903920d301497f40650d9c6ce9fc  preview-0.9.0-modules.png
 0b05074c3354fa723d32389dcf26ed859a922210c4c4bbbc3101dfd0ad7da30b  preview-0.9.0-overview.png

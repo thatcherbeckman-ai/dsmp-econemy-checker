@@ -31,7 +31,7 @@ public final class CharacterSceneRenderer {
             var tilt=new Quaternionf().rotateX((float)Math.toRadians(c.tilt));
             var rotation=new Quaternionf().rotateZ((float)Math.PI).mul(tilt);
             int half=Math.max(8,(int)(p.bodyHeight()*.53));
-            g.entity(state,size,new Vector3f(0,.9f,0),rotation,tilt,cx-half,feet-p.bodyHeight()-4,cx+half,feet+4);
+            GuiEntities.entity(g,state,size,new Vector3f(0,.9f,0),rotation,tilt,cx-half,feet-p.bodyHeight()-4,cx+half,feet+4);
             g.nextStratum();
             if(c.matchLighting){int color=SceneLighting.of(options.scene).color();g.fillGradient(originX,originY,originX+width,originY+height,0x00000000|color,0x18000000|color);}
             if(!CinematicTerrain.usesBlocks(options)&&!CinematicTerrain.usesIllustrated(options)&&c.base!=CharacterComposition.Base.BLOCK&&(c.platform==CharacterComposition.Platform.GRASS||c.platform==CharacterComposition.Platform.MOSS))for(int i=0;i<7;i++){int x=cx-18+i*6,y=feet+3;g.fill(x,y-3-i%3,x+1,y+1,0xA05C784B);g.fill(x+1,y-1,x+3,y+1,0xA06C8654);}

@@ -34,7 +34,7 @@ public record MenuLayout(int width,int height,int margin,int gap,int buttonHeigh
             int gap=width>=620&&height>=480?10:6,left=side+gap+4,top=height>=480?84:60;
             return new Dashboard(width,height,side,left,width-left-gap-4,Math.clamp((height-top-30)/6,25,68),top,gap);
         }
-        public int navStep(){return Math.clamp((height-bodyTop-12)/12,14,42);}
+        public int navStep(){return Math.clamp((height-bodyTop-44)/12,14,32);}
         public int navY(int index){return bodyTop+index*navStep();}
         public int navHeight(){return Math.max(12,navStep()-Math.min(gap,Math.max(2,navStep()/4)));}
         public int rowY(int index){return bodyTop+index*rowHeight;}

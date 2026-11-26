@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import java.util.*;
 
 /** Paginated holiday choices and an isolated live draft; Cancel never applies the draft. */
-public final class InventoryThemesScreen extends Screen {
+public final class InventoryThemesScreen extends WindowedScreen {
     private static final int PAGE_SIZE=6;
     private final EconomyTrackerClient mod;
     private final Screen parent;
@@ -24,7 +24,7 @@ public final class InventoryThemesScreen extends Screen {
     private int cell(MenuLayout m,int columns){return (formWidth(m)+m.gap())/columns-m.gap();}
     private void change(Runnable action){action.run();rebuildWidgets();}
     private void button(int x,int y,int w,int h,String label,boolean selected,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,selected,mod.config.menuAccent,action));}
-    @Override protected void init(){
+    @Override protected void initMenu(){
         var m=MenuLayout.of(width,height);button(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,this::onClose);button(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,()->Minecraft.getInstance().gui.setScreen(parent));
         var themes=InventoryTheme.values();int from=page*PAGE_SIZE;
         for(int i=0;i<PAGE_SIZE&&from+i<themes.length;i++){var theme=themes[from+i];button(x(m,i%2,2),m.row(i/2),cell(m,2),m.buttonHeight(),theme.label,draft.theme()==theme,()->change(()->draft=draft.theme(theme)));}
@@ -38,7 +38,7 @@ public final class InventoryThemesScreen extends Screen {
         button(x(m,2,3),m.row(5),cell(m,3),m.buttonHeight(),"Faster",false,()->change(()->draft=draft.speed(draft.speed()+25)));
     }
     private int pages(){return (InventoryTheme.values().length+PAGE_SIZE-1)/PAGE_SIZE;}
-    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+    @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Inventory themes / "+draft.theme().label);
         int left=width>=780?m.margin()+formWidth(m)+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(6)+m.gap();
         int w=width-m.margin()-left,h=height-top-32;
@@ -55,10 +55,10 @@ public final class InventoryThemesScreen extends Screen {
                     g.text(Minecraft.getInstance().font,Component.translatable("container.crafting"),97,6,draft.theme()==InventoryTheme.VANILLA?0xFF404040:0xFFE9EDF6,false);
                 }finally{g.pose().popMatrix();}
                 // Entity extraction consumes absolute GUI bounds, unlike the panel's scaled fills.
-                if(Minecraft.getInstance().player!=null)net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(g,x+(int)(26*scale),y+(int)(8*scale),x+(int)(75*scale),y+(int)(78*scale),Math.max(1,(int)(30*scale)),.0625f,x+50*scale,y+25*scale,Minecraft.getInstance().player);
+                if(Minecraft.getInstance().player!=null)GuiEntities.player(g,x+(int)(26*scale),y+(int)(8*scale),x+(int)(75*scale),y+(int)(78*scale),Math.max(1,(int)(30*scale)),.0625f,x+50*scale,y+25*scale,Minecraft.getInstance().player);
             }finally{g.disableScissor();}
         }
-        m.footer(g,notice);super.extractRenderState(g,mx,my,delta);
+        m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
     @Override public void onClose(){try{InventoryThemes.save(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException ex){notice="Save failed: "+ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}

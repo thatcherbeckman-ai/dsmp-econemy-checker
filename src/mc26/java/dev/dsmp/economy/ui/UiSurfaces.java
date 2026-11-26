@@ -14,10 +14,12 @@ import javax.imageio.ImageIO;
 
 /** Three tiny antialiased masks, uploaded once and stretched with protected rounded corners. */
 final class UiSurfaces {
-    private static final Identifier[] MASKS=new Identifier[4];
+    private static final Identifier[] MASKS=new Identifier[6];
     private static boolean failed;
     private UiSurfaces(){}
     static void fill(GuiGraphicsExtractor g,int x,int y,int w,int h,int color){draw(g,0,x,y,w,h,color);}
+    static void card(GuiGraphicsExtractor g,int x,int y,int w,int h,int color){draw(g,4,x,y,w,h,color);}
+    static void cardOutline(GuiGraphicsExtractor g,int x,int y,int w,int h,int color){draw(g,5,x,y,w,h,color);}
     static void outline(GuiGraphicsExtractor g,int x,int y,int w,int h,int color){draw(g,1,x,y,w,h,color);}
     static void corners(GuiGraphicsExtractor g,int x,int y,int w,int h,int color){draw(g,3,x,y,w,h,color);}
     static void shadow(GuiGraphicsExtractor g,int x,int y,int w,int h){draw(g,2,x-2,y,w+4,h+4,0x60000000);}
@@ -26,7 +28,9 @@ final class UiSurfaces {
             var hi=new BufferedImage(128,128,BufferedImage.TYPE_INT_ARGB);var p=hi.createGraphics();
             try{
                 p.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);p.scale(4,4);p.setColor(Color.WHITE);
-                if(i==0)p.fill(new RoundRectangle2D.Double(.5,.5,31,31,14,14));
+                if(i==4)p.fill(new RoundRectangle2D.Double(.5,.5,31,31,8,8));
+                else if(i==5){p.setStroke(new BasicStroke(1));p.draw(new RoundRectangle2D.Double(.5,.5,31,31,8,8));}
+                else if(i==0)p.fill(new RoundRectangle2D.Double(.5,.5,31,31,14,14));
                 else if(i==1){p.setStroke(new BasicStroke(1));p.draw(new RoundRectangle2D.Double(.5,.5,31,31,14,14));}
                 else if(i==3){p.fillRect(0,0,32,32);p.setComposite(AlphaComposite.Clear);p.fill(new RoundRectangle2D.Double(.5,.5,31,31,14,14));}
                 else for(int spread=3;spread>=0;spread--){p.setColor(new Color(255,255,255,30+spread*5));p.fill(new RoundRectangle2D.Double(4-spread,4-spread,24+spread*2,24+spread*2,12+spread*2,12+spread*2));}

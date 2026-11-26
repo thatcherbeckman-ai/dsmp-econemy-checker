@@ -17,7 +17,11 @@ public final class SettingsButton extends Button {
     }
     public SettingsButton navigation(){leading=true;setX(cellX);setWidth(Math.min(142,getWidth()));setHeight(Math.min(18,getHeight()));setY(cellY+(cellHeight-getHeight())/2);return this;}
     public dev.dsmp.economy.design.FullLabel.Fit labelLayout(){return FestiveUi.labelLayout(getMessage().getString(),getWidth(),getHeight(),selected||getMessage().getString().equals("Save")||getMessage().getString().equals("Done"),leading);}
-    public boolean fullLabelFits(){var fit=labelLayout();boolean bold=selected||getMessage().getString().equals("Save")||getMessage().getString().equals("Done");int padding=leading?16:getWidth()<60?8:14;for(String line:fit.lines())if(MenuText.width(line,bold)*fit.scale()>Math.max(1,getWidth()-padding)+.1)return false;return fit.lines().size()*fit.lineHeight()*fit.scale()<=Math.max(1,getHeight()-4)+.1;}
+    public boolean fullLabelFits(){var fit=labelLayout();boolean bold=selected||getMessage().getString().equals("Save")||getMessage().getString().equals("Done");int padding=leading?28:getWidth()<60?8:14;for(String line:fit.lines())if(MenuText.width(line,bold)*fit.scale()>Math.max(1,getWidth()-padding)+.1)return false;return fit.lines().size()*fit.lineHeight()*fit.scale()<=Math.max(1,getHeight()-4)+.1;}
+    @Override public void playDownSound(net.minecraft.client.sounds.SoundManager sounds){
+        if(net.minecraft.client.Minecraft.getInstance().gui.screen() instanceof WindowedScreen&&(leading||java.util.Set.of("Scenes","Look","Motion","Custom","Scenery","Player","Text","Layout","Light","Profiles","Backups","Access","Search","Row","Image").contains(getMessage().getString())))return;
+        super.playDownSound(sounds);
+    }
     @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float delta){
         long now=System.nanoTime();float target=isHovered()?1:0;float elapsed=Math.min(.1f,(now-lastFrame)/1e9f);lastFrame=now;
         hover=MenuBackgrounds.visible().animations&&!dev.dsmp.economy.design.DesignAccess.reduced()?hover+(target-hover)*(1-(float)Math.exp(-elapsed*18)):target;

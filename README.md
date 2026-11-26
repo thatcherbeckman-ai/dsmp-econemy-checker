@@ -1,5 +1,15 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.18.0** changes the O-key menu into a **centered window** with the game visible around it. It uses the reference's dark burgundy/red palette, slim warm borders, small rounded rectangular controls, unboxed sidebar icons/text, Christmas light garlands and a bottom player/account card. Sidebar tabs have no button backgrounds or outlines; the selected tab uses a small red marker and keyboard focus uses a short underline. Their original click targets remain intact. Your own name, skin and existing sections remain in place. The window scales to the Minecraft GUI size and keeps a margin on every side.
+
+Sidebar and settings-tab changes slide in with a short **180 ms ease-out** transition and a soft built-in **bubble pop**. The sound uses Minecraft's **UI** sound category and its volume settings. **Design tools → Access → Reduced motion** removes the sliding; it does not change your audio volume. Clicking the active tab does not replay the transition. Ordinary controls keep their native click feedback.
+
+The main menu and its settings dialogs use the same window coordinates for rendering, clicks, scrolling, text selection and scene-preview dragging. Outside-window clicks are ignored, and changing tabs or reopening a parent dialog keeps the window size stable. Existing custom scenery still appears inside the window when selected. HUD layout, text-box placement, scene drag/full-preview and player-background presentation keep their full-size workspaces so their screen positions remain accurate.
+
+This update changes presentation and local UI feedback. Existing wallet/history files, recording opt-outs, loans and other recorded data keep their existing formats and behavior. It adds no server commands, transfers or automation.
+
+[Windowed menu with unboxed sidebar](downloads/preview-0.18.0-windowed-menu.png) — actual native Minecraft capture, isolated offline sample profile.
+
 Version **0.17.2** adds balance history to **O → Overview**. Select **1D**, **7D**, **28D** or **365D** above the balance/received/paid/profit cards to see the balance change and balance graph for that rolling period. The range applies to balance history only; the other cards are labeled as recorded totals, not period-specific figures. The current balance remains visible separately.
 
 Changes use actual saved readings, including the last known reading at or before the period start when available. **Partial history** means the change begins at the first available reading inside the period. With no readings or only one reading, no change is invented. Existing retained balance readings are imported; installing the update cannot recover history that was never recorded. The graph spaces readings by actual time, and the interface refreshes while open.
@@ -113,7 +123,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.17.2 download](downloads/economy-tracker-0.17.2-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.18.0 download](downloads/economy-tracker-0.18.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -298,3 +308,5 @@ The 0.17.0 design checks cover profile allowlisting/independent copies and name 
 The 0.17.1 label checks cover unbroken names, Unicode, whole-word wrapping and compact dimensions across accessibility scales. The native suite runs 492 menu layout cases (four GUI sizes at three text scales), checks full button-label preservation and text bounds, verifies the compact four-pixel sidebar alignment, and retains profile, backup, drag, lighting, accessibility and Start/Esc checks.
 
 The 0.17.2 checks cover the four rolling balance ranges, exact/partial/missing opening coverage, timestamp order and duplicate readings, overflow, year retention/compaction, local account/server isolation, atomic round trips and corrupt/symlink preservation. Recording opt-out checks cover separate persistence, unchanged prior results, wallet/payment/tax updates while paused and appearance-profile isolation. All **172 regression tests** pass against both compiled sources and the packaged JAR. Native verification includes **552 responsive layouts**, all four balance-range selections and history persistence, plus opt-out Save/Cancel/persistence, custom-result blocking, custom balance readings, and hidden overview/HUD views. The native run uses an isolated offline test account; live DonutSMP capture has not been retested.
+
+The 0.18.0 checks add centered-window bounds and coordinate round trips across small/large viewports, monotone slide completion/restarts/reduced motion, and transformed native player-preview bounds. All **179 regression tests** pass against sources and the packaged JAR. Native checks cover **552 menu layouts**, real inverse-scaled navigation and moving-body control clicks, outside-click rejection, stable tab/dialog rebuilds, the UI sound category, all six rounded-surface masks, player previews, existing scene/HUD workflows and balance-history/recording-off behavior. Native audio output is silent in the isolated smoke profile; the pop uses Minecraft’s built-in UI sound asset.

@@ -7,12 +7,12 @@ ROOT=Path(__file__).resolve().parents[1];CACHE=prepare();BUILD=ROOT/'build/mc26'
 # Menus/fonts and built-in pack metadata are enough for this silent offline smoke.
 meta=json.loads((CACHE/'version.json').read_text());asset=meta['assetIndex'];index=get(CACHE/'assets/indexes'/f"{asset['id']}.json",asset['url'],sha1=asset['sha1'])
 import concurrent.futures
-objects=json.loads(index.read_text())['objects'];selected=[o for name,o in objects.items() if not name.startswith(('minecraft/sounds/','minecraft/lang/')) or name=='minecraft/lang/en_us.json']
+objects=json.loads(index.read_text())['objects'];selected=[o for name,o in objects.items() if not name.startswith(('minecraft/sounds/','minecraft/lang/')) or name in ('minecraft/lang/en_us.json','minecraft/sounds/ui/hud/hud_bubble.ogg')]
 with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
  futures=[executor.submit(get,CACHE/'assets/objects'/o['hash'][:2]/o['hash'],'https://resources.download.minecraft.net/'+o['hash'][:2]+'/'+o['hash'],o['hash']) for o in selected]
  for future in futures:future.result()
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME') or (ROOT.parent/'.tools/economy-jdk25-path.txt').read_text().strip()
-mod=ROOT/'build/economy-tracker-0.17.2-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
+mod=ROOT/'build/economy-tracker-0.18.0-mc26.3.jar';classes=BUILD/'probe-classes';classes.mkdir(exist_ok=True)
 cp=str(mod)+os.pathsep+(BUILD/'classpath.txt').read_text()
 subprocess.run([str(Path(jdk)/'bin/javac'),'--release','25','-cp',cp,'-d',str(classes),str(ROOT/'tools/mc26-smoke/NativeProbe.java')],check=True)
 (game/'mods').mkdir(parents=True,exist_ok=True)

@@ -14,7 +14,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import com.mojang.blaze3d.platform.InputConstants;
 
 /** Scene composer: a copied preference draft plus a preview of the account's actual character. */
-public final class CharacterSceneScreen extends Screen {
+public final class CharacterSceneScreen extends WindowedScreen {
     private static final String[] TABS={"Scenery","Player","Text","Layout","Light"};
     private final EconomyTrackerClient mod;private final Screen parent;private MenuBackgroundOptions draft;
     private final SceneHistory history=new SceneHistory();private final SceneDragController drag=new SceneDragController(()->draft,before->recordDrag(before));
@@ -32,10 +32,10 @@ public final class CharacterSceneScreen extends Screen {
     private int x(MenuLayout m,int col,int cols){return m.margin()+col*(formWidth(m)+m.gap())/cols;}
     private int cw(MenuLayout m,int cols){return (formWidth(m)+m.gap())/cols-m.gap();}
     private void button(int col,int cols,int row,String label,boolean selected,Runnable action){var m=MenuLayout.of(width,height);addRenderableWidget(new SettingsButton(x(m,col,cols),m.row(row),cw(m,cols),m.buttonHeight(),label,selected,mod.config.menuAccent,action));}
-    private void change(Runnable action){if(!fields())return;var before=draft.copy();action.run();draft.validate();recordDrag(before);rebuildWidgets();}
+    private void change(Runnable action){if(!fields())return;var before=draft.copy();int previousTab=tab;action.run();if(tab!=previousTab)tabTransition(tab-previousTab);draft.validate();recordDrag(before);rebuildWidgets();}
     private void triple(int row,String name,int value,Runnable less,Runnable reset,Runnable more){button(0,3,row,name+" -",false,()->change(less));button(1,3,row,name+": "+value,false,()->change(reset));button(2,3,row,name+" +",false,()->change(more));}
     private EditBox field(int col,int cols,int row,String value,int max,String hint){var m=MenuLayout.of(width,height);var input=new SettingsEditBox(font,x(m,col,cols),m.row(row),cw(m,cols),m.buttonHeight(),Component.literal(hint));input.setMaxLength(max);input.setHint(Component.literal(hint));input.setValue(value);addRenderableWidget(input);return input;}
-    @Override protected void init(){
+    @Override protected void initMenu(){
         title=subtitle=titleColor=subtitleColor=null;var m=MenuLayout.of(width,height);var c=draft.character;
         addRenderableWidget(new SettingsButton(m.doneX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Done",true,mod.config.menuAccent,this::onClose));addRenderableWidget(new SettingsButton(m.cancelX(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Cancel",false,mod.config.menuAccent,()->Minecraft.getInstance().gui.setScreen(parent)));
         undoButton=new SettingsButton(m.doneX()-2*(m.actionWidth()+m.gap()),m.actionY(),m.actionWidth(),m.buttonHeight(),"Undo",false,mod.config.menuAccent,()->undo(false));undoButton.active=history.canUndo();addRenderableWidget(undoButton);redoButton=new SettingsButton(m.doneX()-m.actionWidth()-m.gap(),m.actionY(),m.actionWidth(),m.buttonHeight(),"Redo",false,mod.config.menuAccent,()->undo(true));redoButton.active=history.canRedo();addRenderableWidget(redoButton);
@@ -79,7 +79,7 @@ public final class CharacterSceneScreen extends Screen {
     private boolean fields(){if(title==null)return true;try{var next=draft.character.copy();next.title=title.getValue().replace("\\n","\n");next.subtitle=subtitle.getValue().replace("\\n","\n");next.titleColor=dev.dsmp.economy.text.TextBox.rgb(titleColor.getValue());next.subtitleColor=dev.dsmp.economy.text.TextBox.rgb(subtitleColor.getValue());next.validate();var before=draft.copy();draft.character.title=next.title;draft.character.subtitle=next.subtitle;draft.character.titleColor=next.titleColor;draft.character.subtitleColor=next.subtitleColor;recordDrag(before);return true;}catch(IllegalArgumentException ex){notice=ex.getMessage();return false;}}
     private void fullPreview(){if(fields())Minecraft.getInstance().gui.setScreen(new CharacterPreviewScreen(mod,this,draft));}
     private void importPng(){if(!fields())return;LocalImagePicker.choose(path->{if(path==null||Minecraft.getInstance().gui.screen()!=this)return;try{var before=draft.copy();draft.customImage=MenuBackgrounds.store().importPng(Path.of(path));draft.scene=MenuScene.CUSTOM;notice="PNG copied. Done saves your scene.";recordDrag(before);rebuildWidgets();}catch(Exception ex){notice="Import failed: "+ex.getMessage();}},error->notice=error);}
-    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
+    @Override protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config,false);int room=m.doneX()-2*(m.actionWidth()+m.gap())-m.margin()-m.gap();FestiveUi.textFit(g,width<620?"Scene":MenuLayout.BRAND,m.margin(),m.top()>=64?15:9,room,0xFFF2EDF9,.9f,true);if(m.top()>=64)FestiveUi.textFit(g,"Character scene / "+draft.scene.label,m.margin(),39,room,0xFFB8ABC9,.78f,false);
         int form=formWidth(m);FestiveUi.surface(g,m.margin()-6,m.top()-6,form+12,Math.min(height-24,m.row(7)+4)-m.top()+6,0xDA0D1421);
         int left=width>=780?m.margin()+form+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(7)+m.gap(),w=width-m.margin()-left,h=height-top-32;
@@ -89,12 +89,12 @@ public final class CharacterSceneScreen extends Screen {
             var preview=draft.copy();preview.character.enabled=true;CharacterSceneRenderer.draw(g,ix,iy,iw,ih,preview);drag.guides(g,new SceneDragController.Viewport(ix,iy,iw,ih));g.disableScissor();UiSurfaces.corners(g,ix,iy,iw,ih,0xFF111827);
             FestiveUi.text(g,"YOUR CHARACTER / PREVIEW",left+14,top+9,0xFFE8DFF4,.7f,true);
         }
-        m.footer(g,notice);super.extractRenderState(g,mx,my,delta);
+        m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
     private SceneDragController.Viewport viewport(){var m=MenuLayout.of(width,height);int form=formWidth(m),left=width>=780?m.margin()+form+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(7)+m.gap(),w=width-m.margin()-left,h=height-top-32;return h>=80?new SceneDragController.Viewport(left+8,top+28,w-16,h-36):new SceneDragController.Viewport(0,0,0,0);}
-    @Override public boolean mouseClicked(MouseButtonEvent event,boolean doubled){if(super.mouseClicked(event,doubled))return true;return event.button()==InputConstants.MOUSE_BUTTON_LEFT&&drag.click(viewport(),event.x(),event.y());}
-    @Override public boolean mouseDragged(MouseButtonEvent event,double dx,double dy){return drag.drag(viewport(),event.x(),event.y())||super.mouseDragged(event,dx,dy);}
-    @Override public boolean mouseReleased(MouseButtonEvent event){if(drag.release()){rebuildWidgets();return true;}return super.mouseReleased(event);}
+    @Override protected boolean menuMouseClicked(MouseButtonEvent event,boolean doubled){if(super.menuMouseClicked(event,doubled))return true;return event.button()==InputConstants.MOUSE_BUTTON_LEFT&&drag.click(viewport(),event.x(),event.y());}
+    @Override protected boolean menuMouseDragged(MouseButtonEvent event,double dx,double dy){return drag.drag(viewport(),event.x(),event.y())||super.menuMouseDragged(event,dx,dy);}
+    @Override protected boolean menuMouseReleased(MouseButtonEvent event){if(drag.release()){rebuildWidgets();return true;}return super.menuMouseReleased(event);}
     @Override public void onClose(){if(!fields())return;try{MenuBackgrounds.save(draft);if(parent instanceof MenuBackgroundScreen backgrounds)backgrounds.sceneSaved(draft);Minecraft.getInstance().gui.setScreen(parent);}catch(java.io.IOException ex){notice="Save failed: "+ex.getMessage();}}
     @Override public boolean isPauseScreen(){return false;}
 }
