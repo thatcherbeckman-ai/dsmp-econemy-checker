@@ -21,7 +21,8 @@ public enum MenuScene {
     FLOATING_ISLANDS("Floating islands","fantasy",4,Particles.STARS),
     BAMBOO_FOREST("Bamboo forest","fantasy",5,Particles.FIREFLIES),
     GRADIENT("Simple gradient","",0,Particles.NONE),
-    CUSTOM("Your imported PNG","",0,Particles.PETALS);
+    CUSTOM("Your imported PNG","",0,Particles.PETALS),
+    MINECRAFT_SNOW("Minecraft snow overlook","",0,Particles.NONE);
     public enum Particles {AUTO,NONE,PETALS,SNOW,FIREFLIES,STARS,LEAVES,RAIN,CONFETTI}
     public final String label,atlas;public final int tile;public final Particles particles;
     MenuScene(String label,String atlas,int tile,Particles particles){this.label=label;this.atlas=atlas;this.tile=tile;this.particles=particles;}

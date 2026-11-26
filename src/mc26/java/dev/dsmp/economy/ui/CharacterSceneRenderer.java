@@ -24,7 +24,8 @@ public final class CharacterSceneRenderer {
         var p=CharacterPlacement.of(c,width,height);int cx=originX+p.centerX(),feet=originY+p.feetY();
         g.enableScissor(originX,originY,originX+width,originY+height);
         try{
-            ScenePlatformRenderer.draw(g,cx,feet,originY+height,p.platformSize(),options.scene,c);
+            if(CinematicTerrain.usesIllustrated(options))SceneForegroundRenderer.draw(g,originX,originY,width,height,options);
+            else if(!CinematicTerrain.usesBlocks(options))ScenePlatformRenderer.draw(g,cx,feet,originY+height,p.platformSize(),options.scene,c);
             AvatarRenderState state=state(c,options);
             float size=p.bodyHeight()/1.8f;
             var tilt=new Quaternionf().rotateX((float)Math.toRadians(c.tilt));
@@ -33,7 +34,8 @@ public final class CharacterSceneRenderer {
             g.entity(state,size,new Vector3f(0,.9f,0),rotation,tilt,cx-half,feet-p.bodyHeight()-4,cx+half,feet+4);
             g.nextStratum();
             if(c.matchLighting){int color=SceneLighting.of(options.scene).color();g.fillGradient(originX,originY,originX+width,originY+height,0x00000000|color,0x18000000|color);}
-            if(c.base!=CharacterComposition.Base.BLOCK&&(c.platform==CharacterComposition.Platform.GRASS||c.platform==CharacterComposition.Platform.MOSS))for(int i=0;i<7;i++){int x=cx-18+i*6,y=feet+3;g.fill(x,y-3-i%3,x+1,y+1,0xA05C784B);g.fill(x+1,y-1,x+3,y+1,0xA06C8654);}
+            if(!CinematicTerrain.usesBlocks(options)&&!CinematicTerrain.usesIllustrated(options)&&c.base!=CharacterComposition.Base.BLOCK&&(c.platform==CharacterComposition.Platform.GRASS||c.platform==CharacterComposition.Platform.MOSS))for(int i=0;i<7;i++){int x=cx-18+i*6,y=feet+3;g.fill(x,y-3-i%3,x+1,y+1,0xA05C784B);g.fill(x+1,y-1,x+3,y+1,0xA06C8654);}
+            if(c.nameplate){var name=Component.literal(Minecraft.getInstance().getUser().getName());float scale=Math.min(Math.max(.7f,p.bodyHeight()/125f),(width-8)/(float)Math.max(1,Minecraft.getInstance().font.width(name)+16));int labelWidth=Math.round(Minecraft.getInstance().font.width(name)*scale),labelX=Math.clamp(cx-labelWidth/2,originX+4,Math.max(originX+4,originX+width-labelWidth-4));g.pose().pushMatrix();g.pose().translate(labelX,Math.max(originY+4,feet-p.bodyHeight()-Math.round(13*scale)));g.pose().scale(scale);try{g.text(Minecraft.getInstance().font,name,0,0,0xFFFFFFFF,true);}finally{g.pose().popMatrix();}}
             caption(g,originX,originY,width,height,c);
         }finally{g.disableScissor();}
     }

@@ -5,6 +5,7 @@ public record SceneLighting(int color,int sky,int block) {
     public static SceneLighting of(MenuScene scene){return switch(scene){
         case CHERRY_DAWN->new SceneLighting(0xE6B7B5,14,12);case CHERRY_DUSK->new SceneLighting(0x969DCF,11,11);
         case LANTERN_GARDEN->new SceneLighting(0xDAB28F,12,13);case AUTUMN_RIVER->new SceneLighting(0xD7B181,14,12);
+        case MINECRAFT_SNOW->new SceneLighting(0xB8C9F3,13,12);
         case WINTER_CABIN,AURORA_LAKE->new SceneLighting(0x91B6D4,12,12);case MISTY_PINES,ENCHANTED_FOREST->new SceneLighting(0x91B3AB,12,12);
         case ALPINE_SUNRISE->new SceneLighting(0xE3C2B7,14,12);case OCEAN_SUNSET->new SceneLighting(0xE5AF98,13,13);
         case TROPICAL_LAGOON->new SceneLighting(0xA9D4CA,15,12);case DESERT_DUNES->new SceneLighting(0xDBB28D,14,12);
