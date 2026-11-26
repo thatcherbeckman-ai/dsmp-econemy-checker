@@ -63,7 +63,7 @@ public final class TrackerRenderer {
 public static void drawAll(GuiGraphicsExtractor graphics, TrackerConfig config, Ledger ledger2, ViewCycle cycle, int width, int height, boolean editing, boolean demo, boolean estimatedBalance) {
         RenderTheme.begin(config);
         long now = System.nanoTime() / 1000000L;
-        boolean[] enabled = config.enabledViews();
+        boolean[] enabled = dev.dsmp.economy.privacy.TrackingControls.current().visibleViews(config.enabledViews());
         ViewCycle.Frame frame = RenderTheme.frame(cycle.frame(enabled, config.autoCycle&&!dev.dsmp.economy.design.DesignAccess.reduced(), now));
         if(dev.dsmp.economy.design.DesignAccess.reduced())frame=new ViewCycle.Frame(frame.page(),-1,1);
         if (frame.page() >= 0) {
@@ -73,7 +73,7 @@ public static void drawAll(GuiGraphicsExtractor graphics, TrackerConfig config, 
             }
             TrackerRenderer.drawView(new Ink(graphics, (float)frame.blend()), (Ledger)ledger2, frame.page(), (long)config.paymentSettlementSeconds * 1000L);
             Ink solid = new Ink(graphics, 1.0f);
-            long pending = ledger2.pendingCount(System.currentTimeMillis(), (long)config.paymentSettlementSeconds * 1000L);
+            long pending = dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff||dev.dsmp.economy.privacy.TrackingControls.current().playerResultsHidden?0:ledger2.pendingCount(System.currentTimeMillis(), (long)config.paymentSettlementSeconds * 1000L);
             if (demo != false || pending > 0L) {
                 TrackerRenderer.small(solid, (String)(demo != false ? "SAMPLE PREVIEW" : pending + " PENDING \u2014 TOTALS PROVISIONAL"), 8.0f, 282.0f, 0.65f, -2974791);
             }
@@ -87,7 +87,7 @@ public static void drawAll(GuiGraphicsExtractor graphics, TrackerConfig config, 
             solid.fill(34, 292, 34 + progress, 293, -2974791);
             graphics.pose().popMatrix();
         }
-        if (config.rakebackPanel.visible) {
+        if (config.rakebackPanel.visible&&!dev.dsmp.economy.privacy.TrackingControls.current().playerResultsHidden) {
             TrackerRenderer.beginBox(graphics, (TrackerConfig)config, 1, (int)width, (int)height, (boolean)editing);
             TrackerRenderer.rakeback(new Ink(graphics, 1.0f), (Ledger)ledger2, (boolean)demo, (long)config.paymentSettlementSeconds * 1000L);
             graphics.pose().popMatrix();
@@ -108,6 +108,7 @@ private static void beginBox(GuiGraphicsExtractor graphics,TrackerConfig config,
     }
     private static void drawView(Ink g,Ledger ledger,int page,long waitMs){
         g.appearance=RenderTheme.page(page);if(g.alpha<=.02f)return;
+        var controls=dev.dsmp.economy.privacy.TrackingControls.current();if(page==2&&controls.profitHidden||page==0&&controls.playerResultsHidden||page==1&&(controls.betRecordingOff||controls.playerResultsHidden)){TrackerRenderer.empty(g,"Hidden in Tracking controls");return;}
         if(page==3)loans(g,ledger);else if(page==0)nets(g,ledger);else if(page==1)bets(g,ledger,waitMs);else profit(g,ledger);
     }
     private static void nets(Ink g, Ledger ledger) {
@@ -154,12 +155,11 @@ private static void beginBox(GuiGraphicsExtractor graphics,TrackerConfig config,
         TrackerRenderer.hero(g, Money.format(ledger.displayedProfit(), true), 8, 26, 208, 2.25f, TrackerRenderer.color(ledger.displayedProfit()));
         TrackerRenderer.small(g, "In " + Money.format(ledger.displayedMoneyIn(), false) + "   Out " + Money.format(ledger.displayedMoneyOut(), false), 8.0f, 54.0f, 0.88f, -1380105);
         TrackerRenderer.graph(g, ledger.profitPoints());
-        List<Ledger.PlayerNet> players = ledger.playerNets();
+        List<Ledger.PlayerNet> players = dev.dsmp.economy.privacy.TrackingControls.current().playerResultsHidden?List.of():ledger.playerNets();
         List<Ledger.PlayerNet> winners = players.stream().filter(p -> p.cents() > 0L).limit(5L).toList();
         List<Ledger.PlayerNet> losers = players.reversed().stream().filter(p -> p.cents() < 0L).limit(5L).toList();
-        TrackerRenderer.leaderboard(g, "TOP WINNERS", winners, 6, -10688352);
-        TrackerRenderer.leaderboard(g, "TOP LOSERS", losers, 115, -1416577);
-        List<Ledger.Bet> recent = ledger.recentBets();
+        if(!dev.dsmp.economy.privacy.TrackingControls.current().playerResultsHidden){TrackerRenderer.leaderboard(g, "TOP WINNERS", winners, 6, -10688352);TrackerRenderer.leaderboard(g, "TOP LOSERS", losers, 115, -1416577);}
+        List<Ledger.Bet> recent = dev.dsmp.economy.privacy.TrackingControls.current().playerResultsHidden||dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff?List.of():ledger.recentBets();
         if (!recent.isEmpty()) {
             Ledger.Bet bet = recent.getFirst();
             long hostDelta = -bet.playerDelta();

@@ -1,5 +1,21 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.17.2** adds balance history to **O → Overview**. Select **1D**, **7D**, **28D** or **365D** above the balance/received/paid/profit cards to see the balance change and balance graph for that rolling period. The range applies to balance history only; the other cards are labeled as recorded totals, not period-specific figures. The current balance remains visible separately.
+
+Changes use actual saved readings, including the last known reading at or before the period start when available. **Partial history** means the change begins at the first available reading inside the period. With no readings or only one reading, no change is invented. Existing retained balance readings are imported; installing the update cannot recover history that was never recorded. The graph spaces readings by actual time, and the interface refreshes while open.
+
+Balance history is passive and local: it sends no chat or balance commands. Each server/account has its own hashed file under `config/economy-tracker/wallet-history`. It retains minute snapshots for 48 hours and hourly snapshots for about a year, plus an opening anchor/first reading, with at most 12,000 readings. Recent changes flush at most every 30 seconds and on normal disconnect/shutdown. Appearance profiles/backups do not contain or replace this history. Unreadable history files are preserved; the overview reports the issue and falls back to the existing ledger readings.
+
+**O → Tracking → Tracking controls** adds three independent off controls:
+
+- **Turn off bet recording** stops new automatic, custom-parser and manual bet records. Wallet balance readings and payment adjustments keep working. Existing result history remains stored.
+- **Hide profit** hides the profit view and the result-related profit/received/paid cards in the HUD and overview.
+- **Hide player results** hides player nets, winner/loser lists, recent results and rakeback. Hidden views also leave the HUD rotation.
+
+**Turn off all results** applies all three. **Save/Esc** commits these choices; **Cancel** discards the draft. These are recording/visibility opt-outs, stored separately in `tracking-controls.json`; appearance/profile restoration cannot undo them. Hiding a panel does not erase prior records or independently stop its underlying calculations. An unreadable controls file disables recording and hides result panels while preserving the original file.
+
+[Balance-history preview](downloads/preview-0.17.2-balance-history.png) · [Tracking-controls preview](downloads/preview-0.17.2-tracking-controls.png) — isolated offline test account, synthetic sample readings.
+
 Version **0.17.1** keeps complete menu labels visible. Buttons fit the full label without adding an ellipsis; longer labels can use two lines when that gives a larger, clearer text size. Menu headings, descriptions, captions, status messages and welcome text use their full strings with width-aware sizing. Editable text fields retain their normal scrolling behavior.
 
 The dashboard sidebar buttons are left aligned at a four-pixel inset, narrower and capped at 18 pixels tall. The brand is also left aligned; the separate T badge is removed so the name and subtitle have room. The arrangement respects the existing 100%, 115% and 130% accessibility text options. These are cosmetic changes; saved preferences and recorded data keep their existing format.
@@ -97,7 +113,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.17.1 download](downloads/economy-tracker-0.17.1-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.17.2 download](downloads/economy-tracker-0.17.2-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -110,7 +126,7 @@ The dashboard replaces the initial O-key menu with an advanced **Christmas dashb
 
 Press **O** or `/economy` to open it. The sidebar provides:
 
-- **Overview**: a purple welcome banner with the logged-in username and actual local player model/skin, followed by observed balance, profit since reset, money in/out, a smooth balance-history chart, recent bets and top winners/losers. Empty or unknown readings remain empty; charts do not invent a zero starting balance.
+- **Overview**: a purple welcome banner with the logged-in username and actual local player model/skin, followed by observed balance, profit since reset, money in/out, a time-spaced balance-history chart with 1D/7D/28D/365D selectors, recent bets and top winners/losers. Empty or unknown readings remain empty; charts do not invent a zero starting balance.
 - **HUD modules**: explicit ON/OFF controls for Balance, Profit, Player Nets, Recent Bets, Rakeback and Loans.
 - **Appearance**: independent panel sizes, RGB colors, opacity and designs with live preview.
 - **Text boxes**: movable text boxes, individual line design, bubble font, inline pictures and a reference-style preset.
@@ -280,3 +296,5 @@ The 0.16.2 foreground check covers all 18 scenes at two sizes: no pixels above t
 The 0.17.0 design checks cover profile allowlisting/independent copies and name overwrite, file/name/count limits, bounded/deduplicated backup retention across restarts, corrupt/symlink preservation, staged multi-file save failure, accessibility validation, undo/redo branches and limits, drag clamping/snapping, lighting serialization/shadows and multiword search. Native verification includes 164 responsive layouts, profile save/use/delete, actual backup restoration, accessibility preview/cancel/save and reduced motion, search opening the Light tab, character/caption drag with one-gesture Undo/Redo, panel appearance Undo/Redo and lighting/blur persistence. A ledger snapshot is checked before and after profile/restore actions.
 
 The 0.17.1 label checks cover unbroken names, Unicode, whole-word wrapping and compact dimensions across accessibility scales. The native suite runs 492 menu layout cases (four GUI sizes at three text scales), checks full button-label preservation and text bounds, verifies the compact four-pixel sidebar alignment, and retains profile, backup, drag, lighting, accessibility and Start/Esc checks.
+
+The 0.17.2 checks cover the four rolling balance ranges, exact/partial/missing opening coverage, timestamp order and duplicate readings, overflow, year retention/compaction, local account/server isolation, atomic round trips and corrupt/symlink preservation. Recording opt-out checks cover separate persistence, unchanged prior results, wallet/payment/tax updates while paused and appearance-profile isolation. All **172 regression tests** pass against both compiled sources and the packaged JAR. Native verification includes **552 responsive layouts**, all four balance-range selections and history persistence, plus opt-out Save/Cancel/persistence, custom-result blocking, custom balance readings, and hidden overview/HUD views. The native run uses an isolated offline test account; live DonutSMP capture has not been retested.

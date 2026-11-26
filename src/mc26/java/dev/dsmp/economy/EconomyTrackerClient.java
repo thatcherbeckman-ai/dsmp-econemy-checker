@@ -74,6 +74,7 @@ AuctionAction {
     public String status = "Configure server message patterns, or record manually";
 
     public void onInitializeClient() {
+        dev.dsmp.economy.privacy.TrackingControls.initialize();
         this.reloadConfig();
         dev.dsmp.economy.inventory.InventoryThemes.initialize();
         dev.dsmp.economy.menubackground.MenuBackgrounds.initialize();
@@ -82,6 +83,7 @@ AuctionAction {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             dev.dsmp.economy.ui.AuctionItems.invalidate();
             this.saveLedger();
+            dev.dsmp.economy.wallethistory.WalletHistoryService.close();
             this.scope = null;
             AuctionService.close();
             AuctionHologram.clear();
@@ -97,7 +99,7 @@ AuctionAction {
                 String localName = Minecraft.getInstance().getUser().getName();
                 boolean bl = changed = this.config.scoreboardBalance && this.wallet.receiveReply(message.getString(), localName, this.ledger, now);
                 if (!overlay) {
-                    PaymentDetector.Detection payment = this.payments.receiveDetailed(message.getString(), this.ledger, now, (long)this.config.paymentSettlementSeconds * 1000L, localName, this.config.autoDetectPayments);
+                    PaymentDetector.Detection payment = this.payments.receiveDetailed(message.getString(), this.ledger, now, (long)this.config.paymentSettlementSeconds * 1000L, localName, dev.dsmp.economy.privacy.TrackingControls.current().recordsBets(this.config.autoDetectPayments));
                     changed |= payment.betChanged();
                     if (this.config.scoreboardBalance && payment.walletDelta() != null) {
                         changed |= this.wallet.payment(payment.walletDelta(), this.ledger, now);
@@ -135,7 +137,7 @@ AuctionAction {
             }
             while (nextView.consumeClick()) {
                 if (client.gui.screen() != null || client.level == null) continue;
-                this.viewCycle.next(this.config.enabledViews(), System.nanoTime() / 1000000L);
+                this.viewCycle.next(dev.dsmp.economy.privacy.TrackingControls.current().visibleViews(this.config.enabledViews()), System.nanoTime() / 1000000L);
             }
             if (++this.sampleTicks >= 20) {
                 this.sampleTicks = 0;
@@ -146,8 +148,10 @@ AuctionAction {
                         this.saveLedger();
                     }
                 }
+                if(this.scope!=null&&this.dataWritable)dev.dsmp.economy.wallethistory.WalletHistoryService.capture(this.ledger.balances(),System.currentTimeMillis());
             }
         });
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {this.saveLedger();dev.dsmp.economy.wallethistory.WalletHistoryService.close();});
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             LiteralArgumentBuilder<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> root = ClientCommands.literal((String)"economy").executes(context -> {
                 Minecraft.getInstance().schedule(() -> Minecraft.getInstance().gui.setScreen((Screen)new DashboardScreen(this)));
@@ -165,7 +169,7 @@ AuctionAction {
             })).then(ClientCommands.literal((String)"on").executes(context -> {
                 this.config.autoDetectPayments = true;
                 this.config.scoreboardBalance = true;
-                this.say(this.saveConfig() ? "Automatic stakes/payouts and scoreboard balance enabled." : this.status);
+                this.say(this.saveConfig() ? (dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff?"Bet recording remains off; balance reader enabled.":"Automatic stakes/payouts and scoreboard balance enabled.") : this.status);
                 return 1;
             }))).then(ClientCommands.literal((String)"off").executes(context -> {
                 this.config.autoDetectPayments = false;
@@ -178,6 +182,7 @@ AuctionAction {
                 return 1;
             }))));
             root.then(ClientCommands.literal((String)"bet").then(ClientCommands.argument((String)"player", StringArgumentType.word()).then(ClientCommands.argument((String)"playerNet", StringArgumentType.word()).executes(context -> this.runLocal(() -> {
+                if(dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff){this.say("Bet recording is turned off in Tracking controls.");return;}
                 long delta = Money.parse(StringArgumentType.getString((CommandContext)context, (String)"playerNet"));
                 this.ledger.recordBet(new Ledger.Bet(UUID.randomUUID().toString(), StringArgumentType.getString((CommandContext)context, (String)"player"), delta, System.currentTimeMillis()));
                 this.say(this.saveLedger() ? "Manual bet recorded locally (positive = player ahead)." : this.status);
@@ -276,7 +281,7 @@ AuctionAction {
             this.config = loaded;
             this.configWritable = true;
             this.payments.clear();
-            this.status = this.config.autoDetectPayments ? "Automatic payment-based bet capture enabled; wait " + this.config.paymentSettlementSeconds + "s" : (this.config.trackingEnabled ? "Custom message tracking enabled" : "Automatic bet capture paused");
+            this.status = dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff?"Bet recording is turned off; balance reader unchanged.":this.config.autoDetectPayments ? "Automatic payment-based bet capture enabled; wait " + this.config.paymentSettlementSeconds + "s" : (this.config.trackingEnabled ? "Custom message tracking enabled" : "Automatic bet capture paused");
         }
         catch (Exception ex) {
             this.configWritable = false;
@@ -286,6 +291,8 @@ AuctionAction {
             LOG.error("Cannot load tracker settings; refusing to overwrite file", (Throwable)ex);
         }
     }
+
+    public void clearResultIntents(){if(dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff)this.payments.clear();}
 
     public boolean saveConfig() {
         if (!this.configWritable) {
@@ -308,6 +315,7 @@ AuctionAction {
         if (this.scope != null) {
             this.saveLedger();
         }
+        dev.dsmp.economy.wallethistory.WalletHistoryService.close();
         this.scope = null;
         AuctionService.close();
         AuctionHologram.clear();
@@ -334,6 +342,7 @@ AuctionAction {
             this.status = "Ledger unreadable; tracking paused to preserve the file";
             LOG.error(this.status, (Throwable)ex);
         }
+        dev.dsmp.economy.wallethistory.WalletHistoryService.open(this.scope,net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("economy-tracker/wallet-history"),this.ledger.balances());
         LoanService.open(this.scope, this.store.loanDirectory());
         AuctionService.open(this.scope, this.store.auctionDirectory());
     }
@@ -353,6 +362,7 @@ AuctionAction {
         }
         try {
             this.store.saveLedger(this.scope, this.ledger);
+            dev.dsmp.economy.wallethistory.WalletHistoryService.capture(this.ledger.balances(),System.currentTimeMillis());
             return true;
         }
         catch (Exception ex) {
@@ -366,7 +376,7 @@ AuctionAction {
         try {
             Optional<Long> balance;
             boolean changed = false;
-            Optional<MessageParser.ParsedBet> bet = this.parser.bet(line);
+            Optional<MessageParser.ParsedBet> bet = dev.dsmp.economy.privacy.TrackingControls.current().betRecordingOff?Optional.empty():this.parser.bet(line);
             if (bet.isPresent()) {
                 MessageParser.ParsedBet result = bet.get();
                 changed = this.ledger.recordBet(new Ledger.Bet(result.id(), result.player(), result.playerDelta(), System.currentTimeMillis()));
