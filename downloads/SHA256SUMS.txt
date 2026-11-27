@@ -21,6 +21,7 @@ eb7d3a746e20c245881e5695f97ba607adec6d6dafba6c83a4e311b0bfb47296  economy-tracke
 cb1b313d579a9a476d1a95e5beb94b10e95c71358da6e72ae5a91b5e869f01c7  economy-tracker-0.21.0-mc26.3.jar
 9fdc1aabefc1ad3c208a613bf6c81b9b26bc2c2cbb5674de4fec3e14a6c8c15d  economy-tracker-0.21.1-mc26.3.jar
 ff83155c925941f84a4d5c9c8198e48835f4f59e19bb5bec22ec54e07adb06e3  economy-tracker-0.21.2-mc26.3.jar
+a1d073eb4f51eaa5eba7a02c5f0a0bbdcc4aff11cfea9ba202c9bd8ea45d4ee7  economy-tracker-0.22.0-mc26.3.jar
 534d580b2e0cfcb47204226d5919789ce78692304f79ba9c5bd96a053e8f837c  economy-tracker-0.3.0-mc1.21.11.jar
 c0a78dc33f1746c938fe6ae2b168fb3afd1fc8c62d9f12474833515a7eefcfc0  economy-tracker-0.4.0-mc1.21.11.jar
 ad452f3bdd629594f218aaeb349b9cca5ede238bf064772373a508400b804840  economy-tracker-0.4.1-mc1.21.11.jar
@@ -37,7 +38,7 @@ a2ca79ff5124bc1bfe08dafbb8ba6afd11bb5dc9e6269e7089b8be6347083de7  economy-tracke
 5e53ce46269dc5347a70457fcc060ca2fdcc0f1cb02182aa1d6e791fc1896417  economy-tracker-0.8.0-mc1.21.11.jar
 6447e1a2ae3da343a15b80e4f4221d5c82c6b009d1c3ad57fa5b1bc7d7a125c7  economy-tracker-0.9.0-mc1.21.11.jar
 c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c  economy-tracker-1.21.11.jar
-ff83155c925941f84a4d5c9c8198e48835f4f59e19bb5bec22ec54e07adb06e3  economy-tracker-26.3.jar
+a1d073eb4f51eaa5eba7a02c5f0a0bbdcc4aff11cfea9ba202c9bd8ea45d4ee7  economy-tracker-26.3.jar
 be9952e61f25f97c0f87ae5954b0e4597cde5f84e766dadae9dc27855b7a235e  preview-0.11.0-text-lines.png
 9dfe17c96d0cd436ee912de89b7288e054c33881ae8d5acc0dcbfe2b033656c1  preview-0.12.1-settings.png
 6f65bdadd7bd304cb478b4900b92bb3749e0411ae12ad93c518fec2e26981e3b  preview-0.13.0-inventory-themes.png
@@ -68,5 +69,7 @@ fff0b7043cf25de70dfebb01e43fc5a24ac478b24a7eb02dccf02fc5333de8ef  preview-0.21.0
 b3d116fed81cca8ff554b86c025bccd68eae943ba2e13ff04e33f63121dc4518  preview-0.21.1-spotify-overlay.png
 f4f904114fb9c6e694ebf5909015bc5dda9377687583c5af3b0949d1172010a1  preview-0.21.2-spotify-overlay.png
 963dffd66769ae396e790560ec877df08070cca644187b63f9517f4253e492d8  preview-0.21.2-spotify-placement.png
+bf4374667efb95629199f4e319bb080f823ac4b5db1698ac53088a88da15c6dd  preview-0.22.0-shaders-controls.png
+e9e79cfa68fa8e83c503b80c9b99628cf3ec2884cf0d5b3296c4e9a52ebab434  preview-0.22.0-shaders-missing.png
 5a25bd3d9904e5668993cc36b81a8e7001ae903920d301497f40650d9c6ce9fc  preview-0.9.0-modules.png
 0b05074c3354fa723d32389dcf26ed859a922210c4c4bbbc3101dfd0ad7da30b  preview-0.9.0-overview.png

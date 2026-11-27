@@ -19,7 +19,7 @@ import java.util.*;
 /** Offline, test-only checks for persistent dashboard navigation and real menu-background drafts. */
 public final class SpotifyProbe implements ClientModInitializer {
  private EconomyTrackerClient mod;private DashboardScreen host;private int ticks,step,checks;private long deadline;private MenuBackgroundOptions original;private InventoryOptions inventory;private String ledger;private int texts;private String placementFile;private dev.dsmp.economy.spotify.SpotifyOptions originalSpotify;
- private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background","Design tools","Spotify"};
+ private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background","Design tools","Spotify","Shaders"};
  private Path game(){return Path.of(System.getProperty("user.dir"));}
  private static void check(boolean ok,String reason){if(!ok)throw new AssertionError(reason);}
  private float slide(WindowedScreen screen)throws Exception{var m=WindowedScreen.class.getDeclaredMethod("tabOffset");m.setAccessible(true);return (float)m.invoke(screen);}
@@ -35,7 +35,7 @@ public final class SpotifyProbe implements ClientModInitializer {
   var w=host.menuWindow();var event=new MouseButtonEvent(w.screenX(x),w.screenY(y),new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT,0));check(host.mouseClicked(event,false),"Pointer did not activate "+widget.getMessage().getString());host.mouseReleased(event);
  }
  private void inspect()throws Exception{
-  check(MenuNavigation.active() instanceof SpotifyPlacementScreen||Minecraft.getInstance().gui.screen()==host,"Sidebar replaced unexpectedly");check(host.children().stream().filter(e->e instanceof SettingsButton b&&Arrays.asList(NAV).contains(b.getMessage().getString())).count()==13,"Sidebar sections disappeared");
+  check(MenuNavigation.active() instanceof SpotifyPlacementScreen||Minecraft.getInstance().gui.screen()==host,"Sidebar replaced unexpectedly");check(host.children().stream().filter(e->e instanceof SettingsButton b&&Arrays.asList(NAV).contains(b.getMessage().getString())).count()==14,"Sidebar sections disappeared");
   var active=MenuNavigation.active();for(var c:active.children())if(c instanceof AbstractWidget w){check(w.getX()>=0&&w.getY()>=0&&w.getRight()<=active.width&&w.getBottom()<=active.height,"Offscreen panel widget "+w.getMessage().getString());if(w instanceof SettingsButton b)check(b.fullLabelFits(),"Panel label clipped");}var widgets=active.children().stream().filter(e->e instanceof AbstractWidget).map(e->(AbstractWidget)e).toList();for(var a:widgets)for(var b:widgets)if(a!=b)check(a.getX()>=b.getRight()||b.getX()>=a.getRight()||a.getY()>=b.getBottom()||b.getY()>=a.getBottom(),"Overlapping Spotify controls");checks++;
  }
  public void onInitializeClient(){

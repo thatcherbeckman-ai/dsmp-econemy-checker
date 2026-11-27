@@ -30,6 +30,7 @@ final class MenuChrome {
             case "HUD modules","HUD layout"->{outline(g,x,y,9,7,color);g.fill(x+3,y+8,x+6,y+9,color);}
             case "Appearance","Inventory themes"->{outline(g,x+1,y+1,7,7,color);g.fill(x+3,y+3,x+7,y+5,color);}
             case "Text boxes"->{g.fill(x,y+1,x+9,y+2,color);g.fill(x+4,y+1,x+5,y+9,color);}
+            case "Shaders"->{outline(g,x+2,y+2,5,5,color);g.fill(x+4,y,x+5,y+1,color);g.fill(x+4,y+8,x+5,y+9,color);g.fill(x,y+4,x+1,y+5,color);g.fill(x+8,y+4,x+9,y+5,color);}
             case "Spotify"->{g.fill(x+3,y,x+9,y+2,color);g.fill(x+3,y,x+4,y+8,color);UiSurfaces.fill(g,x,y+6,4,3,color);g.fill(x+8,y,x+9,y+7,color);UiSurfaces.fill(g,x+5,y+5,4,3,color);}
             case "Loans"->{outline(g,x,y+2,9,6,color);g.fill(x+6,y+4,x+9,y+6,color);}
             case "Tracking"->{for(int i=0;i<3;i++)g.fill(x+i*3,y+6-i*2,x+i*3+2,y+9,color);}

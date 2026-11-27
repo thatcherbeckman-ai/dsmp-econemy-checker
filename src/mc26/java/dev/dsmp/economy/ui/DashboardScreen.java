@@ -11,7 +11,7 @@ import java.util.*;
 
 /** Responsive settings dashboard: read-only overview, explicit HUD controls and loan tools. */
 public final class DashboardScreen extends WindowedScreen {
-    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background","Design tools","Spotify"};
+    private static final String[] NAV={"Overview","HUD modules","Appearance","Text boxes","HUD layout","Loans","Tracking","Settings","Auctions","Inventory themes","Player background","Design tools","Spotify","Shaders"};
     private static final int WHITE=0xFFE7EAF3,MUTED=0xFF8993AC,GREEN=0xFF63D9A0,RED=0xFFE57885;
     private record LoanRow(String name,String value,boolean heading){}
     private final EconomyTrackerClient mod;
@@ -21,7 +21,7 @@ public final class DashboardScreen extends WindowedScreen {
     public WindowedScreen activePanel(){return panel;}
     private PanelViewport panelView(){var d=layout();return PanelViewport.of(d.left(),d.bodyTop(),d.contentWidth(),height-d.bodyTop()-28);}
     public void openPanel(WindowedScreen child){notice="Save applies this page. Switching sections discards its unsaved draft.";panel=child;clearFocus();var v=panelView();child.attach(this,v.contentWidth(),v.contentHeight());rebuildWidgets();}
-    public void closePanel(){panel=null;panelDrag=false;if(java.util.Set.of(2,3,4,8,9,11,12).contains(page))page=0;rebuildWidgets();}
+    public void closePanel(){panel=null;panelDrag=false;if(java.util.Set.of(2,3,4,8,9,11,12,13).contains(page))page=0;rebuildWidgets();}
     private void discardPanel(){for(int i=0;panel!=null&&i<12;i++){var prior=panel;var cancel=prior.children().stream().filter(e->e instanceof net.minecraft.client.gui.components.Button b&&b.getMessage().getString().equals("Cancel")).map(e->(net.minecraft.client.gui.components.Button)e).findFirst();if(cancel.isPresent())cancel.get().onPress(new net.minecraft.client.input.MouseButtonInfo(0,0));else{panel=null;break;}if(panel==prior){panel=null;break;}}panelDrag=false;}
     private BalanceWindow balanceWindow;private long balanceWindowSecond=-1;
     private record OverviewLayout(int bannerHeight,int rangeTop,int rangeHeight,int cardsTop,int cardHeight,int cardGap){}
@@ -50,7 +50,7 @@ public final class DashboardScreen extends WindowedScreen {
     private void button(int x,int y,int w,int h,String label,boolean active,Runnable action){addRenderableWidget(new SettingsButton(x,y,w,h,label,active,mod.config.menuAccent,action));}
     private void toggle(MenuLayout.Dashboard d,int y,boolean value,java.util.function.Consumer<Boolean> set){button(width-108,y,40,d.controlHeight(),"ON",value,()->change(()->set.accept(true)));button(width-58,y,40,d.controlHeight(),"OFF",!value,()->change(()->set.accept(false)));}
     private void change(Runnable action){action.run();rebuildWidgets();}
-    private void navigate(int target){if(target==page&&panel!=null&&java.util.Set.of(2,3,4,8,9,11,12).contains(target))return;int previous=page;commitDraft();discardPanel();page=target;if(target!=previous)tabTransition(target-previous);WindowedScreen child=switch(target){case 2->new AppearanceScreen(mod,this);case 3->new TextBoxesScreen(mod,this);case 4->new TrackerScreen(mod);case 8->new AuctionScreen(mod,this);case 9->new InventoryThemesScreen(mod,this);case 11->new DesignToolsScreen(mod,this);case 12->new SpotifyScreen(mod,this);default->null;};notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";if(child!=null)openPanel(child);else rebuildWidgets();}
+    private void navigate(int target){if(target==page&&panel!=null&&java.util.Set.of(2,3,4,8,9,11,12,13).contains(target))return;int previous=page;commitDraft();discardPanel();page=target;if(target!=previous)tabTransition(target-previous);WindowedScreen child=switch(target){case 2->new AppearanceScreen(mod,this);case 3->new TextBoxesScreen(mod,this);case 4->new TrackerScreen(mod);case 8->new AuctionScreen(mod,this);case 9->new InventoryThemesScreen(mod,this);case 11->new DesignToolsScreen(mod,this);case 12->new SpotifyScreen(mod,this);case 13->new ShaderSettingsScreen(mod,this);default->null;};notice=target==5?"Cancel reverts settings, not saved loans.":"Changes apply live. Save or Cancel when finished.";if(child!=null)openPanel(child);else rebuildWidgets();}
     private void commitDraft(){if(name!=null){nameDraft=name.getValue();amountDraft=amount.getValue();}}
     private void initLoans(MenuLayout.Dashboard d){
         int gap=d.gap(),h=d.controlHeight(),half=(d.contentWidth()-gap)/2,y=d.bodyTop();
