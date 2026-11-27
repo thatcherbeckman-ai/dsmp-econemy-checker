@@ -76,6 +76,7 @@ AuctionAction {
     public void onInitializeClient() {
         dev.dsmp.economy.privacy.TrackingControls.initialize();
         this.reloadConfig();
+        dev.dsmp.economy.spotify.Spotify.initialize();
         dev.dsmp.economy.inventory.InventoryThemes.initialize();
         dev.dsmp.economy.menubackground.MenuBackgrounds.initialize();
         dev.dsmp.economy.design.DesignManager.initialize(this);
@@ -122,6 +123,7 @@ AuctionAction {
         });
         HudElementRegistry.attachElementBefore((Identifier)VanillaHudElements.CHAT, (Identifier)Identifier.fromNamespaceAndPath((String)"economy_tracker", (String)"trackers"), (graphics, delta) -> {
             Minecraft client = Minecraft.getInstance();
+            if(client.level!=null&&!client.gui.hud.isHidden()&&client.gui.screen()==null)dev.dsmp.economy.ui.SpotifyHud.draw(graphics,client.getWindow().getGuiScaledWidth(),client.getWindow().getGuiScaledHeight());
             if (client.level != null && this.scope != null && !client.gui.hud.isHidden() && !RenderTheme.isEditor(client.gui.screen())) {
                 TrackerRenderer.drawAll(graphics, this.config, this.ledger, this.viewCycle, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight(), false, false, this.wallet.estimated());
             }
@@ -151,7 +153,7 @@ AuctionAction {
                 if(this.scope!=null&&this.dataWritable)dev.dsmp.economy.wallethistory.WalletHistoryService.capture(this.ledger.balances(),System.currentTimeMillis());
             }
         });
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {this.saveLedger();dev.dsmp.economy.wallethistory.WalletHistoryService.close();});
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {dev.dsmp.economy.spotify.Spotify.close();this.saveLedger();dev.dsmp.economy.wallethistory.WalletHistoryService.close();});
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             LiteralArgumentBuilder<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> root = ClientCommands.literal((String)"economy").executes(context -> {
                 Minecraft.getInstance().schedule(() -> Minecraft.getInstance().gui.setScreen((Screen)new DashboardScreen(this)));

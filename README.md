@@ -1,5 +1,21 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.21.0** adds **O → Spotify** in the existing right-hand menu panel. Link your Spotify account through Spotify’s browser sign-in, then show a rounded **Now playing** HUD with the song title, artist, playing/paused state, elapsed time and progress bar. Spotify supplies song details; audio continues playing in your Spotify app. The overlay works independently of the connected Minecraft server.
+
+**Spotify setup (a registered Spotify developer app is required):**
+
+1. Open **Spotify → Account → Developer dashboard** and create an app with **Web API** access, subject to Spotify’s current developer-account requirements.
+2. Add this exact redirect URI to that app: `http://127.0.0.1:43821/callback`. The menu’s **Copy redirect URI** button copies it.
+3. Copy the app’s public **Client ID** into the menu. Do not enter its Client Secret or your Spotify password. Your Spotify account must be permitted to use that developer app.
+4. Press **Connect Spotify**, approve the read-only song permission on Spotify’s website, and return to Minecraft. Open Spotify on any device and play a song.
+5. In **Overlay**, choose one of nine screen positions, **70–150%** size, six color palettes, and whether to hide the box while paused/idle. **Done** or the dashboard **Save** applies the draft; **Cancel** or switching sections discards unsaved appearance changes.
+
+Connecting saves the Client ID and enables the overlay immediately. OAuth uses a random state, **PKCE S256** and a three-minute, one-use callback bound only to `127.0.0.1`. Only `user-read-currently-playing` is requested. Access/refresh tokens stay in memory and are cleared by **Disconnect** or closing Minecraft; **reconnect after restarting the game**. Public appearance preferences and the Client ID live in `config/economy-tracker/spotify.json`; credentials are never written there or added to appearance profiles. **App permissions** opens Spotify’s page for revoking access. This mod does not include a shared developer app or Client Secret.
+
+Requests run off the game thread, poll at most every five seconds, honor rate-limit cooldowns, refresh expired tokens, reject unsafe song links and bound both request duration and response size. A busy callback port, cancelled sign-in, missing app access or unavailable Spotify is reported in the Account panel. Unsupported playback types such as podcasts/advertisements show no active song. Existing game data and the 1.21.11 release retain their previous formats and behavior.
+
+[Spotify account setup](downloads/preview-0.21.0-spotify-account.png) · [Spotify overlay controls](downloads/preview-0.21.0-spotify-overlay.png) — native Minecraft captures from an isolated offline sample profile. **Real Spotify account authorization has not been tested:** Spotify domains are blocked in the build workspace. Protocol behavior is tested with local callbacks and fake Web API responses; use your own app and account to complete the real sign-in.
+
 Version **0.20.0** adds a larger **Text** editor and a new **Style** editor under **O → Text boxes**. Select or create a box, then choose **Text** for real multiline editing: Enter inserts a new line, with the existing limits of 24 lines, 160 characters per logical line and 1,024 characters per box. Valid edits preview live; Cancel restores the previous content and styling.
 
 **Style** stays in the right-hand panel and provides:
@@ -152,7 +168,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.20.0 download](downloads/economy-tracker-0.20.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.21.0 download](downloads/economy-tracker-0.21.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -343,3 +359,5 @@ The 0.18.0 checks add centered-window bounds and coordinate round trips across s
 The 0.19.0 unit suite passes **190 tests**, including right-panel coordinate transforms, exact solid-color pixels, real menu image effects, RGB validation/migration/copy/persistence, independent menu holiday choices, bounded/frozen/distinct motifs and palette restoration. The focused native check passes **145 panel cases** across all 12 sidebar sections, four sizes and three text scales, plus nested return, pointer/text entry, draft cancellation, solid/hex live preview/save/reload, holiday preview/animation/save/cancel, inventory independence, presentation return and unchanged recorded data. The broader native regression suite includes **576 responsive layouts** and the existing editor, profile, scene and history/recording-off checks. These are isolated offline checks; they do not connect to a live DonutSMP account. Financial core, wallet/history, loan, auction and recording-opt-out model classes remain byte-for-byte unchanged.
 
 The 0.20.0 suite passes **199 tests** against both compiled sources and the packaged JAR. New checks cover legacy defaults, complete style copy/restore and settings round trips, preset content/position/image preservation, atomic invalid edits, bounded Undo/Redo, Unicode-aware letter spacing, scaled effect padding, measured drag bounds, override propagation and validation. A focused native check passes **72 style layouts** at four sizes and three text scales, plus real multiline Enter/typing, both swatch pages and custom hex input, preset Undo/Redo, vertical-gradient clipping in the scaled panel, effects/spacing/bold/italic, persistence and both style/content cancellation. The broader native regression suite passes **576 layouts** and retains editor/profile/scene/history checks. Diagnostic profiles stay offline and are excluded from release JARs.
+
+The 0.21.0 suite passes **214 tests** against sources and the final packaged JAR. Spotify checks include the RFC 7636 PKCE vector, callback host/state/duplicate validation, cancellation, local end-to-end fake authorization, refresh/401/rate limits, bounded responses, safe metadata links, in-flight disconnect isolation, and preferences without credentials. Native verification passes **24 Spotify panel layouts** (four sizes, three text scales), pointer/text routing, invalid-ID rejection, appearance save/reload and cancellation, and sample playback rendering. The wider right-panel suite passes **157 layouts across all 13 sections** with existing nested navigation/theme behavior. Tests use an isolated offline profile and synthetic playback; real Spotify account sign-in is untested because the workspace cannot reach Spotify.
