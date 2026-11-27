@@ -9,10 +9,8 @@ public final class SpotifyHud {
     public static void draw(GuiGraphicsExtractor g,int width,int height){
         var service=Spotify.service();var options=service.options();if(!options.enabled())return;
         var track=service.track();if(options.hideIdle()&&(track==null||!track.playing()))return;
-        float scale=Math.min(options.scale()/100f,Math.min((width-12)/250f,(height-12)/78f));
-        int w=Math.round(250*scale),h=Math.round(78*scale),col=options.position()%3,row=options.position()/3;
-        int x=col==0?6:col==1?(width-w)/2:width-w-6,y=row==0?6:row==1?(height-h)/2:height-h-6;
-        g.pose().pushMatrix();g.pose().translate(x,y);g.pose().scale(scale);
+        var bounds=SpotifyPlacement.bounds(options,width,height);
+        g.pose().pushMatrix();g.pose().translate(bounds.x(),bounds.y());g.pose().scale(bounds.scale());
         try{card(g,options,track,service.connected()?"Open Spotify and play a song":options.source()==SpotifySource.DESKTOP?"Start desktop mode in the menu":"Connect Spotify in the menu",false);}finally{g.pose().popMatrix();}
     }
     static void card(GuiGraphicsExtractor g,SpotifyOptions options,SpotifyApi.Track track,String idle,boolean preview){

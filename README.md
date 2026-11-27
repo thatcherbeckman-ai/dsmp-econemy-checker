@@ -1,5 +1,19 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.21.2** adds **smaller Spotify widgets and precise positioning**. Spotify size now ranges from **25% to 150%**, with five-percentage-point menu steps and exact whole-percent entry. Existing saved anchors, source and appearance remain compatible.
+
+Open **O → Spotify → Overlay → Move / exact size** for a full-screen canvas using the same coordinates and bounds as the actual Spotify HUD:
+
+- **Drag the box** anywhere, including up to a screen edge. Grabbing retains the pointer’s offset, and the box stays within the viewport.
+- **Arrow keys** move one Minecraft GUI pixel; **Shift + arrows** move ten. The Left/Right/Up/Down buttons use the same steps.
+- **Scroll on the box** to change size by five percentage points; hold **Shift** for one-point steps. Wheel resizing preserves the box’s center where screen bounds allow it.
+- Type **X**, **Y** and **size %**, then choose **Apply** to preview the exact values. The fields keep pending edits when focus changes. Values are clamped to the size range and visible screen area.
+- **Save** also applies any valid pending numeric fields, writes the current Spotify appearance/placement and returns to the same menu panel. **Cancel/Esc** discards the canvas draft. A later parent Cancel does not undo an explicitly saved canvas.
+
+The toolbar moves to the opposite side of the box so it stays easy to drag. A sample song is shown when no music is available. The normal Overlay preview reflects smaller sizes. The nine existing position presets remain available; selecting and saving one returns to that anchor. Custom coordinates are stored relative to the available viewport area, so they adapt to Minecraft GUI/window resizing. Displayed pixel coordinates refer to Minecraft GUI pixels. Custom placement is preserved through palette/visibility changes, desktop-reader Start/Stop and source changes; menu resizing retains the current top-left pixel position.
+
+[Precise Spotify placement](downloads/preview-0.21.2-spotify-placement.png) · [Smaller overlay controls](downloads/preview-0.21.2-spotify-overlay.png) — native Minecraft captures, isolated offline sample profile. This changes Spotify presentation only; Windows playback integration retains the 0.21.1 implementation and its documented on-device verification limits.
+
 Version **0.21.1** adds **Spotify desktop mode for Windows**, so the overlay can read the Spotify desktop app’s local media information without a developer account, Client ID, Premium subscription or browser authorization. This mode does not call Spotify’s Web API. Spotify must be playing on the **same Windows PC** as Minecraft, and its song information must be available through Windows media controls.
 
 To use it:
@@ -185,7 +199,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.21.1 download](downloads/economy-tracker-0.21.1-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.21.2 download](downloads/economy-tracker-0.21.2-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -380,3 +394,5 @@ The 0.20.0 suite passes **199 tests** against both compiled sources and the pack
 The 0.21.0 suite passes **214 tests** against sources and the final packaged JAR. Spotify checks include the RFC 7636 PKCE vector, callback host/state/duplicate validation, cancellation, local end-to-end fake authorization, refresh/401/rate limits, bounded responses, safe metadata links, in-flight disconnect isolation, and preferences without credentials. Native verification passes **24 Spotify panel layouts** (four sizes, three text scales), pointer/text routing, invalid-ID rejection, appearance save/reload and cancellation, and sample playback rendering. The wider right-panel suite passes **157 layouts across all 13 sections** with existing nested navigation/theme behavior. Tests use an isolated offline profile and synthetic playback; real Spotify account sign-in is untested because the workspace cannot reach Spotify.
 
 The 0.21.1 suite passes **226 tests** against compiled sources and the packaged JAR. Desktop checks cover legacy/new source preferences, local metadata validation/sanitization/Unicode, both Spotify source IDs, idle/paused/unknown timing, bounded output, the packaged encoded helper, unsupported platforms, streamed updates, single-helper ownership, watchdog/cooldowns, Stop and restart persistence, in-flight source isolation, and zero account API requests in Desktop mode. Windows helper syntax was checked with the checksum-verified official PowerShell 7.7.0 parser; live execution on Windows PowerShell 5.1 remains unverified. Native checks pass 37 layout/action cases covering the three Spotify pages at four sizes and three text scales, plus immediate Desktop Start/Stop, preferences, Cancel behavior and the actual HUD renderer. Real Windows media playback remains untested on this Linux profile.
+
+The 0.21.2 suite passes **233 tests** against sources and the packaged JAR. Placement checks cover migration/round trips, all nine anchors and custom extremes across viewport sizes and 25–150% scales, exact pixel movement/clamps, center-preserving resizing, resolution adaptation, immutable cosmetic/source changes and Start/Stop preservation. Native checks pass **49 layout/action cases**, exercising all Spotify tabs and the full-screen canvas, exact fields across render/focus, actual pointer drag and edge clamps, wheel resizing, arrow/Shift movement, minimum size, pending-field Save, file reload, Save/Cancel/Esc returns and source/size placement preservation. Checks use offline sample content.

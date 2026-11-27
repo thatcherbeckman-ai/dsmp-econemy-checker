@@ -36,11 +36,11 @@ public final class SpotifyService implements AutoCloseable {
     }
     public synchronized void startDesktop()throws IOException{
         if(closed)throw new IOException("Spotify is shutting down.");
-        var next=new SpotifyOptions(options.clientId(),true,options.hideIdle(),options.position(),options.scale(),options.palette(),SpotifySource.DESKTOP);
+        var next=options.enabled(true).source(SpotifySource.DESKTOP);
         save(next);disconnect();desktop.start();desktopActive=true;status="Starting desktop mode. Play music in the Spotify app on this PC.";
     }
     public synchronized void stopDesktop()throws IOException{
-        try{if(options.source()==SpotifySource.DESKTOP)save(new SpotifyOptions(options.clientId(),false,options.hideIdle(),options.position(),options.scale(),options.palette(),SpotifySource.DESKTOP));}
+        try{if(options.source()==SpotifySource.DESKTOP)save(options.enabled(false));}
         finally{disconnect();}
     }
     /** The caller opens this URI only in response to the user's Connect click. */
