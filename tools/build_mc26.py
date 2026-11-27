@@ -6,7 +6,7 @@ from prepare_mc26 import prepare
 ROOT=Path(__file__).resolve().parents[1];CACHE=prepare();BUILD=ROOT/'build/mc26';BUILD.mkdir(parents=True,exist_ok=True)
 BASE=ROOT/'downloads/economy-tracker-0.11.0-mc1.21.11.jar'
 assert hashlib.sha256(BASE.read_bytes()).hexdigest()=='c97b77a6ef9711caeb5faf9e5fa857f63935cadf249f892ebb9e755dc02a6f6c'
-VERSION='0.21.0'
+VERSION='0.21.1'
 jdk=os.environ.get('ECONOMY_JAVA25') or os.environ.get('JAVA_HOME')
 prepared=ROOT.parent/'.tools/economy-jdk25-path.txt'
 if not jdk and prepared.exists():jdk=prepared.read_text().strip()
@@ -22,6 +22,9 @@ classes=BUILD/'classes';shutil.rmtree(classes,ignore_errors=True);classes.mkdir(
 native_sources=list((ROOT/'src/mc26/java').rglob('*.java'));overrides={p.relative_to(ROOT/'src/mc26/java') for p in native_sources}
 sources=[p for p in (ROOT/'src/main/java').rglob('*.java') if 'net.minecraft' not in p.read_text() and p.relative_to(ROOT/'src/main/java') not in overrides]+native_sources
 subprocess.run([javac,'-proc:none','--release','25','-cp',classpath,'-d',str(classes),*map(str,sources)],check=True)
+for resource in (ROOT/'src/mc26/resources').rglob('*'):
+    if resource.is_file():
+        destination=classes/resource.relative_to(ROOT/'src/mc26/resources');destination.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(resource,destination)
 junit=Path(os.environ.get('JUNIT_JAR',str(ROOT.parent/'.tools/junit.jar')))
 tests=BUILD/'test-classes';shutil.rmtree(tests,ignore_errors=True);tests.mkdir()
 cp=os.pathsep.join([str(classes),classpath,str(junit)])

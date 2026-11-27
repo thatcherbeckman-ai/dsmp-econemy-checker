@@ -1,5 +1,22 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.21.1** adds **Spotify desktop mode for Windows**, so the overlay can read the Spotify desktop app’s local media information without a developer account, Client ID, Premium subscription or browser authorization. This mode does not call Spotify’s Web API. Spotify must be playing on the **same Windows PC** as Minecraft, and its song information must be available through Windows media controls.
+
+To use it:
+
+1. Replace the previous mod JAR with the **0.21.1 Fabric 26.3** download, then start Minecraft.
+2. Open the **Spotify desktop app** and play a song.
+3. In Minecraft press **O → Spotify → Desktop app → Use desktop app**. This immediately saves Desktop as the source and enables the overlay.
+4. Choose **Overlay settings** to set position, size, colors and idle visibility, then **Done**.
+
+Desktop mode reads the title, artist and playing/paused state through Windows’ documented **GlobalSystemMediaTransportControlsSessionManager** API. It accepts only Spotify desktop session IDs, including the Microsoft Store edition. Song progress is shown when the app supplies a usable timeline; otherwise the HUD says **Progress not supplied by app**. Windows does not supply a Spotify song link, and this mode does not control playback, record audio or retrieve account credentials. It requires **Windows 10 version 1809 or later, or Windows 11**, with the built-in **Windows PowerShell 5.1** and Windows media API available. Browser playback, macOS/Linux and playback on a phone or other PC are outside this local mode.
+
+One hidden, noninteractive helper runs the script packaged inside the JAR. It loads no PowerShell profiles, downloads no code, performs no account/network requests, and does not change execution policy or require administrator rights. Metadata is read in memory, bounded and sanitized. A timeout kills an unresponsive helper and delays retries; stopping the reader, changing source, disabling the overlay or quitting Minecraft ends it. The helper also watches Minecraft’s process so it can exit after an abnormal shutdown. **Stop Spotify reader** immediately stops the reader and saves the disabled preference, including across Minecraft restarts. A saved enabled Desktop mode resumes on the next launch. Appearance controls retain Done/Cancel drafts; Start/Stop are immediate actions.
+
+The existing account-linking method remains under **Spotify → Account (advanced)**, subject to Spotify’s developer access and Premium eligibility requirements. Existing 0.21.0 preferences keep Web API mode until Desktop is selected; new preferences recommend Desktop mode. Switching source clears prior playback and session credentials, and late responses cannot restore the previous source. Existing data services and historical JARs are preserved.
+
+[Desktop mode menu](downloads/preview-0.21.1-spotify-desktop.png) · [Overlay controls](downloads/preview-0.21.1-spotify-overlay.png) — native Minecraft captures from an isolated offline profile. **Live Spotify on Windows is not verified here:** this build environment runs Linux. The packaged helper is syntax checked, the Microsoft WinRT method signatures are checked against Microsoft’s Windows bindings, and the source/process lifecycle is covered by simulated media/process tests; the actual Windows desktop session still needs an on-device check.
+
 Version **0.21.0** adds **O → Spotify** in the existing right-hand menu panel. Link your Spotify account through Spotify’s browser sign-in, then show a rounded **Now playing** HUD with the song title, artist, playing/paused state, elapsed time and progress bar. Spotify supplies song details; audio continues playing in your Spotify app. The overlay works independently of the connected Minecraft server.
 
 **Spotify setup (a registered Spotify developer app is required):**
@@ -168,7 +185,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.21.0 download](downloads/economy-tracker-0.21.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.21.1 download](downloads/economy-tracker-0.21.1-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -361,3 +378,5 @@ The 0.19.0 unit suite passes **190 tests**, including right-panel coordinate tra
 The 0.20.0 suite passes **199 tests** against both compiled sources and the packaged JAR. New checks cover legacy defaults, complete style copy/restore and settings round trips, preset content/position/image preservation, atomic invalid edits, bounded Undo/Redo, Unicode-aware letter spacing, scaled effect padding, measured drag bounds, override propagation and validation. A focused native check passes **72 style layouts** at four sizes and three text scales, plus real multiline Enter/typing, both swatch pages and custom hex input, preset Undo/Redo, vertical-gradient clipping in the scaled panel, effects/spacing/bold/italic, persistence and both style/content cancellation. The broader native regression suite passes **576 layouts** and retains editor/profile/scene/history checks. Diagnostic profiles stay offline and are excluded from release JARs.
 
 The 0.21.0 suite passes **214 tests** against sources and the final packaged JAR. Spotify checks include the RFC 7636 PKCE vector, callback host/state/duplicate validation, cancellation, local end-to-end fake authorization, refresh/401/rate limits, bounded responses, safe metadata links, in-flight disconnect isolation, and preferences without credentials. Native verification passes **24 Spotify panel layouts** (four sizes, three text scales), pointer/text routing, invalid-ID rejection, appearance save/reload and cancellation, and sample playback rendering. The wider right-panel suite passes **157 layouts across all 13 sections** with existing nested navigation/theme behavior. Tests use an isolated offline profile and synthetic playback; real Spotify account sign-in is untested because the workspace cannot reach Spotify.
+
+The 0.21.1 suite passes **226 tests** against compiled sources and the packaged JAR. Desktop checks cover legacy/new source preferences, local metadata validation/sanitization/Unicode, both Spotify source IDs, idle/paused/unknown timing, bounded output, the packaged encoded helper, unsupported platforms, streamed updates, single-helper ownership, watchdog/cooldowns, Stop and restart persistence, in-flight source isolation, and zero account API requests in Desktop mode. Windows helper syntax was checked with the checksum-verified official PowerShell 7.7.0 parser; live execution on Windows PowerShell 5.1 remains unverified. Native checks pass 37 layout/action cases covering the three Spotify pages at four sizes and three text scales, plus immediate Desktop Start/Stop, preferences, Cancel behavior and the actual HUD renderer. Real Windows media playback remains untested on this Linux profile.

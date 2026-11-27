@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.nio.file.*;
 
 /** Public preferences only. OAuth credentials deliberately never enter this model. */
-public record SpotifyOptions(String clientId, boolean enabled, boolean hideIdle, int position, int scale, int palette) {
+public record SpotifyOptions(String clientId, boolean enabled, boolean hideIdle, int position, int scale, int palette, SpotifySource source) {
     public static final String[] PALETTES={"Spotify green","Lavender","Ocean","Rose","Gold","Ice"};
     public static final int[] COLORS={0xFF1ED760,0xFFB69AFF,0xFF51C9E8,0xFFFF98B7,0xFFFFCE72,0xFFC4EFFF};
     public SpotifyOptions {
+        source=source==null?SpotifySource.WEB_API:source;
         clientId=clientId==null?"":clientId.trim();
         if(!clientId.isEmpty()&&!clientId.matches("[a-fA-F0-9]{32}"))throw new IllegalArgumentException("Enter the 32-character Spotify Client ID.");
         position=Math.clamp(position,0,8);scale=Math.clamp(scale,70,150);palette=Math.clamp(palette,0,PALETTES.length-1);
     }
-    public static SpotifyOptions defaults(){return new SpotifyOptions("",false,true,6,100,0);}
+    public SpotifyOptions(String clientId,boolean enabled,boolean hideIdle,int position,int scale,int palette){this(clientId,enabled,hideIdle,position,scale,palette,SpotifySource.WEB_API);}
+    public static SpotifyOptions defaults(){return new SpotifyOptions("",false,true,6,100,0,SpotifySource.DESKTOP);}
     public static SpotifyOptions load(Path file)throws IOException{
         if(!Files.exists(file,LinkOption.NOFOLLOW_LINKS))return defaults();
         if(Files.isSymbolicLink(file)||!Files.isRegularFile(file)||Files.size(file)>8192)throw new IOException("Invalid Spotify preferences file.");

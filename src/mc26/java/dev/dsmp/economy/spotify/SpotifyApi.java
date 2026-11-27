@@ -71,6 +71,6 @@ public final class SpotifyApi {
         }catch(RuntimeException ex){throw new IOException("Could not read Spotify playback details.");}
     }
     private static String secret(JsonObject json,String key){String value=json.get(key).getAsString();if(value.isBlank()||value.length()>8192||value.chars().anyMatch(c->c<33||c>126))throw new IllegalArgumentException();return value;}
-    private static String clean(String value){return value.replaceAll("[\\p{Cc}\\p{Cf}§]","").codePoints().limit(256).collect(StringBuilder::new,StringBuilder::appendCodePoint,StringBuilder::append).toString();}
+    static String clean(String value){return value.replaceAll("[\\p{Cc}\\p{Cf}§]","").codePoints().limit(256).collect(StringBuilder::new,StringBuilder::appendCodePoint,StringBuilder::append).toString();}
     private static void check(Reply reply)throws Failure{if(reply.status!=200)throw new Failure(reply.status,reply.retryAfter);}
 }

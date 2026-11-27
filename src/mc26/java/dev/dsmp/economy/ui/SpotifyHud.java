@@ -13,7 +13,7 @@ public final class SpotifyHud {
         int w=Math.round(250*scale),h=Math.round(78*scale),col=options.position()%3,row=options.position()/3;
         int x=col==0?6:col==1?(width-w)/2:width-w-6,y=row==0?6:row==1?(height-h)/2:height-h-6;
         g.pose().pushMatrix();g.pose().translate(x,y);g.pose().scale(scale);
-        try{card(g,options,track,service.connected()?"Open Spotify and play a song":"Connect Spotify in the menu",false);}finally{g.pose().popMatrix();}
+        try{card(g,options,track,service.connected()?"Open Spotify and play a song":options.source()==SpotifySource.DESKTOP?"Start desktop mode in the menu":"Connect Spotify in the menu",false);}finally{g.pose().popMatrix();}
     }
     static void card(GuiGraphicsExtractor g,SpotifyOptions options,SpotifyApi.Track track,String idle,boolean preview){
         int color=SpotifyOptions.COLORS[options.palette()];
@@ -25,7 +25,7 @@ public final class SpotifyHud {
         FestiveUi.textFit(g,track==null?idle:track.artist(),12,41,226,0xFFB2C1BC,.7f,false);
         long progress=track==null?0:track.progressAt(System.currentTimeMillis()),duration=track==null?0:track.duration();
         UiSurfaces.fill(g,12,60,185,3,0xFF34443D);if(duration>0)UiSurfaces.fill(g,12,60,(int)(185*progress/duration),3,color);
-        FestiveUi.text(g,time(progress)+" / "+time(duration),12,68,0xFF95AAA0,.5f,false);
+        FestiveUi.text(g,track!=null&&duration==0?"Progress not supplied by app":time(progress)+" / "+time(duration),12,68,0xFF95AAA0,.5f,false);
         FestiveUi.text(g,"NOW PLAYING",194,66,0xFF95AAA0,.45f,true);
     }
     private static String time(long ms){long s=Math.max(0,ms)/1000;return (s/60)+":"+String.format(java.util.Locale.ROOT,"%02d",s%60);}
