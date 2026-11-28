@@ -11,15 +11,15 @@ import java.util.Arrays;
 
 /** A live cosmetic draft, with separate scene, appearance, motion and PNG controls. */
 public final class MenuBackgroundScreen extends WindowedScreen {
-    private static final String[] TABS={"Scenes","Look","Motion","Custom","Colors","Themes"};
+    private static final String[] TABS={"Scenes","Look","Motion","Custom","Colors","Themes","Display"};
     private final EconomyTrackerClient mod;private final Screen parent;
     private MenuBackgroundOptions draft=MenuBackgrounds.current();
     private net.minecraft.client.gui.components.EditBox hexColor;
-    private int themePage;
+    private int themePage,displayPage;
     private int tab,page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;
     private String notice=MenuBackgrounds.loadError()==null?"Preview updates live. Done saves; Cancel restores your current background.":MenuBackgrounds.loadError();
     public MenuBackgroundScreen(EconomyTrackerClient mod,Screen parent){super(Component.literal(MenuLayout.BRAND+" / Menu backgrounds"));this.mod=mod;this.parent=parent;}
-    public MenuBackgroundScreen openTab(int value){tab=Math.clamp(value,0,5);return this;}
+    public MenuBackgroundScreen openTab(int value){tab=Math.clamp(value,0,6);return this;}
     public MenuBackgroundOptions previewOptions(){return draft;}
     public void sceneSaved(MenuBackgroundOptions saved){draft=saved.copy();page=Arrays.asList(MenuScene.values()).indexOf(draft.scene)/6;notice="Character scene saved. Use the editor for a full-screen preview.";rebuildWidgets();}
     private int formWidth(MenuLayout m){return width>=780?(m.contentWidth()-m.gap()*2)/2:m.contentWidth();}
@@ -38,7 +38,7 @@ public final class MenuBackgroundScreen extends WindowedScreen {
             button(0,2,3,"Blur: "+MenuBackgroundOptions.LEVELS[draft.blur],false,()->change(()->draft.blur=(draft.blur+1)%4));button(1,2,3,"Tint: "+MenuBackgroundOptions.TINTS[draft.tint],false,()->change(()->draft.tint=(draft.tint+1)%MenuBackgroundOptions.TINTS.length));
             triple(4,"Tint",draft.tintAmount,()->draft.tintAmount=Math.max(0,draft.tintAmount-5),()->draft.tintAmount=15,()->draft.tintAmount=Math.min(50,draft.tintAmount+5));
             button(0,2,5,"Vignette: "+MenuBackgroundOptions.LEVELS[draft.vignette],false,()->change(()->draft.vignette=(draft.vignette+1)%4));button(1,2,5,draft.contain?"Fit: Contain":"Fit: Cover",false,()->change(()->draft.contain=!draft.contain));
-            triple(6,"Cards",draft.cards,()->draft.cards=Math.max(45,draft.cards-5),()->draft.cards=85,()->draft.cards=Math.min(100,draft.cards+5));
+            triple(6,"Cards",draft.cards,()->draft.cards=Math.max(10,draft.cards-5),()->draft.cards=85,()->draft.cards=Math.min(100,draft.cards+5));
         }else if(tab==2){
             button(0,2,1,"Animation: "+(draft.animations?"on":"off"),draft.animations,()->change(()->draft.animations=!draft.animations));button(1,2,1,"Pan: "+(draft.parallax?"on":"off"),draft.parallax,()->change(()->draft.parallax=!draft.parallax));
             button(0,1,2,"Particles: "+draft.particles.name().toLowerCase(java.util.Locale.ROOT),false,()->change(()->{var values=MenuScene.Particles.values();draft.particles=values[(draft.particles.ordinal()+1)%values.length];}));
@@ -55,12 +55,26 @@ public final class MenuBackgroundScreen extends WindowedScreen {
             hexColor=new SettingsEditBox(font,m.margin(),m.row(4),formWidth(m),m.buttonHeight(),net.minecraft.network.chat.Component.literal("Background color: RRGGBB"));hexColor.setMaxLength(7);hexColor.setValue(String.format(java.util.Locale.ROOT,"%06X",draft.solidColor));addRenderableWidget(hexColor);
             button(0,2,5,"Use hex color",true,()->{try{int rgb=dev.dsmp.economy.text.TextBox.rgb(hexColor.getValue());change(()->WindowBackdrop.solid(draft,rgb));}catch(IllegalArgumentException ex){notice=ex.getMessage();}});
             button(1,2,5,"Festive menu",false,()->change(()->{draft.scene=MenuScene.ORIGINAL;draft.solidColor=0x301316;}));
-        }else{
+        }else if(tab==5){
             var themes=dev.dsmp.economy.inventory.InventoryTheme.values();int pages=(themes.length+8)/9;themePage=Math.floorMod(themePage,pages);
             for(int i=0;i<9&&themePage*9+i<themes.length;i++){var theme=themes[themePage*9+i];button(i%3,3,1+i/3,theme==dev.dsmp.economy.inventory.InventoryTheme.VANILLA?"Festive menu":theme.label,draft.scene==MenuScene.HOLIDAY&&draft.menuTheme==theme,()->change(()->WindowBackdrop.holiday(draft,theme)));}
             button(0,3,4,"Prev themes",false,()->change(()->themePage=Math.floorMod(themePage-1,pages)));button(1,3,4,"Themes "+(themePage+1)+" / "+pages,false,()->change(()->themePage=(themePage+1)%pages));button(2,3,4,"Next themes",false,()->change(()->themePage=(themePage+1)%pages));
             button(0,2,5,"Animation: "+(draft.animations?"on":"off"),draft.animations,()->change(()->draft.animations=!draft.animations));button(1,2,5,"Density: "+MenuBackgroundOptions.DENSITIES[draft.density],false,()->change(()->draft.density=(draft.density+1)%3));
             triple(6,"Speed",draft.speed,()->draft.speed=Math.max(25,draft.speed-25),()->draft.speed=100,()->draft.speed=Math.min(200,draft.speed+25));
+        }else{
+            String[] sections={"Character","Transparency","Palettes"};for(int i=0;i<sections.length;i++){int target=i;button(i,3,1,sections[i],displayPage==i,()->change(()->displayPage=target));}
+            if(displayPage==0){
+                button(0,2,2,"Mini avatar: "+(draft.miniAvatar?"on":"off"),draft.miniAvatar,()->change(()->draft.miniAvatar=!draft.miniAvatar));
+                button(1,2,2,"Follow mouse: "+(draft.avatarFollowsMouse?"on":"off"),draft.avatarFollowsMouse,()->change(()->draft.avatarFollowsMouse=!draft.avatarFollowsMouse));
+                triple(3,"Avatar size",draft.avatarSize,()->draft.avatarSize=Math.max(60,draft.avatarSize-10),()->draft.avatarSize=100,()->draft.avatarSize=Math.min(140,draft.avatarSize+10));
+            }else if(displayPage==1){
+                triple(2,"Text",draft.textOpacity,()->draft.textOpacity=Math.max(25,draft.textOpacity-5),()->draft.textOpacity=100,()->draft.textOpacity=Math.min(100,draft.textOpacity+5));
+                triple(3,"Panels",draft.cards,()->draft.cards=Math.max(10,draft.cards-5),()->draft.cards=93,()->draft.cards=Math.min(100,draft.cards+5));
+                button(0,2,4,"Soft glass",false,()->change(()->{draft.textOpacity=85;draft.cards=35;}));button(1,2,4,"Solid",false,()->change(()->{draft.textOpacity=100;draft.cards=100;}));
+            }else{
+                var palettes=MenuPalette.values();for(int i=0;i<palettes.length;i++){var palette=palettes[i];button(i%3,3,2+i/3,palette.label,draft.palette==palette,()->change(()->draft.palette=palette));}
+                button(0,1,4,"Show palette background",false,()->change(()->{WindowBackdrop.solid(draft,draft.solidColor);draft.scene=MenuScene.ORIGINAL;}));
+            }
         }
     }
     private void triple(int row,String name,int value,Runnable less,Runnable reset,Runnable more){button(0,3,row,name+" -",false,()->change(less));button(1,3,row,name+": "+value+"%",false,()->change(reset));button(2,3,row,name+" +",false,()->change(more));}
@@ -69,7 +83,7 @@ public final class MenuBackgroundScreen extends WindowedScreen {
         var m=MenuLayout.of(width,height);FestiveUi.background(g,width,height,mod.config);m.header(g,"Menu backgrounds / "+draft.scene.label);
         int form=formWidth(m);FestiveUi.surface(g,m.margin()-6,m.top()-6,form+12,Math.min(height-24,m.row(tab==1?7:6)+4)-m.top()+6,0xD40D1421);
         int left=width>=780?m.margin()+form+m.gap()*2:m.margin(),top=width>=780?m.top():m.row(7)+m.gap(),w=width-m.margin()-left,h=height-top-32;
-        if(h>=60){
+        if(h>=60&&tab!=6){
             FestiveUi.panel(g,left,top,w,h,mod.config.menuAccent);
             int ix=left+8,iy=top+28,iw=w-16,ih=h-36;
             g.enableScissor(ix,iy,ix+iw,iy+ih);g.pose().pushMatrix();g.pose().translate(ix,iy);
@@ -80,6 +94,7 @@ public final class MenuBackgroundScreen extends WindowedScreen {
             FestiveUi.text(g,"Your menu",left+28,sampleY+9,0xFFF0E6F2,.9f,true);FestiveUi.text(g,"Cards and text stay readable",left+28,sampleY+27,0xFFBAC1D3,.68f,false);
         }
 
+        if(tab==6){int sy=m.row(5)+4,sw=formWidth(m),sh=Math.max(32,Math.min(60,height-sy-30));FestiveUi.panel(g,m.margin(),sy,sw,sh,mod.config.menuAccent);FestiveUi.textFit(g,displayPage==0?"Your own character follows the cursor beside the menu.":displayPage==1?"Menu information / live transparency preview":"Color palette: "+draft.palette.label,m.margin()+10,sy+9,sw-20,0xFFF0F5FF,.8f,true);if(sh>=45)FestiveUi.textFit(g,dev.dsmp.economy.design.DesignAccess.contrast()?"High contrast keeps menu text and panels fully opaque.":"Changes preview live. Done saves; Cancel restores your look.",m.margin()+10,sy+28,sw-20,0xFFB8ABC9,.7f,false);}
         m.footer(g,notice);super.drawMenu(g,mx,my,delta);
     }
     @Override public void onClose(){try{MenuBackgrounds.save(draft);MenuNavigation.open(parent);}catch(java.io.IOException|IllegalArgumentException ex){notice="Save failed: "+ex.getMessage();}}

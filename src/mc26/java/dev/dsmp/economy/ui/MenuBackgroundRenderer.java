@@ -16,7 +16,7 @@ import java.util.*;
 
 /** Bounded photo textures, cached blur/color work, and live menu-only scenery. */
 public final class MenuBackgroundRenderer {
-    private record Key(MenuScene scene,String custom,int brightness,int blur,int tint,int tintAmount,int w,int h,int accent,boolean festive,int solidColor,dev.dsmp.economy.inventory.InventoryTheme menuTheme,String geometry){}
+    private record Key(MenuScene scene,String custom,int brightness,int blur,int tint,int tintAmount,int w,int h,int accent,boolean festive,int solidColor,dev.dsmp.economy.inventory.InventoryTheme menuTheme,MenuPalette palette,String geometry){}
     private record Texture(Identifier id,int width,int height){}
     private static final Map<Key,Texture> CACHE=new LinkedHashMap<>(8,.75f,true);
     private static final Set<Key> FAILED=new HashSet<>();private static int serial;
@@ -26,7 +26,7 @@ public final class MenuBackgroundRenderer {
     public static void background(GuiGraphicsExtractor g,int w,int h,TrackerConfig config,MenuBackgroundOptions options){
         options=dev.dsmp.economy.design.DesignAccess.background(options);
         if(w<1||h<1)return;double seconds=(System.nanoTime()-START)/1e9;
-        var key=new Key(options.scene,options.customImage,options.brightness,options.blur,options.tint,options.tintAmount,options.scene==MenuScene.ORIGINAL||CinematicTerrain.usesBlocks(options)?w:0,options.scene==MenuScene.ORIGINAL||CinematicTerrain.usesBlocks(options)?h:0,options.scene==MenuScene.ORIGINAL?config.menuAccent:0,options.scene==MenuScene.ORIGINAL&&config.festiveBackground,options.solidColor,options.menuTheme,CinematicTerrain.usesBlocks(options)?options.character.size+":"+options.character.x+":"+options.character.ground+":"+options.character.platformSize+":"+options.character.platform+":"+options.character.shadow+":"+options.character.lightDirection+":"+options.character.lightStrength+":"+options.character.shadowSoftness:"");
+        var key=new Key(options.scene,options.customImage,options.brightness,options.blur,options.tint,options.tintAmount,options.scene==MenuScene.ORIGINAL||CinematicTerrain.usesBlocks(options)?w:0,options.scene==MenuScene.ORIGINAL||CinematicTerrain.usesBlocks(options)?h:0,options.scene==MenuScene.ORIGINAL?config.menuAccent:0,options.scene==MenuScene.ORIGINAL&&config.festiveBackground,options.solidColor,options.menuTheme,options.palette,CinematicTerrain.usesBlocks(options)?options.character.size+":"+options.character.x+":"+options.character.ground+":"+options.character.platformSize+":"+options.character.platform+":"+options.character.shadow+":"+options.character.lightDirection+":"+options.character.lightStrength+":"+options.character.shadowSoftness:"");
         Texture texture=CACHE.get(key);
         if(texture==null&&!FAILED.contains(key)){
             try{texture=create(key,options);CACHE.put(key,texture);while(CACHE.size()>6){var oldest=CACHE.keySet().iterator().next();Minecraft.getInstance().getTextureManager().release(CACHE.remove(oldest).id);}}

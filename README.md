@@ -1,5 +1,17 @@
 # thatchacats econemy checker — Fabric 26.3 and 1.21.11
 
+Version **0.23.0** refreshes the menu with **brighter colors, a mouse-following mini character, and menu transparency controls**. The default **Aurora** palette uses blue/lavender backgrounds, mint edges and colorful highlights. The little character appears at the screen’s bottom-right, beside the menu rather than over its buttons.
+
+Open **O → Settings → Backgrounds → Display**:
+
+- **Character**: turn the mini avatar on/off, enable/disable mouse following, and adjust its size from **60–140%**. It uses your own Minecraft skin, turns its head/body toward the pointer and fits into the available outside margin. Its render state is separate from your live player and the larger scenic character. It does not intercept clicks or change the camera. Dedicated full-screen scene/placement canvases keep their existing presentation.
+- **Transparency**: adjust menu **Text** from **25–100%** and information **Panels** from **10–100%**. **Soft glass** sets text to 85% and panels to 35%; **Solid** restores full opacity. High contrast keeps these menu text/panels opaque. Text inputs remain readable. These are menu appearance controls; recorded values and in-game tracking behavior are unchanged.
+- **Palettes**: choose **Aurora, Candy, Mint, Sky, Sunset or Classic**. The colors apply to menu cards, buttons, outlines, navigation and highlights. Original/Festive backgrounds use the chosen palette’s gradient; **Show palette background** selects that background with clear image effects. Existing custom images, solid RGB colors and seasonal scene choices remain available. **Classic** restores the burgundy styling.
+
+All changes preview on the actual menu. **Done/Save** stores the appearance; **Cancel** restores the saved look. New preferences are kept in the existing `config/economy-tracker/menu-background.json` and included in cosmetic profiles/backups. Older preferences receive the new Aurora/mini-avatar defaults; saved scene, captions and other existing settings retain their formats. This update is cosmetic.
+
+[Bright Aurora menu and mini character](downloads/preview-0.23.0-aurora-avatar.png) · [Candy palette](downloads/preview-0.23.0-candy.png) · [Transparency controls](downloads/preview-0.23.0-transparency.png) — native Minecraft captures from an isolated offline profile using its sample account’s default skin. Your client uses its own logged-in account/player skin through Minecraft’s skin manager.
+
 Version **0.22.0** adds **O → Shaders**, an optional integration with an installed **Iris** mod. The Shaders section stays in the menu’s right-hand panel and reports the installed Iris version, enabled state and whether a shader pipeline is currently rendering.
 
 - **Shader packs & options** opens **Iris’s own full-screen shader selector**, where you can choose an installed shader pack, apply it, adjust pack options and open Iris’s shaderpacks folder. Iris’s Done/Esc returns to the same Shaders page and restores the sidebar.
@@ -210,7 +222,7 @@ All existing tracking/configuration paths and features remain compatible. The Mi
 
 | Minecraft | JAR | Java | Fabric Loader |
 | --- | --- | --- | --- |
-| **26.3** | [0.22.0 download](downloads/economy-tracker-0.22.0-mc26.3.jar) | **25** | **0.20.1+** |
+| **26.3** | [0.23.0 download](downloads/economy-tracker-0.23.0-mc26.3.jar) | **25** | **0.20.1+** |
 | **1.21.11** | [0.11.0 download](downloads/economy-tracker-0.11.0-mc1.21.11.jar) | 21 | 0.18.4+ |
 
 Install **Fabric API for the same Minecraft version**. The 26.3 build was compiled against Fabric API **0.166.2+26.3**. Replace the old Economy Tracker JAR; keep one build installed. Minecraft's official release name is **26.3**, not `1.26.3`.
@@ -409,3 +421,5 @@ The 0.21.1 suite passes **226 tests** against compiled sources and the packaged 
 The 0.21.2 suite passes **233 tests** against sources and the packaged JAR. Placement checks cover migration/round trips, all nine anchors and custom extremes across viewport sizes and 25–150% scales, exact pixel movement/clamps, center-preserving resizing, resolution adaptation, immutable cosmetic/source changes and Start/Stop preservation. Native checks pass **49 layout/action cases**, exercising all Spotify tabs and the full-screen canvas, exact fields across render/focus, actual pointer drag and edge clamps, wheel resizing, arrow/Shift movement, minimum size, pending-field Save, file reload, Save/Cancel/Esc returns and source/size placement preservation. Checks use offline sample content.
 
 The 0.22.0 suite passes **240 tests** against compiled sources and the packaged JAR. Iris contract checks cover zero optional class loading when absent, unavailable/broken API handling, configuration versus actual rendering state, public interface calls on private implementations, explicit on/off and same-state behavior, parent identity, factory failures and bounded safe version labels. The focused native check passes **25 layout/return cases** across four sizes and three text scales, including missing-Iris disabling, render-thread toggle calls, full-screen selector, repeated Done/Esc restoration to the same page, immediate-change Cancel semantics and unchanged recorded data. The broader native suite also passes **169 layouts across all 14 sidebar sections**, retaining nested navigation, themes, typing/cancellation, presentation return and data preservation. The native selector is a test double; no actual Iris shader rendering is claimed.
+
+The 0.23.0 suite passes **247 tests** against sources and the packaged JAR. New appearance tests cover legacy/default preferences, independent copies and round trips, validation, monotone alpha/RGB preservation, avatar screen/menu bounds, bounded pointer angles and fixed-facing mode, distinct brighter palette pixels and exact solid-color preservation. The focused native suite passes **36 display layouts** at four sizes and three text scales, real own-skin PIP extraction, independent avatar snapshots/pose/lighting, live toggles/size, palette and transparency preview, Save/reload/Cancel, six palette texture uploads, high-contrast display and inventory/data independence. The broader native suite also passes **169 layouts across all 14 sidebar sections**, retaining navigation, nested editors, scene previews and existing input/save behavior. Checks use a disposable offline profile.

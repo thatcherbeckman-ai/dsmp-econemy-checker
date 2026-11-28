@@ -39,13 +39,18 @@ public final class CharacterSceneRenderer {
             caption(g,originX,originY,width,height,c);
         }finally{g.disableScissor();}
     }
-    private static AvatarRenderState state(CharacterComposition options,MenuBackgroundOptions background){
+    static AvatarRenderState mouseAvatar(dev.dsmp.economy.menubackground.MenuDisplay.Look look){
+        var c=new CharacterComposition();c.view=CharacterComposition.View.FRONT;c.matchLighting=false;c.cape=false;
+        var result=state(c,MenuBackgrounds.visible(),true);result.id=Integer.MIN_VALUE+278;result.bodyRot=look.bodyYaw();result.yRot=look.headYaw();result.xRot=look.pitch();return result;
+    }
+    private static AvatarRenderState state(CharacterComposition options,MenuBackgroundOptions background){return state(options,background,false);}
+    private static AvatarRenderState state(CharacterComposition options,MenuBackgroundOptions background,boolean fresh){
         var client=Minecraft.getInstance();AvatarRenderState state;
-        if(client.player!=null){var renderer=client.getEntityRenderDispatcher().getRenderer(client.player);state=(AvatarRenderState)renderer.createRenderState(client.player,1);}
+        if(client.player!=null&&!fresh){var renderer=client.getEntityRenderDispatcher().getRenderer(client.player);state=(AvatarRenderState)renderer.createRenderState(client.player,1);}
         else{
             state=new AvatarRenderState();var account=client.getGameProfile();
-            if(!account.id().equals(profile)){profile=account.id();cachedSkin=client.getSkinManager().createLookup(account,false);}
-            state.skin=cachedSkin==null?DefaultPlayerSkin.get(account):cachedSkin.get();if(state.skin==null)state.skin=DefaultPlayerSkin.get(account);
+            if(client.player==null&&!account.id().equals(profile)){profile=account.id();cachedSkin=client.getSkinManager().createLookup(account,false);}
+            state.skin=client.player!=null?client.player.getSkin():cachedSkin==null?DefaultPlayerSkin.get(account):cachedSkin.get();if(state.skin==null)state.skin=DefaultPlayerSkin.get(account);
         }
         state.entityType=EntityTypes.PLAYER;state.boundingBoxWidth=.6f;state.boundingBoxHeight=1.8f;state.eyeHeight=1.62f;state.scale=state.ageScale=1;
         state.pose=Pose.STANDING;state.bodyRot=options.view.yaw+options.turn;state.yRot=0;state.xRot=-3;

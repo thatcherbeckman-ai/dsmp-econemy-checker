@@ -28,13 +28,14 @@ public abstract class WindowedScreen extends Screen {
     @Override public final void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){
         if(window==null)return;
         if(fullScreenWorkspace()&&!embedded){drawMenu(g,mx,my,delta);return;}
-        g.fill(0,0,window.viewportWidth(),window.viewportHeight(),0x35000000);
+        g.fill(0,0,window.viewportWidth(),window.viewportHeight(),FestiveUi.palette().colorful()?0x20000000:0x35000000);
         int x=Math.round(window.x()),y=Math.round(window.y()),w=Math.round(width*window.scale()),h=Math.round(height*window.scale());
-        UiSurfaces.shadow(g,x-2,y-2,w+4,h+4);UiSurfaces.fill(g,x-2,y-2,w+4,h+4,0xED351417);UiSurfaces.outline(g,x-2,y-2,w+4,h+4,0xB57E3837);
+        UiSurfaces.shadow(g,x-2,y-2,w+4,h+4);UiSurfaces.fill(g,x-2,y-2,w+4,h+4,FestiveUi.frameColor());UiSurfaces.outline(g,x-2,y-2,w+4,h+4,FestiveUi.frameBorder());
         g.enableScissor(x,y,x+w,y+h);g.pose().pushMatrix();g.pose().translate(window.x(),window.y());g.pose().scale(window.scale());
         FestiveUi.windowed(true);
         try{float offset=slideWholeMenu()?tabOffset():0;g.pose().pushMatrix();g.pose().translate(offset,0);try{drawMenu(g,(int)(window.localX(mx)-offset),(int)window.localY(my),delta);}finally{g.pose().popMatrix();}if(FestiveUi.decorated())MenuChrome.lights(g,width,height);}
         finally{FestiveUi.windowed(false);g.pose().popMatrix();g.disableScissor();}
+        MenuAvatarRenderer.draw(g,window,mx,my);
     }
     protected void drawMenu(GuiGraphicsExtractor g,int mx,int my,float delta){super.extractRenderState(g,mx,my,delta);}
     private MouseButtonEvent local(MouseButtonEvent event){return new MouseButtonEvent(window.localX(event.x())-(slideWholeMenu()?tabOffset():0),window.localY(event.y()),event.buttonInfo());}

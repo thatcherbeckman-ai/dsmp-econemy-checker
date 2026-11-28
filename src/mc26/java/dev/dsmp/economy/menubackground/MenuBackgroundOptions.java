@@ -4,6 +4,9 @@ package dev.dsmp.economy.menubackground;
 public final class MenuBackgroundOptions {
     public CharacterComposition character=new CharacterComposition();
     public MenuScene scene=MenuScene.ORIGINAL;
+    public MenuPalette palette=MenuPalette.AURORA;
+    public boolean miniAvatar=true,avatarFollowsMouse=true;
+    public int avatarSize=100,textOpacity=100;
     public dev.dsmp.economy.inventory.InventoryTheme menuTheme=dev.dsmp.economy.inventory.InventoryTheme.CHRISTMAS;
     public int solidColor=0x301316;
     public int brightness=100,overlay=0,blur=0,tint=0,tintAmount=15,vignette=0,cards=93,zoom=100;
@@ -14,14 +17,15 @@ public final class MenuBackgroundOptions {
     public static final String[] TINTS={"None","Rose","Lavender","Teal","Amber","Midnight"};
     public static final int[] TINT_COLORS={0,0xF2A6BE,0xA997DC,0x68B9AD,0xEBC17A,0x344779};
     public static final String[] LEVELS={"Off","Low","Medium","High"},DENSITIES={"Low","Medium","High"},DECORATIONS={"Auto","Off","Christmas"};
-    public MenuBackgroundOptions copy(){var n=new MenuBackgroundOptions();n.scene=scene;n.solidColor=solidColor;n.menuTheme=menuTheme;n.brightness=brightness;n.overlay=overlay;n.blur=blur;n.tint=tint;n.tintAmount=tintAmount;n.vignette=vignette;n.cards=cards;n.zoom=zoom;n.animations=animations;n.parallax=parallax;n.contain=contain;n.particles=particles;n.density=density;n.speed=speed;n.particleOpacity=particleOpacity;n.decorations=decorations;n.customImage=customImage;n.character=character.copy();return n;}
+    public MenuBackgroundOptions copy(){var n=new MenuBackgroundOptions();n.scene=scene;n.palette=palette;n.miniAvatar=miniAvatar;n.avatarFollowsMouse=avatarFollowsMouse;n.avatarSize=avatarSize;n.textOpacity=textOpacity;n.solidColor=solidColor;n.menuTheme=menuTheme;n.brightness=brightness;n.overlay=overlay;n.blur=blur;n.tint=tint;n.tintAmount=tintAmount;n.vignette=vignette;n.cards=cards;n.zoom=zoom;n.animations=animations;n.parallax=parallax;n.contain=contain;n.particles=particles;n.density=density;n.speed=speed;n.particleOpacity=particleOpacity;n.decorations=decorations;n.customImage=customImage;n.character=character.copy();return n;}
     /** A temporary visible composition; opening a player view does not save or enable menu layers. */
     public MenuBackgroundOptions playerView(){var view=copy();if(!view.character.enabled&&view.scene==MenuScene.ORIGINAL){view.scene=MenuScene.CHERRY_DAWN;view.overlay=15;view.cards=85;view.vignette=1;}view.character.enabled=true;return view;}
     public void validate(){
         if(character==null)throw new IllegalArgumentException("Invalid character scene preferences");character.validate();
+        if(palette==null||avatarSize<60||avatarSize>140||textOpacity<25||textOpacity>100)throw new IllegalArgumentException("Invalid menu display preferences");
         if(menuTheme==null||scene==null||particles==null||customImage==null||(!customImage.isEmpty()&&!customImage.matches("[0-9a-f]{64}\\.png")))throw new IllegalArgumentException("Invalid menu background selection");
         if((solidColor&0xFF000000)!=0)throw new IllegalArgumentException("Invalid menu RGB color");
-        if(brightness<50||brightness>150||overlay<0||overlay>80||blur<0||blur>3||tint<0||tint>=TINTS.length||tintAmount<0||tintAmount>50||vignette<0||vignette>3||cards<45||cards>100||zoom<100||zoom>150||density<0||density>2||speed<25||speed>200||particleOpacity<20||particleOpacity>100||decorations<0||decorations>2)throw new IllegalArgumentException("Menu background option is outside its range");
+        if(brightness<50||brightness>150||overlay<0||overlay>80||blur<0||blur>3||tint<0||tint>=TINTS.length||tintAmount<0||tintAmount>50||vignette<0||vignette>3||cards<10||cards>100||zoom<100||zoom>150||density<0||density>2||speed<25||speed>200||particleOpacity<20||particleOpacity>100||decorations<0||decorations>2)throw new IllegalArgumentException("Menu background option is outside its range");
     }
     public double time(double seconds){return animations&&Double.isFinite(seconds)?Math.max(0,seconds)%4096*speed/100d:0;}
     public MenuScene.Particles effectiveParticles(){return particles==MenuScene.Particles.AUTO?scene.particles:particles;}
